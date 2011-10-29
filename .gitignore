@@ -14,3 +14,7 @@
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Meld generated files#
+######################
+*.orig
