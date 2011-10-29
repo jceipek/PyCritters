@@ -109,9 +109,13 @@ class Node(object):
     def process(self, inputs, dt):
         pass
     
+    def processReturn(self, inputs, dt):
+        self.process(inputs, dt)
+        return self.output
+    
 class InputNode(Node):
     
-    numInputs = 0
+    numInputs = 1
     
     def process(self, inputs, dt):
         self.output = inputs[0]
@@ -187,9 +191,10 @@ class IfNode(Node):
                 return
                 
 
+if __name__ == '__main__':
+    layers = [[SumNode() for _ in range(3)] for _ in range(3)]
+    nn = makeNeuralNetwork(5, layers)
+    nn.randomizeWeights()
+    inputs = range(5)
+    print(nn.clone().process(inputs))
 
-layers = [[SumNode() for _ in range(3)] for _ in range(3)]
-nn = makeNeuralNetwork(5, layers)
-nn.randomizeWeights()
-inputs = range(5)
-print(nn.clone().process(inputs))
