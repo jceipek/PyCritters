@@ -109,7 +109,7 @@ class Node(object):
     def process(self, inputs, dt):
         pass
     
-    def _processReturn(self, inputs, dt):
+    def processReturn(self, inputs, dt):
         self.process(inputs, dt)
         return self.output
     
@@ -132,16 +132,16 @@ class ProductNode(Node):
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
-        self.output = utils.product(inputs)
+        self.output = reduce(operator.mul, inputs)
         
 class DivideNode(Node):
     
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
-        self.output = utils.divide(inputs)
+        self.output = reduce(operator.div, inputs)
         
-class SumThresholdNode(Node):
+class SumThreshold(Node):
     
     numInputs = UNLIMITED_INPUTS
     
@@ -164,6 +164,16 @@ class SignOfNode(Node):
     
     def process(self, inputs, dt):
         self.output = utils.sign(inputs[0])
+
+
+<<<<<<< HEAD
+if __name__ == '__main__':
+    layers = [[SumNode() for _ in range(3)] for _ in range(3)]
+    nn = makeNeuralNetwork(5, layers)
+    nn.randomizeWeights()
+    inputs = range(5)
+    print(nn.clone().process(inputs))
+=======
 
 class MinNode(Node):
     
@@ -191,10 +201,10 @@ class IfNode(Node):
                 return
                 
 
-if __name__ == '__main__':
-    layers = [[SumNode() for _ in range(3)] for _ in range(3)]
-    nn = makeNeuralNetwork(5, layers)
-    nn.randomizeWeights()
-    inputs = range(5)
-    print(nn.clone().process(inputs))
 
+layers = [[SumNode() for _ in range(3)] for _ in range(3)]
+nn = makeNeuralNetwork(5, layers)
+nn.randomizeWeights()
+inputs = range(5)
+print(nn.clone().process(inputs))
+>>>>>>> a0b6968b85acda04c044df8d671199db85474f86
