@@ -109,9 +109,13 @@ class Node(object):
     def process(self, inputs, dt):
         pass
     
+    def processReturn(self, inputs, dt):
+        self.process(inputs, dt)
+        return self.output
+    
 class InputNode(Node):
     
-    numInputs = 0
+    numInputs = 1
     
     def process(self, inputs, dt):
         self.output = inputs[0]
@@ -161,10 +165,36 @@ class SignOfNode(Node):
     def process(self, inputs, dt):
         self.output = utils.sign(inputs[0])
 
+class MinNode(Node):
+    
+    def process(self, inputs, dt):
+        self.output = min(inputs)
+        
+class MaxNode(Node):
+    
+    def process(self, inputs, dt):
+        self.output = max(inputs)
+        
+class AbsNode(Node):
 
+    numInputs = 1
+    
+    def process(self, inputs, dt):
+        self.output = abs(inputs[0])
+        
+class IfNode(Node):
+    
+    def process(self, inputs, dt):
+        for i in inputs:
+            if i:
+                self.output = i
+                return
+                
 
-layers = [[SumNode() for _ in range(3)] for _ in range(3)]
-nn = makeNeuralNetwork(5, layers)
-nn.randomizeWeights()
-inputs = range(5)
-print(nn.clone().process(inputs))
+if __name__ == '__main__':
+    layers = [[SumNode() for _ in range(3)] for _ in range(3)]
+    nn = makeNeuralNetwork(5, layers)
+    nn.randomizeWeights()
+    inputs = range(5)
+    print(nn.clone().process(inputs))
+
