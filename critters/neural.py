@@ -40,6 +40,14 @@ def _makeFeedForwardGraph(layers, weight=1):
     return graph
 
 class NeuralNetwork(object):
+    """A class used to consruct neural networks with multiple layers.
+    
+    A neural network has an input layer that consists of input nodes that take in
+    a single input from a sensor and return an output.
+    
+    ...
+    """
+    
     
     def __init__(self, layers, graph):
         self.layers = layers
@@ -49,7 +57,9 @@ class NeuralNetwork(object):
     def inputNodes(self): return self.layers[0]
     
     @property
-    def innerLayers(self): return self.layers[1:-1]
+    def innerLayers(self):
+        """"""
+        return self.layers[1:-1]
         
     @property
     def outputNodes(self): return self.layers[-1]
@@ -97,96 +107,130 @@ class NeuralNetwork(object):
 UNLIMITED_INPUTS = -1
  
 class Node(object):
+    """The base class for a neural network node.
+    
+    Nodes that inherit from this class need to override the 'process'
+    method. numInputs specifies the total number of inputs a node can
+    take. By default, it is unlimited (UNLIMITED_INPUTS).
+    
+    Attributes:
+        output (the output of the node)
+    """
     
     numInputs = UNLIMITED_INPUTS
     
     def __init__(self):
         self.clear()
+        self.output = 0
     
     def clear(self):
+        """Clears all state associated with a node.
+        
+        This includes the value of the output attribute and any
+        memory attributes defined by the node. Subclasses with
+        memory will need to override this method. 
+        """
         self.output = 0
     
     def process(self, inputs, dt):
+        """Sets the output attribute based on the type of node.
+        
+        This depends on a list of inputs and a timestep dt (from
+        the physics environment). This method needs to be overriden
+        by all subclasses.
+        """
         pass
     
-    def processReturn(self, inputs, dt):
+    def _processReturn(self, inputs, dt):
+        """Utility method that returns output after caling process()."""
         self.process(inputs, dt)
         return self.output
     
 class InputNode(Node):
-    
+    """A node that returns the input unchanged."""
     numInputs = 1
     
     def process(self, inputs, dt):
         self.output = inputs[0]
     
 class SumNode(Node):
-    
+    """A node that returns the sum of all inputs."""
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = sum(inputs)
         
 class ProductNode(Node):
-    
+    """A node that returns the product of all inputs."""
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = reduce(operator.mul, inputs)
         
 class DivideNode(Node):
-    
+    """A node that returns the result of 1/2/.../n for inputs [1,2,...,n]."""
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = reduce(operator.div, inputs)
         
 class SumThreshold(Node):
+    """A node that returns 1 if sum(inputs) is greater than threshold.
     
+    The threshold attribute is considered to be a parameter, and is thus not
+    cleared when clear is called. The threshold may be changed by a mutation.
+    """
     numInputs = UNLIMITED_INPUTS
     
     def __init__(self, threshold=1):
         self.threshold = threshold
         
     def process(self, inputs, dt):
-        self.output = sum(inputs) > self.threshold
+        self.output = int(sum(inputs) > self.threshold)
         
 class GreaterThanNode(Node):
-    
+    """A node that returns true if i+1>i for i inputs."""
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
-        self.output = all(lambda (prev, cur): cur > prev, zip(inputs, inputs[1:]))
+        self.output = int(all(lambda (prev, cur): cur > prev,
+                              zip(inputs, inputs[1:])))
         
 class SignOfNode(Node):
-    
+    """A node with one input that will return the sign of the input (-1,0,1)."""
     numInputs = 1
     
     def process(self, inputs, dt):
         self.output = utils.sign(inputs[0])
 
 class MinNode(Node):
+    """A node that will return its smallest value input."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = min(inputs)
         
 class MaxNode(Node):
+    """A node that will return its greatest value input."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = max(inputs)
         
 class AbsNode(Node):
-
+    """A node with one input that will return the absolute value of the input."""
     numInputs = 1
     
     def process(self, inputs, dt):
         self.output = abs(inputs[0])
         
 class IfNode(Node):
+    """A node that will return the first input greater than 0."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         for i in inputs:
-            if i:
+            if i > 0:
                 self.output = i
                 return
                 
