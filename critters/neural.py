@@ -8,6 +8,9 @@ from __future__ import print_function
 
 import networkx as nx
 import copy
+import operator
+import math
+import utils
 from random import random
 
 def makeNeuralNetwork(numInputs, upperLayers):
@@ -36,7 +39,7 @@ def _makeFeedForwardGraph(layers, weight=1):
             
     return graph
 
-class NeuralNetwork:
+class NeuralNetwork(object):
     
     def __init__(self, layers, graph):
         self.layers = layers
@@ -91,7 +94,11 @@ class NeuralNetwork:
         if clear: newNN.clear()
         return newNN
     
-class Node:
+UNLIMITED_INPUTS = -1
+ 
+class Node(object):
+    
+    numInputs = UNLIMITED_INPUTS
     
     def __init__(self):
         self.clear()
@@ -104,13 +111,57 @@ class Node:
     
 class InputNode(Node):
     
+    numInputs = 0
+    
     def process(self, inputs, dt):
         self.output = inputs[0]
     
 class SumNode(Node):
     
+    numInputs = UNLIMITED_INPUTS
+    
     def process(self, inputs, dt):
         self.output = sum(inputs)
+        
+class ProductNode(Node):
+    
+    numInputs = UNLIMITED_INPUTS
+    
+    def process(self, inputs, dt):
+        self.output = reduce(operator.mul, inputs)
+        
+class DivideNode(Node):
+    
+    numInputs = UNLIMITED_INPUTS
+    
+    def process(self, inputs, dt):
+        self.output = reduce(operator.div, inputs)
+        
+class SumThreshold(Node):
+    
+    numInputs = UNLIMITED_INPUTS
+    
+    def __init__(self, threshold=1):
+        self.threshold = threshold
+        
+    def process(self, inputs, dt):
+        self.output = sum(inputs) > self.threshold
+        
+class GreaterThanNode(Node):
+    
+    numInputs = UNLIMITED_INPUTS
+    
+    def process(self, inputs, dt):
+        self.output = all(lambda (prev, cur): cur > prev, zip(inputs, inputs[1:]))
+        
+class SignOfNode(Node):
+    
+    numInputs = 1
+    
+    def process(self, inputs, dt):
+        self.output = utils.sign(inputs[0])
+
+
 
 layers = [[SumNode() for _ in range(3)] for _ in range(3)]
 nn = makeNeuralNetwork(5, layers)
