@@ -112,6 +112,33 @@ class SumNode(Node):
     def process(self, inputs, dt):
         self.output = sum(inputs)
 
+class MinNode(Node):
+    
+    def process(self, inputs, dt):
+        self.output = min(inputs)
+        
+class MaxNode(Node):
+    
+    def process(self, inputs, dt):
+        self.output = max(inputs)
+        
+class AbsNode(Node):
+
+    numInputs = 1
+    
+    def process(self, inputs, dt):
+        self.output = abs(inputs[0])
+        
+class IfNode(Node):
+    
+    def process(self, inputs, dt):
+        for i in inputs:
+            if i:
+                self.output = i
+                return
+                
+
+
 layers = [[SumNode() for _ in range(3)] for _ in range(3)]
 nn = makeNeuralNetwork(5, layers)
 nn.randomizeWeights()
