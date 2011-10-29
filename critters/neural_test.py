@@ -54,14 +54,37 @@ class TestDivideNode(NodeTest):
             self.assertTimeIndependent(nums)
             
 class TestSumThresholdNode(NodeTest):
-    
-    def setUp(self): self.node = neural.SumThresholdNode()
 
     def test_process(self):
-        numSets = [[1,-1,2,4,3.2, 4.1], [1], [-1,2]]
+        self.node = neural.SumThresholdNode(threshold=1)
+        
+        nums = [1,-1,2,4,3.2, 4.1]
+        self.assertEquals(self.node._processReturn(nums, 1), 1)
+        
+        nums = [1,-1,2,-4,-3.2, 4.1]
+        self.assertEquals(self.node._processReturn(nums, 1), 0)
+        
+        nums = [1]
+        self.assertEquals(self.node._processReturn(nums, 1), 1)
+        
+        numSets = [[1,-1,2,4,3.2, 4.1], [1], [1,-2]]
         for nums in numSets:
-            self.assertAlmostEquals(self.node._processReturn(nums, 1), 
-                                    utils.divide(nums))
+            self.assertTimeIndependent(nums)
+    
+    def test_diffThreshold(self):
+        self.node = neural.SumThresholdNode(threshold=0)
+        
+        nums = [1,-1,2,4,3.2, 4.1]
+        self.assertEquals(self.node._processReturn(nums, 1), 1)
+        
+        nums = [1,-1,2,-4,-3.2, 4.1]
+        self.assertEquals(self.node._processReturn(nums, 1), 0)
+        
+        nums = [0]
+        self.assertEquals(self.node._processReturn(nums, 1), 1)
+        
+        numSets = [[1,-1,2,4,3.2, 4.1], [0], [1,-2]]
+        for nums in numSets:
             self.assertTimeIndependent(nums)
 
 if __name__ == "__main__":
