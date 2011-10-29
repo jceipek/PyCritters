@@ -161,8 +161,6 @@ class SignOfNode(Node):
     def process(self, inputs, dt):
         self.output = utils.sign(inputs[0])
 
-
-
 class MinNode(Node):
     
     def process(self, inputs, dt):
