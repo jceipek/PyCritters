@@ -1,7 +1,7 @@
 
 import unittest
 import utils
-
+import random
 
 class TestUtils(unittest.TestCase):
 
@@ -28,8 +28,13 @@ class TestUtils(unittest.TestCase):
                                 0.052734272003374986)
         self.assertAlmostEquals(utils.divide([-0.5, 10.1, 3]), 
                                 -0.06600660066006601)
-
-
+    def test_mutate(self):
+        for i in range(20):
+            expectedMedian = random.randint(5,20)
+            myVals = [utils.scalarMutate(expectedMedian) for i in range(1000)]
+            mySum = sum(myVals)/float(len(myVals))
+            self.assertAlmostEqual(expectedMedian/mySum, 1.0,places=1)
+            
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
