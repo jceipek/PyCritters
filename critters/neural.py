@@ -42,8 +42,13 @@ def _makeFeedForwardGraph(layers, weight=1):
 class NeuralNetwork(object):
     """A class used to consruct neural networks with multiple layers.
     
-    A neural network has an input layer that consists of input nodes that take in
-    a single input from a sensor and return an output.
+    A neural network has (1) an input layer and (2) an upper layer that contains
+    inner (hidden) layers (2a).
+    
+    1) Consists of input nodes that take in a single input from a sensor and
+       return an output.
+       
+    2) Consists of all nodes not in the input layer
     
     ...
     """
@@ -119,7 +124,6 @@ class Node(object):
     numInputs = UNLIMITED_INPUTS
     
     def __init__(self):
-        self.clear()
         self.output = 0
     
     def clear(self):
@@ -144,6 +148,14 @@ class Node(object):
         """Utility method that returns output after caling process()."""
         self.process(inputs, dt)
         return self.output
+        
+    def mutate():
+        """Has a chance of mutating the parameters of the node.
+        
+        This depends on the node type and must thus be overidden by
+        all subclasses for which mutation makes sense.
+        """
+        pass
     
 class InputNode(Node):
     """A node that returns the input unchanged."""
@@ -181,11 +193,14 @@ class SumThresholdNode(Node):
     """
     numInputs = UNLIMITED_INPUTS
     
-    def __init__(self, threshold=1):
+    def __init__(self, threshold=1.0):
         self.threshold = threshold
         
     def process(self, inputs, dt):
         self.output = int(sum(inputs) > self.threshold)
+        
+    def mutate():
+        self.threshold = utils.scalarMutate(self.threshold)
         
 class GreaterThanNode(Node):
     """A node that returns true if i+1>i for i inputs."""
