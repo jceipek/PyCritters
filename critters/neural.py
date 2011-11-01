@@ -150,7 +150,7 @@ class Node(object):
         return self.output
         
     def mutate():
-        """Has a chance of mutating the parameters of the node.
+        """Has a chance of mutating the parameters of the node (not in place).
         
         This depends on the node type and must thus be overidden by
         all subclasses for which mutation makes sense.
