@@ -161,13 +161,13 @@ class Node(object):
         self.process(inputs, dt)
         return self.output
         
-    def mutate():
+    def mutate(self):
         """Has a chance of mutating the parameters of the node.
         
         This depends on the node type and must thus be overidden by
         all subclasses for which mutation makes sense.
         """
-        pass
+        return copy.deepcopy(self)
     
 class InputNode(Node):
     """A node that returns the input unchanged."""
@@ -213,8 +213,10 @@ class SumThresholdNode(Node):
     def process(self, inputs, dt):
         self.output = int(sum(inputs) >= self.threshold)
         
-    def mutate():
-        self.threshold = utils.scalarMutate(self.threshold)
+    def mutate(self):
+        mutated = Node.mutate(self)
+        mutated.threshold = utils.scalarMutate(self.threshold)
+        return mutated
         
 class GreaterThanNode(Node):
     """A node that returns true if i+1>i for i inputs."""
