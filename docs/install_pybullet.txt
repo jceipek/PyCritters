@@ -1,0 +1,4 @@
+bzr branch http://bazaar.launchpad.net/~exarkun/pybullet/trunk/
+cd trunk
+python setup.py build_ext --include-dirs /home/pathTo/bullet-2.79/src
+python setup.py install
