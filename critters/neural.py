@@ -197,7 +197,7 @@ class SumThresholdNode(Node):
         self.threshold = threshold
         
     def process(self, inputs, dt):
-        self.output = int(sum(inputs) > self.threshold)
+        self.output = int(sum(inputs) >= self.threshold)
         
     def mutate():
         self.threshold = utils.scalarMutate(self.threshold)
