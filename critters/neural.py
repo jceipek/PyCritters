@@ -1,8 +1,3 @@
-'''
-Created on Oct 28, 2011
-
-@author: ckernan
-'''
 
 from __future__ import print_function
 
@@ -11,7 +6,7 @@ import copy
 import operator
 import math
 import utils
-from random import random
+from random import random, choice
 
 def makeNeuralNetwork(numInputs, upperLayers):
     layers = [_makeInputs(numInputs)] + upperLayers
@@ -78,6 +73,8 @@ class NeuralNetwork(object):
     def numOutputs(self): return len(self.outputNodes)
     
     def process(self, inputs, dt=1):
+        assert len(inputs) == self.numInputs
+        
         for node, inpt in zip(self.inputNodes, inputs):
             node.process([inpt], dt)
         
@@ -109,6 +106,21 @@ class NeuralNetwork(object):
         return newNN
     
 UNLIMITED_INPUTS = -1
+
+def nodeTypes(includeInput=False):
+    """Returns a list of Node classes (excluding Node)."""
+    types = Node.__subclasses__()
+    if not includeInput: types = [t for t in types if t != InputNode]
+    return types
+    
+def randomNodes(n=1):
+    """Returns a list with n Node instances.
+    
+    Selects from all node types except input nodes and initializes them with no
+    parameters specified (should yield random parameters).
+    """
+    types = nodeTypes(includeInput=False)
+    return [choice(types)() for _ in range(n)]
  
 class Node(object):
     """The base class for a neural network node.
@@ -149,13 +161,13 @@ class Node(object):
         self.process(inputs, dt)
         return self.output
         
-    def mutate():
+    def mutate(self):
         """Has a chance of mutating the parameters of the node (not in place).
         
         This depends on the node type and must thus be overidden by
         all subclasses for which mutation makes sense.
         """
-        pass
+        return copy.deepcopy(self)
     
 class InputNode(Node):
     """A node that returns the input unchanged."""
@@ -193,21 +205,25 @@ class SumThresholdNode(Node):
     """
     numInputs = UNLIMITED_INPUTS
     
-    def __init__(self, threshold=1.0):
+    def __init__(self, threshold=None):
+        """Threshold defaults to a random number between 0 and 1."""
+        if threshold is None: threshold = random()
         self.threshold = threshold
         
     def process(self, inputs, dt):
         self.output = int(sum(inputs) >= self.threshold)
         
-    def mutate():
-        self.threshold = utils.scalarMutate(self.threshold)
+    def mutate(self):
+        mutated = Node.mutate(self)
+        mutated.threshold = utils.scalarMutate(self.threshold)
+        return mutated
         
 class GreaterThanNode(Node):
     """A node that returns true if i+1>i for i inputs."""
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
-        self.output = int(all(lambda (prev, cur): cur > prev,
+        self.output = int(all(cur > prev for prev, cur in 
                               zip(inputs, inputs[1:])))
         
 class SignOfNode(Node):
@@ -239,7 +255,10 @@ class AbsNode(Node):
         self.output = abs(inputs[0])
         
 class IfNode(Node):
-    """A node that will return the first input greater than 0."""
+    """A node that will output the first input greater than 0.
+    
+    If no input is greater than 0, output is 0.
+    """
     numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
@@ -247,6 +266,8 @@ class IfNode(Node):
             if i > 0:
                 self.output = i
                 return
+        
+        self.output = 0
                 
 
 if __name__ == '__main__':
