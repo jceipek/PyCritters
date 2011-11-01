@@ -7,7 +7,7 @@ import pygame.locals, pygame.display
 from OpenGL.GL import (
     GL_DEPTH_TEST, GL_LINES, glEnable, glTranslate,GL_TRIANGLE_STRIP, GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT,
     glPushMatrix, glPopMatrix, glColor, glClear,
-    glBegin, glEnd, glTranslate, glVertex)
+    glBegin, glEnd, glTranslate, glRotate, glVertex)
 from OpenGL.GLU import gluPerspective,gluNewQuadric, gluSphere
 from OpenGL.GLUT import glutSolidCube, glutInit
 
@@ -112,8 +112,10 @@ class Cube:
 
     def render(self):
         o = self.motion.getWorldTransform().getOrigin()
+        x = self.motion.getWorldTransform().getRotation()
         glColor(*self.color)
         glTranslate(o.x, o.y, o.z)
+        glRotate(x.getAngle()*57.2957795,x.getAxis().x,x.getAxis().y,x.getAxis().z)
         glutSolidCube(5.0)
 
 
