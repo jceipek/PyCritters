@@ -186,6 +186,7 @@ cdef extern from "btBulletDynamicsCommon.h":
         void setRestitution(btScalar)
         btScalar getRestitution()
 
+        btTransform& getInterpolationWorldTransform()
         btTransform& getWorldTransform()
         void setWorldTransform(btTransform& worldTrans)
 
