@@ -94,7 +94,7 @@ cdef extern from "btBulletCollisionCommon.h":
 
     cdef cppclass btBoxShape(btConvexShape):
         btBoxShape(btVector3 boxHalfExtents)
-
+        btVector3& getHalfExtentsWithoutMargin()
 
     cdef cppclass btSphereShape(btConvexShape):
         btSphereShape(btScalar radius)
