@@ -212,6 +212,37 @@ cdef extern from "btBulletDynamicsCommon.h":
         void setVelocityForTimeInterval(
             btVector3 velocity, btScalar timeInterval)
 
+cdef extern from "BulletDynamics/ConstraintSolver/btTypedConstraint.h":
+
+    cdef enum btTypedConstraintType:    
+        POINT2POINT_CONSTRAINT_TYPE
+        HINGE_CONSTRAINT_TYPE
+        CONETWIST_CONSTRAINT_TYPE
+        D6_CONSTRAINT_TYPE
+        SLIDER_CONSTRAINT_TYPE
+        CONTACT_CONSTRAINT_TYPE 
+
+    cdef cppclass btTypedConstraint:
+    
+        btRigidBody &   getRigidBodyA ()
+        btRigidBody &   getRigidBodyB ()
+        int     getUserConstraintType () 
+        void    setUserConstraintType (int userConstraintType)
+        void    setUserConstraintId (int uid)
+        int     getUserConstraintId () 
+        int     getUid () 
+        bool    needsFeedback () 
+        void    enableFeedback (bool needsFeedback)
+        btScalar    getAppliedImpulse ()
+        btTypedConstraintType   getConstraintType ()
+
+
+cdef extern from "BulletCollision/CollisionShapes/btCompoundShape.h":
+    cdef cppclass btCompoundShape(btCollisionShape):
+        btCompoundShape(bool)
+        
+        void addChildShape(btTransform&, btCollisionShape*)
+        void removeChildShape(btCollisionShape*)
 
 
 cdef extern from "BulletCollision/CollisionShapes/btCylinderShape.h":
