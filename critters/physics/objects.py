@@ -5,17 +5,19 @@ with mesh, texture, lighting, or even color information.
 '''
 
 from bullet.bullet import (
-    Vector3, Transform, BoxShape, DefaultMotionState, RigidBody)
+    Vector3, Transform,
+    DefaultMotionState, RigidBody,
+    BoxShape, StaticPlaneShape)
 
 class Box(object):
     
     def __init__(self, position, size, mass=2.0, restitution=0.9):
     
         self.size = size
-        shape = BoxShape(size/2.0)
+        shape = BoxShape(size*0.5)
         transform = Transform()
         transform.setIdentity()
-        transform.setOrigin()
+        transform.setOrigin(position)
         
         motion = DefaultMotionState()
         motion.setWorldTransform(transform)
@@ -26,8 +28,10 @@ class Box(object):
         self.motion = motion
         
 
-class Plane(object):
+class StaticPlane(object):
 
     def __init__(self, normalVec, distToOrigin):
-        # Vector3d, scalar
-        pass #Not yet implemented
+        # Vector3, scalar
+        shape = StaticPlaneShape(normalVec, distToOrigin)
+        
+        self.body = RigidBody(None, shape, 0.0)
