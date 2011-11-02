@@ -1,0 +1,17 @@
+Step 1: download bullet-2.79-rev2440.tgz from http://code.google.com/p/bullet/downloads/detail?name=bullet-2.79-rev2440.tgz&can=2&q=
+
+Step 2: unzip: tar -xvf bullet-2.79-rev2440.tgz 
+
+Step 3: cd bullet-2.79/
+
+Step 4: install aclocal, libtool 
+
+Step 5: run ./autogen.sh
+
+Step 6: install cmake
+
+Step 7:install freeglut3
+
+Step 8: cmake . -G "Unix Makefiles" -SHARED_LIBS=ON
+
+Step 9: make

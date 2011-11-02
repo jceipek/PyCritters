@@ -21,6 +21,7 @@ class TestInputNode(NodeTest):
         self.assertEquals(self.node._processReturn([2], 1), 2)
         self.assertTimeIndependent([0.5])
 
+
 class TestSumNode(NodeTest):
     
     def setUp(self): self.node = neural.SumNode()
