@@ -124,8 +124,9 @@ class NeuralNetwork(object):
         """Adds a node to the graph at the given layer index.
         
         """
-        self.graph.add_node(node)
-        layer.append(node)
+        if node not in layer: 
+            self.graph.add_node(node)
+            layer.append(node)
                 
     def connectNode(self, node, layer, forwards=True, backwards=True):
         """Adds and connects node to the graph at the given layer index.
@@ -133,7 +134,6 @@ class NeuralNetwork(object):
         TODO: Document me!
         """
         self.addNode(node, layer)
-        
         layerIndex = self._layerIndex(layer)
         
         if layerIndex > 0 and backwards:
@@ -185,10 +185,10 @@ class NeuralNetwork(object):
         if numOutputs != self.numOutputs: return False
         
         for layerIndex, layer in enumerate(self.layers):
-            if layerIndex != 0:
+            if layerIndex > 0:
                 if any(not self._validNodeInputs(node) for node in layer):
                     return False
-            if layerIndex != len(self.layers) - 1:
+            if layerIndex < len(self.layers) - 1:
                 if any(not self._validNodeOutputs(node) for node in layer):
                     return False
             
@@ -232,6 +232,11 @@ class NeuralNetwork(object):
             # edge case, we get a layer with no nodes, so we add a node
             # that should always work (any num of inputs).
             if not layer: fixLayer(layer, 1, randomNode)
+            
+        for layer in self.layers[0:-1]:
+            for node in layer:
+                if not self.graph.successors(node):
+                    self.connectNode(node, layer, backwards=False)
         
         outputDiff = numOutputs - self.numOutputs
         if outputDiff: 
@@ -246,7 +251,8 @@ class NeuralNetwork(object):
         for node in self.nodes: node.mutate()
         
         if random() < self.INSERT_NODE_MUTATION_RATE:
-            nn.connectNode(randomNode(), randint(1, len(nn.upperLayers)))
+            node = randomNode()
+            nn.connectNode(node, choice(nn.upperLayers))
             
         if random() < self.REMOVE_NODE_MUTATION_RATE:
             nn.removeNode(choice(nn.upperNodes))
@@ -497,7 +503,7 @@ if __name__ == '__main__':
     nn1 = randomNeuralNetwork(8, 5, 3, 10)
     nn2 = randomNeuralNetwork(8, 5, 3, 10)
     d1, d2 = nn1.crossover(nn2)
-    #d1.validate(8, 5)
-    #d2.validate(8, 5)
+    for _ in range(100): d1 = d1.mutate()
+    d1.validate(8, 5)
     print(d1.process(range(8)))
 

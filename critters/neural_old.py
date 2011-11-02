@@ -20,7 +20,6 @@ def randomNeuralNetwork(numInputs, numOutputs, numUpperLayers, nodesPerLayer):
     nn.conform(numInputs, numOutputs)
     return nn
 
-
 class NeuralNetwork(object):
     """A class used to consruct neural networks with multiple layers.
     
