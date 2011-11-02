@@ -21,8 +21,11 @@ def step(world):
     delay = now % timeStep
     time.sleep(delay)
 
+global ang
+ang = 0.3
 
 def render(ents):
+    global ang
     glPushMatrix()
     for o in ents:
         if o.__class__ == objects.Box:
@@ -36,6 +39,8 @@ def render(ents):
             glPopMatrix()
     glPopMatrix()
 
+    glRotate(ang,0.0,1.0,0.0)
+    
     pygame.display.flip()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -58,7 +63,7 @@ def simulate(world, ents, debug):
         render(ents)
 
 class DebugDraw:
-    mode = DRAW_WIREFRAME | DRAW_AABB | DRAW_CONTACT_POINTS
+    mode = DRAW_WIREFRAME #| DRAW_AABB | DRAW_CONTACT_POINTS
 
     def reset(self):
         self.lines = []
@@ -99,7 +104,7 @@ def main():
     dynamicsWorld.setDebugDrawer(debug)
     
     ents.append(objects.StaticPlane(Vector3(0,1,0), 0.0)) # Y is up
-    ents.append(objects.Box(Vector3(0, 40, 1), Vector3(5.0,5.0,5.0)))
+    ents.append(objects.Box(Vector3(0, 40, 0), Vector3(5.0,5.0,5.0)))
 
     for o in ents:
         dynamicsWorld.addRigidBody(o.body)
