@@ -420,7 +420,7 @@ cdef extern from "btBulletCollisionCommon.h":
         btAxisSweep3(btVector3, btVector3, unsigned short int maxHandles,
                      btOverlappingPairCache *pairCache,
                      bool disableRaycastAccelerator)
-
+        btOverlappingPairCache* getOverlappingPairCache()
 
     cdef cppclass btDbvtBroadphase(btBroadphaseInterface):
         pass
