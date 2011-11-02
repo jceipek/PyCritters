@@ -6,20 +6,19 @@ import copy
 import operator
 import math
 from utils import *
-from random import random, choice, sample, randint, normalvariate
+from random import random, choice, sample, randint
 
 def randomNeuralNetwork(numInputs, numOutputs, numUpperLayers, nodesPerLayer):
     assert numUpperLayers >= 1
     
     nn = NeuralNetwork(numInputs, numUpperLayers)
-    for layer in nn.upperLayers:
+    for layerIndex in range(1, numUpperLayers + 1):
         for _ in range(nodesPerLayer):
-            nn.addNode(randomNode(), layer)
+            nn.addNode(randomNode(), layerIndex)
             
     nn.connectAll()
-    nn.validate(numInputs, numOutputs)
+    nn.conform(numInputs, numOutputs)
     return nn
-
 
 class NeuralNetwork(object):
     """A class used to consruct neural networks with multiple layers.
@@ -36,14 +35,12 @@ class NeuralNetwork(object):
     """
     
     INSERT_NODE_MUTATION_RATE = 0.25
-    REMOVE_NODE_MUTATION_RATE = 0.2
-    EDGE_MUTATION_RATE = 0.1
-    CROSSOVER_RATE = 1
+    REMOVE_NODE_MUTATION_RATE = 0.1
     
     def __init__(self, numInputs, numUpperLayers=1):
         self.graph = nx.DiGraph()
         self.layers = [[] for _ in range(numUpperLayers + 1)]
-        for _ in range(numInputs): self.addNode(InputNode(), self.inputNodes)
+        for _ in range(numInputs): self.addNode(InputNode(), 0)
         
     @property
     def nodes(self): return flatten(self.layers)
@@ -77,9 +74,18 @@ class NeuralNetwork(object):
         
         for layer in self.upperLayers:
             for node in layer:
-                node.process([pred.output*self.getWeight(pred, node) 
-                              for pred in 
-                              self.graph.predecessors_iter(node)], dt)
+                try:
+                    node.process([pred.output*self.getWeight(pred, node) 
+                                  for pred in 
+                                  self.graph.predecessors_iter(node)], dt)
+                except:
+                    print("SHIT")
+                    print(str(self.layers.index(layer)) + "/" + str(len(self.layers)))
+                    print(layer)
+                    print(self.layers[self.layers.index(layer)-1])
+                    print(node)
+                    print(list(self.graph.predecessors_iter(node)))
+                    raise
         
         return [node.output for node in self.outputNodes]
     
@@ -120,26 +126,33 @@ class NeuralNetwork(object):
                     break
                 except: pass
                 
-    def addNode(self, node, layer):
+    def addNode(self, node, layerIndex):
         """Adds a node to the graph at the given layer index.
         
+        Layer index of 0 indicates the input layer, upper layers are positive
+        integers.
         """
-        if node not in layer: 
-            self.graph.add_node(node)
-            layer.append(node)
+        self.graph.add_node(node)
+        self.layers[layerIndex].append(node)
                 
-    def connectNode(self, node, layer, forwards=True, backwards=True):
+    def connectNode(self, node, layerIndex, forwards=True, backwards=True):
         """Adds and connects node to the graph at the given layer index.
         
-        TODO: Document me!
+        Layer index of 0 indicates the input layer, upper layers are positive
+        integers.
+        
+        All nodes on the previous layer are connected as inputs, and all nodes 
+        on the next layer are connected as outputs. 
+        
+        NOTE: This does NOT respect the numInputs restriction of nodes. To 
+        fix this, call prune.
         """
-        self.addNode(node, layer)
-        layerIndex = self._layerIndex(layer)
+        self.graph.add_node(node)
+        self.layers[layerIndex].append(node)
         
         if layerIndex > 0 and backwards:
             for prev in self.layers[layerIndex-1]:
                 self.makeConnection(prev, node)
-        
         if layerIndex < len(self.layers)-1 and forwards:
             for nextNode in self.layers[layerIndex + 1]:
                 self.makeConnection(node, nextNode)
@@ -150,32 +163,28 @@ class NeuralNetwork(object):
         
         Weight defaults to a random number but can be specified as a function
         or as a scalar value.
-        
-        Does nothing if the nodes are already connected.
         """
-        if self.graph.has_edge(prev, node): return
-        
         if callable(weight): weight = weight()
         self.graph.add_edge(prev, node, weight=weight)
         
-    def connectAll(self, layers=None, weight=random):
+    def connectAll(self, weight=random):
         """Adds connections between all nodes, respecting node requirements.
         
         Weight defaults to a random number but can be specified as a function
         or as a scalar value.
-        
-        If layers is specified as a list of list of nodes, then only those
-        layers are connected, otherwise all layers are connected.
         """
-        layers = layers or self.layers
-        
-        for prevLayer, layer in zip(layers, layers[1:]):
+        for prevLayer, layer in zip(self.layers, self.layers[1:]):
             for prev in prevLayer:
                 for node in layer:
                     self.makeConnection(prev, node, weight)
+        self.prune()
         
     def _validNodeInputs(self, node):
-        return len(self.graph.predecessors(node)) >= 1
+        numInputs = len(self.graph.predecessors(node))
+        if node.numInputs == UNLIMITED_INPUTS: 
+            return numInputs >= 1
+        else: 
+            return numInputs == node.numInputs
         
     def _validNodeOutputs(self, node):
         return len(self.graph.successors(node)) >= 1
@@ -183,15 +192,16 @@ class NeuralNetwork(object):
     def _validState(self, numInputs, numOutputs):
         if numInputs != self.numInputs: return False
         if numOutputs != self.numOutputs: return False
+        print("Nums ok...")
         
         for layerIndex, layer in enumerate(self.layers):
-            if layerIndex > 0:
+            if layerIndex != 0:
                 if any(not self._validNodeInputs(node) for node in layer):
                     return False
-            if layerIndex < len(self.layers) - 1:
+            if layerIndex != len(self.layers) - 1:
                 if any(not self._validNodeOutputs(node) for node in layer):
                     return False
-            
+            print("layer %d ok" % layerIndex)
         return True
     
     def _nextLayer(self, layer):
@@ -206,43 +216,176 @@ class NeuralNetwork(object):
     def validate(self, numInputs, numOutputs):
         if self._validState(numInputs, numOutputs): return
         
-        def fixLayer(layer, diff, newNodeFunc):
+        def fixLayer(layerIndex, diff, newNodeFunc):
+            layer = self.layers[layerIndex]
             if diff > 0:
                 for _ in range(diff): 
-                    self.connectNode(newNodeFunc(), layer)
+                    self.connectNode(newNodeFunc(), layerIndex)
             else:
                 for node in sample(layer, abs(diff)): 
                     self.removeNode(node, layer)
                     
         inputDiff = numInputs - self.numInputs
-        if inputDiff: fixLayer(self.inputNodes, inputDiff, InputNode)
+        if inputDiff: fixLayer(0, inputDiff, InputNode)
         
-        def buildUpNode(layer, node):
-            prevLayer = self._prevLayer(layer)
-            if prevLayer:
-                for prev in prevLayer: self.makeConnection(prev, node)
+        def restrictNode(inputs, node):
+            selected = sample(inputs, node.numInputs)
+            for inp in filterOut(inputs, selected): 
+                self.graph.remove_edge(inp, node)
+        
+        def buildUpNode(i, inputs, node):
+            # i is the index in the upperLayers, so layers[i] is the layer 
+            # below it
+            if len(self.layers[i]) >= node.minimumRequiredInputs:
+                choices = filterOut(self.layers[i], inputs)
+                needed = node.minimumRequiredInputs - len(inputs)
+                newInputs = sample(choices, needed)
+                for prev in newInputs: self.makeConnection(prev, node)
             else:
-                fixLayer(prevLayer, 1, randomNode)
+                self.removeNode(node, self.upperLayers[i])
         
-        for layer in self.upperLayers:
-            for node in layer:
-                if not self.graph.predecessors(node): 
-                    buildUpNode(layer, node)
+        def doLoop(func):
+            for i, layer in enumerate(self.upperLayers):
+                for node in list(layer):
+                    inputs = self.graph.predecessors(node)
+                    func(i, layer, node, inputs)
+                    
+                # edge case, we get a layer with no nodes, so we add a node
+                # that should always work (any num of inputs).
+                if not layer: 
+                    fixLayer(i+1, 1, lambda: randomNode(includeRestrictedInputs=False))
+                assert layer
+                    
+        def checkTooMany(i, layer, node, inputs):
+            if len(inputs) > node.numInputs and not node.unlimitedInputs: 
+                restrictNode(inputs, node)
                 
-            # edge case, we get a layer with no nodes, so we add a node
-            # that should always work (any num of inputs).
-            if not layer: fixLayer(layer, 1, randomNode)
+        def checkTooFew(i, layer, node, inputs):
+            if len(inputs) < node.minimumRequiredInputs:
+                buildUpNode(i, inputs, node)
+        
+        doLoop(checkTooFew)
+        doLoop(checkTooMany)
+        
+        def findOutput(node, layer):
+            nextLayer = self._nextLayer(layer)
             
-        for layer in self.layers[0:-1]:
-            for node in layer:
-                if not self.graph.successors(node):
-                    self.connectNode(node, layer, backwards=False)
+            for match in nextLayer:
+                if match.unlimitedInputs:
+                    self.makeConnection(node, match)
+                    return
+            
+            i = self._layerIndex(nextLayer)
+            self.connectNode(randomNode(includeRestrictedInputs=False), i,
+                             backward=True, forward=False)
+        
+        # check outputs
+        for layer in self.innerLayers:
+            missingOutput = (n for n in layer if not self.graph.out_edges(n))
+            for node in missingOutput: findOutput(node, layer)
         
         outputDiff = numOutputs - self.numOutputs
         if outputDiff: 
-            fixLayer(self.outputNodes, outputDiff, randomNode)
+            fixLayer(len(self.layers)-1, outputDiff, 
+                     lambda: randomNode(includeRestrictedInputs=False))
         
         assert self._validState(numInputs, numOutputs)
+    
+    def prune(self):
+        """Prunes the graph of extraneous/malformed nodes.
+        
+        Removes extra inputs that a node cannot support and removes nodes that 
+        have no outputs.
+        
+        Should maintain numInputs and numOutputs
+        """
+        numInputs = self.numInputs
+        assert numInputs != 0
+        numOutputs = self.numOutputs
+        assert numOutputs != 0
+        
+        def restrictNode(inputs, node):
+            selected = sample(inputs, node.numInputs)
+            for inp in filterOut(inputs, selected): 
+                self.graph.remove_edge(inp, node)
+        
+        def buildUpNode(i, inputs, node):
+            # i is the index in the upperLayers, so layers[i] is the layer 
+            # below it
+            if len(self.layers[i]) >= node.minimumRequiredInputs:
+                choices = filterOut(self.layers[i], inputs)
+                needed = node.minimumRequiredInputs - len(inputs)
+                newInputs = sample(choices, needed)
+                for prev in newInputs: self.makeConnection(prev, node)
+            else:
+                self.removeNode(node, self.upperLayers[i])
+        
+        def doLoop(func):
+            for i, layer in enumerate(self.upperLayers):
+                for node in list(layer):
+                    inputs = self.graph.predecessors(node)
+                    func(i, layer, node, inputs)
+                    
+                # edge case, we get a layer with no nodes, so we add a node
+                # that should always work (any num of inputs).
+                if not layer: 
+                    extra = randomNode(includeRestrictedInputs=False)
+                    self.connectNode(extra, i + 1)
+                assert layer
+                    
+        def checkTooMany(i, layer, node, inputs):
+            if len(inputs) > node.numInputs and not node.unlimitedInputs: 
+                restrictNode(inputs, node)
+                
+        def checkTooFew(i, layer, node, inputs):
+            if len(inputs) < node.minimumRequiredInputs:
+                buildUpNode(i, inputs, node)
+        
+        # check outputs
+        for layer in self.innerLayers:
+            toRemove = (n for n in layer if self.graph.out_edges(n))
+            for node in toRemove: self.removeNode(node, layer)
+        
+        doLoop(checkTooFew)
+        doLoop(checkTooMany)
+          
+        # Edge case, we might not have enough output nodes, so we'll just 
+        # add in a few sum nodes.
+        #for _ in range(numOutputs - self.numOutputs):
+        #    self.connectNode(randomNode(includeRestrictedInputs=False), 
+        #                     len(self.layers) - 1)
+            
+        assert self.numInputs == numInputs
+        assert self.numOutputs == numOutputs
+            
+    def conform(self, numInputs, numOutputs):
+        """Ensures that the NN is in a valid state.
+        
+        Adds and subtracts nodes to make sure that it has the right number of
+        inputs and outputs.
+        """
+        inputDiff = numInputs - self.numInputs
+        outputDiff = numOutputs - self.numOutputs
+        
+        def fixLayer(layerIndex, diff, newNodeFunc):
+            layer = self.layers[layerIndex]
+            if diff > 0:
+                for _ in range(diff): 
+                    self.addNode(newNodeFunc(), layerIndex)
+            else:
+                for node in sample(layer, abs(diff)): 
+                    self.removeNode(node, layer)
+        
+        if inputDiff: 
+            fixLayer(0, inputDiff, InputNode)
+        if outputDiff: 
+            fixLayer(len(self.layers)-1, outputDiff, 
+                     lambda: randomNode(includeRestrictedInputs=False))
+        
+        if inputDiff or outputDiff: self.prune()
+        
+        assert self.numInputs == numInputs
+        assert self.numOutputs == numOutputs
     
     def mutate(self):
         nn = self.clone()
@@ -252,67 +395,24 @@ class NeuralNetwork(object):
         
         if random() < self.INSERT_NODE_MUTATION_RATE:
             node = randomNode()
-            nn.connectNode(node, choice(nn.upperLayers))
+            nn.connectNode(node, randint(1, len(nn.upperLayers)))
             
         if random() < self.REMOVE_NODE_MUTATION_RATE:
             nn.removeNode(choice(nn.upperNodes))
         
-        for prev, node in self.graph.edges_iter():
-            if random() < self.EDGE_MUTATION_RATE:
-                current = self.getWeight(prev, node)
-                self.setWeight(prev, node, scalarMutate(current))
-                
-        nn.validate(self.numInputs, self.numOutputs)
+        nn.conform(self.numInputs, self.numOutputs)
         return nn
+        
     
-    def crossover(self, other):
-        daughters = self.clone(), other.clone()
-        
-        if random() < self.CROSSOVER_RATE:
-            def chooseCrossoverPoint(nn):
-                return 1+choice(range(len(self.innerLayers)))
-            points = chooseCrossoverPoint(self), chooseCrossoverPoint(other)
-            
-            
-            def subgraph(nn, layers):
-                return nn.graph.subgraph(flatten(layers))
-            
-            def disconnect(nn, layers):
-                for layer in layers:
-                    for node in layer: 
-                        nn.removeNode(node)
-            
-            def mergeGraph(nn, subgraph):
-                nn.graph.add_nodes_from(subgraph.nodes_iter())
-                nn.graph.add_edges_from(subgraph.edges_iter(data=True))
-                
-            def connectLayers(nn, bottom, top):
-                nn.connectAll([bottom[-1], top[0]])
-                nn.connectAll([top[0], nn.outputNodes])
-            
-            bottoms = [d.layers[0:p] for d, p in zip(daughters, points)]
-            tops = [d.layers[p:-1] for d, p in zip(daughters, points)]
-            subgraphs = [subgraph(d, top) for d, top in zip(daughters, tops)]
-            
-            for d, top in zip(daughters, tops): disconnect(d, top)
-            
-            mergeGraph(daughters[0], subgraphs[1])
-            mergeGraph(daughters[1], subgraphs[0])
-            
-            connectLayers(daughters[0], bottoms[0], tops[1])
-            connectLayers(daughters[1], bottoms[1], tops[0])
-            
-            daughters[0].layers[points[0]:-1] = tops[1]
-            daughters[1].layers[points[1]:-1] = tops[0]
-        
-        return daughters
+UNLIMITED_INPUTS = -1
 
-
-def nodeTypes(includeInput=False):
+def nodeTypes(includeInput=False, includeRestrictedInputs=True):
     """Returns a list of Node classes (excluding Node)."""
     types = Node.__subclasses__()
     if not includeInput: 
         types = [t for t in types if t != InputNode]
+    if not includeRestrictedInputs:
+        types = [t for t in types if t.numInputs == UNLIMITED_INPUTS]
     return types
     
 def randomNodes(n=1, **kwgs):
@@ -338,6 +438,8 @@ class Node(object):
         output (the output of the node)
     """
     
+    numInputs = UNLIMITED_INPUTS
+    
     def __init__(self):
         self.output = 0
     
@@ -359,29 +461,38 @@ class Node(object):
         """
         pass
     
+    @property
+    def hasLocalMutations(self): return hasattr(self, "mutateLocal")
+    
+    @property
+    def minimumRequiredInputs(self):
+        if self.numInputs == UNLIMITED_INPUTS: 
+            return 1
+        else: 
+            return self.numInputs
+        
+    @property
+    def unlimitedInputs(self): return self.numInputs == UNLIMITED_INPUTS
+    
     def _processReturn(self, inputs, dt):
         """Utility method that returns output after caling process()."""
         self.process(inputs, dt)
         return self.output
         
     def mutate(self):
-        """Has a chance of mutating the parameters of the node (not in place).
+        """Has a chance of mutating the parameters of the node.
         
         This depends on the node type and must thus be overidden by
         all subclasses for which mutation makes sense.
         """
         pass
-    
-    def _pickInput(self, inputs, floatIndex):
-        intIndex = int(round((len(inputs)-1)*floatIndex))
-        return inputs[intIndex]
 
     
 class InputNode(Node):
     """A node that returns the input unchanged."""
+    numInputs = 1
     
     def process(self, inputs, dt):
-        assert len(inputs) == 1
         self.output = inputs[0]
         
     def mutate(self):
@@ -389,18 +500,21 @@ class InputNode(Node):
     
 class SumNode(Node):
     """A node that returns the sum of all inputs."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = sum(inputs)
         
 class ProductNode(Node):
     """A node that returns the product of all inputs."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = product(inputs)
         
 class DivideNode(Node):
     """A node that returns the result of 1/2/.../n for inputs [1,2,...,n]."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = divide(inputs)
@@ -411,6 +525,7 @@ class SumThresholdNode(Node):
     The threshold attribute is considered to be a parameter, and is thus not
     cleared when clear is called. The threshold may be changed by a mutation.
     """
+    numInputs = UNLIMITED_INPUTS
     
     THRESHOLD_MUTATE_RATE = 0.2
     
@@ -428,6 +543,7 @@ class SumThresholdNode(Node):
         
 class GreaterThanNode(Node):
     """A node that returns true if i+1>i for i inputs."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = int(all(cur > prev for prev, cur in 
@@ -435,60 +551,38 @@ class GreaterThanNode(Node):
         
 class SignOfNode(Node):
     """A node with one input that will return the sign of the input (-1,0,1)."""
-    
-    INDEX_MUTATION_RATE = 0.2
-    
-    def __init__(self, index=None):
-        """Index defaults to a random number between 0 and 1."""
-        if index is None: index = random()
-        self.index = index
+    numInputs = 1
     
     def process(self, inputs, dt):
-        self.output = sign(self._pickInput(inputs, self.index))
-        
-    def mutate(self):
-        if random() < self.INDEX_MUTATION_RATE:
-            self.index = clampRange((0, 1), scalarMutate(self.index))
+        self.output = sign(inputs[0])
 
 class MinNode(Node):
     """A node that will return its smallest value input."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = min(inputs)
         
 class MaxNode(Node):
     """A node that will return its greatest value input."""
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         self.output = max(inputs)
         
 class AbsNode(Node):
-    """A node with one input that will return the absolute value of an input.
-    
-    Which input is specified by an index [0,1] where 0 is the first input, 1 is
-    the last input and values in between are rounded to the nearest actual 
-    index.
-    """
-    
-    INDEX_MUTATION_RATE = 0.2
-    
-    def __init__(self, index=None):
-        """Index defaults to a random number between 0 and 1."""
-        if index is None: index = random()
-        self.index = index
+    """A node with one input that will return the absolute value of the input."""
+    numInputs = 1
     
     def process(self, inputs, dt):
-        self.output = abs(self._pickInput(inputs, self.index))
-        
-    def mutate(self):
-        if random() < self.INDEX_MUTATION_RATE:
-            self.index = clampRange((0, 1), scalarMutate(self.index))
+        self.output = abs(inputs[0])
         
 class IfNode(Node):
     """A node that will output the first input greater than 0.
     
     If no input is greater than 0, output is 0.
     """
+    numInputs = UNLIMITED_INPUTS
     
     def process(self, inputs, dt):
         for i in inputs:
@@ -500,10 +594,15 @@ class IfNode(Node):
 
 
 if __name__ == '__main__':
-    nn1 = randomNeuralNetwork(8, 5, 3, 10)
-    nn2 = randomNeuralNetwork(8, 5, 3, 10)
-    d1, d2 = nn1.crossover(nn2)
-    for _ in range(100): d1 = d1.mutate()
-    d1.validate(8, 5)
-    print(d1.process(range(8)))
+    nn = randomNeuralNetwork(3, 3, 100, 3)
+    print(nn._validState(3, 3))
+    nn.validate(3, 3)
+    #for _ in range(100):
+    #    old = nn
+    #    nn = nn.mutate()
+    #    print(len(old.nodes), len(nn.nodes))
+    #    print(old.numInputs, nn.numInputs)
+        
+    inputs = range(3)
+    print(nn.clone().process(inputs))
 

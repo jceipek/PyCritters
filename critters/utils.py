@@ -2,6 +2,9 @@
 import operator
 import random
 
+__all__ = ["sign", "product", "divide", "scalarMutate", "filterOut", "repeat",
+           "flatten", "clampRange"]
+
 def sign(x):
     """Returns the sign of a number.
     
@@ -20,16 +23,19 @@ def product(numbers):
     """
     return reduce(operator.mul, numbers, 1)
 
-def divide(numbers):
+def divide(numbers, divideByZero=0):
     """Divides an iterable of numbers.
     
     If the iterable is empty, returns 1. If the iterable has 1 element, it 
     returns the reciprocal of the element, otherwise it return the successive
     division of the elements (i.e. 1/a/b/c/d/e for a list [a, b, c, d, e]).
     """
-    return reduce(operator.div, numbers, 1)
+    try:
+        return reduce(operator.div, numbers, 1)
+    except ZeroDivisionError:
+        return divideByZero
     
-def scalarMutate(aVal, mods=3):
+def scalarMutate(aVal):
     """Mutates a scalar value using Sims-esque methods.
     
     The value is mutated by adding mods random numbers from a
@@ -38,4 +44,20 @@ def scalarMutate(aVal, mods=3):
     original value (sigma is |original value|^(1/2)).
     """
     #FIXME: The mutations here may be too large
-    return aVal + sum(random.normalvariate(0.0, abs(aVal)**0.5) for _ in xrange(mods))
+    return aVal + random.normalvariate(0.0, abs(aVal)**0.5)
+
+def filterOut(base, toRemove):
+    return [x for x in base if x not in toRemove]
+
+def repeat(x, call=False): 
+    while True: 
+        yield x() if call else x
+        
+def flatten(lst):
+    return [x for sublist in lst for x in sublist]
+
+def clampRange(rnge, value):
+    lower, upper = rnge
+    if value < lower: return lower
+    if value > upper: return upper
+    return value
