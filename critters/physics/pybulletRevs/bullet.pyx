@@ -450,7 +450,8 @@ cdef extern from "btBulletCollisionCommon.h":
 
         void applyCentralImpulse(btVector3 impulse)
         void applyImpulse(btVector3 impulse, btVector3 relativePosition)
-
+        void applyTorque(btVector3& torque)
+        void applyTorqueImpulse(btVector3& torque)
 
     cdef cppclass btCollisionWorld:
         btCollisionWorld(
