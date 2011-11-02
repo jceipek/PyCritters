@@ -119,6 +119,9 @@ cdef extern from "BulletCollision/CollisionShapes/btBox2dShape.h":
     cdef cppclass btBox2dShape(btConvexShape):
         btBox2dShape(btVector3 boxHalfExtents)
 
+cdef extern from "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h":
+    cdef cppclass btBroadphaseProxy
+
 
 cdef extern from "btBulletDynamicsCommon.h":
     cdef cppclass btTransform:
