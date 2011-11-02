@@ -124,6 +124,36 @@ cdef extern from "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h":
 
 
 cdef extern from "btBulletDynamicsCommon.h":
+    cdef cppclass btMatrix3x3:
+        btMatrix3x3()
+        btMatrix3x3(btQuaternion&)
+        btMatrix3x3(btScalar&, btScalar&, btScalar&,
+                    btScalar&, btScalar&, btScalar&,
+                    btScalar&, btScalar&, btScalar&) # N.B. row-major
+
+        btVector3 getColumn(int)
+        btVector3& getRow(int)
+        
+        void setValue(btScalar&, btScalar&, btScalar&,
+                      btScalar&, btScalar&, btScalar&,
+                      btScalar&, btScalar&, btScalar&) # N.B. row-major
+        void setRotation(btQuaternion&)
+        void setEulerYPR(btScalar&, btScalar&, btScalar&)
+        void setEulerZYX(btScalar, btScalar, btScalar)
+        void setIdentity()
+        
+        void getRotation(btQuaternion&)
+        void getEulerYPR(btScalar&, btScalar&, btScalar&)
+        void getEulerZYX(btScalar&, btScalar&, btScalar&, int)        
+        
+        btMatrix3x3 scaled(btVector3&)
+        btScalar determinant()
+        btMatrix3x3 adjoint()
+        btMatrix3x3 absolute()
+        btMatrix3x3 transpose()
+        btMatrix3x3 inverse()
+
+
     cdef cppclass btTransform:
         btVector3 getOrigin()
         void setOrigin(btVector3)
