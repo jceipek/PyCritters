@@ -161,6 +161,9 @@ cdef extern from "btBulletDynamicsCommon.h":
         void setRotation(btQuaternion&)
         btQuaternion getRotation()
 
+        btMatrix3x3& getBasis()
+        
+        void getOpenGLMatrix(btScalar* arr)
 
     cdef cppclass btMotionState:
         void getWorldTransform(btTransform &transform)
