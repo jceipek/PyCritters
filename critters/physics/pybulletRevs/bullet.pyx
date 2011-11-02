@@ -407,13 +407,14 @@ cdef extern from "btBulletCollisionCommon.h":
 
         btVector3 getAxis()
         btScalar getAngle()
-
+        btScalar angle(btQuaternion& other)
         btQuaternion operator* (btQuaternion)
 
 
     cdef cppclass btBroadphaseInterface:
         btOverlappingPairCache* getOverlappingPairCache()
-
+    
+    cdef cppclass btOverlappingPairCache   #LOOK
 
     cdef cppclass btAxisSweep3(btBroadphaseInterface):
         btAxisSweep3(btVector3, btVector3, unsigned short int maxHandles,
