@@ -190,6 +190,11 @@ cdef extern from "btBulletDynamicsCommon.h":
         btTransform& getWorldTransform()
         void setWorldTransform(btTransform& worldTrans)
 
+        void setContactProcessingThreshold(btScalar)
+        btScalar getContactProcessingThreshold()
+
+        btBroadphaseProxy* getBroadphaseHandle()
+
         int getActivationState()
         void setActivationState(int newState)
 
