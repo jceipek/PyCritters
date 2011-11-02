@@ -32,10 +32,13 @@ r.setup()
 running = True
 rot = 0.0
 
+
+# ESC to quit; LEFT and RIGHT to change rotation speed.
 while running:
     step(dynamicsWorld)
     
     r.render(ents)
+    r.rotateCamera(rot)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
