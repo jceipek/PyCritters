@@ -21,7 +21,7 @@ dynamicsWorld = DiscreteDynamicsWorld()
 ground = objects.StaticPlane(Vector3(0,1,0), 0.0) #Y is up
 dynamicsWorld.addRigidBody(ground.body)
 for i in range(10):
-    box = objects.Box(Vector3(0, 0.5+5*i, 0), Vector3(5.0,5.0,5.0))
+    box = objects.Box(Vector3(0, 0.5+5*i, 0), Vector3(9.0,5.0,5.0))
     rBox = makeRenderable(box, (255,0,0))
     ents.add(rBox)
     dynamicsWorld.addRigidBody(box.body)
