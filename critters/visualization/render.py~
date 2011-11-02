@@ -84,7 +84,7 @@ class Renderer(object):
             
             
 class DebugDrawer:
-    mode = DRAW_WIREFRAME #| DRAW_AABB | DRAW_CONTACT_POINTS
+    mode = DRAW_WIREFRAME | DRAW_AABB | DRAW_CONTACT_POINTS
 
     def reset(self):
         self.lines = []

@@ -25,13 +25,8 @@ from OpenGL.GL import (
     glEnd, 
     glTranslate, 
     glRotate,
-    glVertex,
-    glColor)
+    glVertex)
 
-from bullet.bullet import (DRAW_WIREFRAME, DRAW_AABB, DRAW_CONTACT_POINTS)
-
-from OpenGL.GLU import gluPerspective
-from OpenGL.GLUT import glutInit
 
 class Renderer(object):
 
@@ -84,7 +79,7 @@ class Renderer(object):
             
             
 class DebugDrawer:
-    mode = DRAW_WIREFRAME #| DRAW_AABB | DRAW_CONTACT_POINTS
+    mode = DRAW_WIREFRAME | DRAW_AABB | DRAW_CONTACT_POINTS
 
     def reset(self):
         self.lines = []
