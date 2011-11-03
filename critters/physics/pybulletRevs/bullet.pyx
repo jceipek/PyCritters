@@ -917,6 +917,13 @@ cdef class Quaternion:
         """
         return self.quaternion.getAngle()
 
+    def angle(self, Quaternion other):
+        """
+        Returns the angle between this quaternion and the other. 
+        """
+        return self.quaternion.angle(other.quaternion[0])
+
+
 
 
 cdef class CollisionShape:
