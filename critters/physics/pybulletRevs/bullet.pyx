@@ -1598,6 +1598,16 @@ cdef class CollisionObject:
         self.thisptr.setWorldTransform(transform.thisptr[0])
 
 
+    def setContactProcessingThreshold(self, btScalar contactProcessingThreshold):
+        """
+        Set the distance after which the constraint solver can discard solving contacts.
+        """
+        self.thisptr.setContactProcessingThreshold(contactProcessingThreshold)
+
+
+    def getContactProcessingThreshold(self):
+        return self.thisptr.getContactProcessingThreshold()
+
     def getActivationState(self):
         """
         Return the current activation state of this object.
