@@ -414,7 +414,7 @@ cdef extern from "btBulletCollisionCommon.h":
     cdef cppclass btBroadphaseInterface:
         btOverlappingPairCache* getOverlappingPairCache()
     
-    cdef cppclass btOverlappingPairCache   #LOOK
+    #cdef cppclass btOverlappingPairCache   #LOOK
 
     cdef cppclass btAxisSweep3(btBroadphaseInterface):
         btAxisSweep3(btVector3, btVector3, unsigned short int maxHandles,
@@ -1497,6 +1497,8 @@ cdef class BroadphaseProxy:
     def __cinit__(self):
         self.thisptr = NULL     
 
+
+
 ACTIVE_TAG = _ACTIVE_TAG
 ISLAND_SLEEPING = _ISLAND_SLEEPING
 WANTS_DEACTIVATION = _WANTS_DEACTIVATION
@@ -2195,7 +2197,6 @@ cdef class OverlappingPairCache:
         self.thisptr.setInternalGhostPairCallback(new btGhostPairCallback())
 
 
-
 cdef class HashedOverlappingPairCache(OverlappingPairCache):
     """
     A HashedOverlappingPairCache manages the addition, removal, and storage of
@@ -2525,7 +2526,7 @@ cdef class DiscreteDynamicsWorld(DynamicsWorld):
         """
         cdef btDynamicsWorld *world = <btDynamicsWorld*>self.thisptr
         return world.stepSimulation(timeStep, maxSubSteps, fixedTimeStep)
-#OLD ENF OF FILE
+
 cdef class VehicleRaycasterResult:
     """ An internal class used by the raycast vehicle. """
     
