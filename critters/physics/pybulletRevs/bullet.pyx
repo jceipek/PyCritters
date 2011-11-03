@@ -2079,12 +2079,14 @@ cdef class DynamicsWorld(CollisionWorld):
     This class is a wrapper around btDynamicsWorld.
     """
     cdef list _rigidBodies
+    cdef list _constraints
 
     def __init__(self,
                  CollisionDispatcher dispatcher = None,
                  BroadphaseInterface broadphase = None):
         CollisionWorld.__init__(self, dispatcher, broadphase)
         self._rigidBodies = []
+        self._constraints = []
 
 
     def addRigidBody(self, RigidBody body not None):
@@ -2144,7 +2146,7 @@ cdef class DiscreteDynamicsWorld(DynamicsWorld):
         if solver is None:
             solver = SequentialImpulseConstraintSolver()
         if broadphase is None:
-            broadphase = AxisSweep3(Vector3(-100, -100, -100), Vector3(100, 100, 100))
+            broadphase = AxisSweep3(Vector3(-100, -100, -100), Vector3(100, 100, 100)) #this was fixed in trunk rev 32
 
         self.solver = solver
         self.thisptr = <btCollisionWorld*>new btDiscreteDynamicsWorld(
