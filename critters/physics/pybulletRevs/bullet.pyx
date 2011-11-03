@@ -2088,6 +2088,23 @@ cdef class DynamicsWorld(CollisionWorld):
         self._rigidBodies = []
         self._constraints = []
 
+    def addConstraint(self, TypedConstraint constraint, bool disableCollisionsBetweenLinkedBodies=False):
+        """
+        Add a new constraint to this DynamicsWorld.
+        """
+        cdef btDynamicsWorld *world = <btDynamicsWorld*>self.thisptr
+        world.addConstraint(constraint.thisptr, disableCollisionsBetweenLinkedBodies)
+        self._constraints.append(constraint)
+
+
+    def removeConstraint(self, TypedConstraint constraint):
+        """
+        Remove a constraint from this DynamicsWorld.
+        """
+        cdef btDynamicsWorld *world = <btDynamicsWorld*>self.thisptr
+        self._constraints.remove(constraint)
+        world.removeConstraint(constraint.thisptr)
+
 
     def addRigidBody(self, RigidBody body not None):
         """
