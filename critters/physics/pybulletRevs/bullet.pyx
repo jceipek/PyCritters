@@ -1382,10 +1382,9 @@ cdef class BvhTriangleMeshShape(ConvexShape):
     """
     cdef StridingMeshInterface stride
 
-    def __init__(self, StridingMeshInterface mesh not None):
+    def __init__(self, StridingMeshInterface mesh not None, bool buildBvh=True):
         self.stride = mesh
-        self.thisptr = new btBvhTriangleMeshShape(mesh.thisptr, True, False)
-
+        self.thisptr = new btBvhTriangleMeshShape(mesh.thisptr, True, buildBvh)
 
     def buildOptimizedBvh(self):
         """
@@ -1418,10 +1417,13 @@ cdef class Transform:
     """
     cdef btTransform *thisptr
 
-    def __cinit__(self):
+    def __cinit__(self, Vector3 origin=None, Quaternion rotation=None):
         self.thisptr = new btTransform()
         self.thisptr.setIdentity()
-
+        if origin is not None:
+            self.setOrigin(origin)
+        if rotation is not None:
+            self.setRotation(rotation)
 
     def __dealloc__(self):
         del self.thisptr
@@ -1465,6 +1467,35 @@ cdef class Transform:
         """
         self.thisptr.setIdentity()
 
+    def getOpenGLMatrix(self):
+        """
+        Returns an array of floats in row-major form, suitable for use with
+        the OpenGL function glMultMatrixf.
+        """
+        cdef numpy.ndarray arr = numpy.ndarray((16,), dtype=numpy.float32)
+        cdef btScalar* z = <btScalar*> arr.data
+        self.thisptr.getOpenGLMatrix(z)
+        return arr
+        
+        
+    def getBasis(self):
+        """
+        Returns the basis matrix for the rotation.
+        """
+        cdef Matrix3x3 basis = Matrix3x3()
+        basis.thisptr[0] = self.thisptr.getBasis()
+        return basis
+   
+cdef class BroadphaseProxy:
+    """
+    A BroadphaseProxy stores collision shape type information, collision filter
+    information and a client object, typically a btCollisionObject or btRigidBody.
+    """
+
+    cdef btBroadphaseProxy *thisptr
+   
+    def __cinit__(self):
+        self.thisptr = NULL     
 
 ACTIVE_TAG = _ACTIVE_TAG
 ISLAND_SLEEPING = _ISLAND_SLEEPING
