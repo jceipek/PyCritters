@@ -924,6 +924,54 @@ cdef class Quaternion:
         return self.quaternion.angle(other.quaternion[0])
 
 
+cdef class Matrix3x3:
+    """
+    A 3x3 matrix. This class is loosely a wrapper around btMatrix3x3.
+    """
+    
+    cdef btMatrix3x3 *thisptr
+    CachedIdentityMatrix = None
+    
+    @classmethod
+    def getIdentity(cls):
+        if Matrix3x3.CachedIdentityMatrix is None:
+            Matrix3x3.CachedIdentityMatrix = Matrix3x3() 
+        return Matrix3x3.CachedIdentityMatrix
+            
+    
+    def __cinit__(self, *args):
+        """
+        The constructor has three different forms:
+
+            Matrix3x3(): returns a new 3x3 identity matrix.
+            Matrix3x3(Quaternion): returns a new 3x3 matrix that represents the
+                                   same rotation as the given quaternion.
+            Matrix3x3(9 scalars): returns a new 3x3 matrix with the given
+                                  values (in row-major form).
+            
+        """
+        cdef Quaternion q
+        cdef btScalar xx, xy, xz, yx, yy, yz, zx, zy, zz
+        if len(args) == 0:
+            self.thisptr = new btMatrix3x3()
+            self.thisptr.setIdentity()
+        elif len(args) == 1:
+            q = args[0]
+            self.thisptr = new btMatrix3x3(q.quaternion[0])
+        else:
+            assert len(args) == 9
+            xx, xy, xz, yx, yy, yz, zx, zy, zz = args
+            self.thisptr = new btMatrix3x3(xx, xy, xz, yx, yy, yz, zx, zy, zz)
+    
+    
+    def getColumn(self, int column):
+        """
+        Returns a vector representing the given column of this matrix.
+        Changes to the vector will not be reflected in the matrix.
+        """
+        cdef btVector3 v = self.thisptr.getColumn(column)
+        return Vector3(v.getX(), v.getY(), v.getZ())
+        
 
 
 cdef class CollisionShape:
