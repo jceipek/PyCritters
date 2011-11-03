@@ -1732,6 +1732,63 @@ cdef class RigidBody(CollisionObject):
         cdef btVector3 pos = btVector3(
             relativePosition.x, relativePosition.y, relativePosition.z)
         body.applyImpulse(impulse, pos)
+    
+    def applyTorque(self, Vector3 t not None):
+        """
+        Apply torque to this RigidBody.
+        """
+        (<btRigidBody*>self.thisptr).applyTorque(btVector3(t.x, t.y, t.z))
+
+
+    def applyTorqueImpulse(self, Vector3 ti not None):
+        """
+        Apply a torque impulse to this RigidBody.
+        """
+        (<btRigidBody*>self.thisptr).applyTorqueImpulse(btVector3(ti.x, ti.y, ti.z))
+
+
+    def setCenterOfMassTransform(self, Transform trans not None):
+        """
+        Set the transform that describes the center of mass of this body.
+        """
+        (<btRigidBody*>self.thisptr).setCenterOfMassTransform(trans.thisptr[0])
+
+
+    def getCenterOfMassTransform(self):
+        """
+        Returns a Transform that describes the center of mass of this body.
+        """
+        cdef Transform transform = Transform()
+        transform.thisptr[0] = (<btRigidBody*>self.thisptr).getCenterOfMassTransform()
+        return transform    
+
+
+    def setAngularVelocity(self, Vector3 velocity not None):
+        """
+        Change the angular velocity of this RigidBody for at least a single
+        simulation step.  It is unspecified whether the change will persist for
+        more than one simulation step.  For reliable and reproducable results,
+        you must set this before each simulation tick.
+        """
+        (<btRigidBody*>self.thisptr).setAngularVelocity(
+            btVector3(velocity.x, velocity.y, velocity.z))
+    
+    
+    def getAngularVelocity(self):
+        """
+        Returns the instantaneous angular velocity of this body as a Vector3.
+        """
+        cdef btVector3 velocity = (<btRigidBody*>self.thisptr).getAngularVelocity()
+        return Vector3(velocity.getX(), velocity.getY(), velocity.getZ())
+
+    
+    def getOrientation(self):
+        """
+        Returns the orientation of this object (world-space).
+        """
+        cdef Quaternion orientation = Quaternion()
+        orientation.quaternion[0] = (<btRigidBody*>self.thisptr).getOrientation()
+        return orientation
 
 
 
