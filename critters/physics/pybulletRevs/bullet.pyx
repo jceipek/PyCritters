@@ -2066,6 +2066,12 @@ cdef class CollisionWorld:
         """
         self.thisptr.removeCollisionObject(collisionObject.thisptr)
 
+    def getDispatcher(self):
+        """
+        Returns the CollisionDispatcher that this world uses.
+        """
+        return <CollisionDispatcher>self.dispatcher
+
 
 
 cdef class DynamicsWorld(CollisionWorld):
