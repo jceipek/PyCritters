@@ -1125,6 +1125,10 @@ cdef class BoxShape(ConvexShape):
             btVector3(boxHalfExtents.x, boxHalfExtents.y, boxHalfExtents.z))
 
 
+    def getHalfExtentsWithoutMargin(self):
+        cdef btVector3 v = (<btBoxShape*>self.thisptr).getHalfExtentsWithoutMargin()
+        return Vector3(v.getX(), v.getY(), v.getZ())
+
 
 cdef class SphereShape(ConvexShape):
     """
