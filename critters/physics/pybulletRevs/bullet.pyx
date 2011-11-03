@@ -1078,6 +1078,10 @@ cdef class CollisionShape:
     """
     cdef btCollisionShape *thisptr
 
+    def calculateLocalInertia(self, btScalar mass):
+        cdef btVector3 *inertia = new btVector3(0, 0, 0)
+        self.thisptr.calculateLocalInertia(mass, inertia[0])
+        return Vector3(inertia.getX(), inertia.getY(), inertia.getZ())
 
     def __dealloc__(self):
         del self.thisptr
