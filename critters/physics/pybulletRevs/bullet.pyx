@@ -847,6 +847,7 @@ cdef class Quaternion:
         Construct a new Quaternion from four scalar components.
         """
         q = Quaternion()
+        del q.quaternion
         q.quaternion = new btQuaternion(x, y, z, w)
         return q
 
@@ -857,6 +858,7 @@ cdef class Quaternion:
         Construct a new Quaternion from an axis and a rotation around that axis.
         """
         q = Quaternion()
+        del q.quaternion
         q.quaternion = new btQuaternion(
             btVector3(axis.x, axis.y, axis.z), angle)
         return q
