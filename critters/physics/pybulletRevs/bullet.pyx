@@ -1604,6 +1604,8 @@ cdef class CollisionObject:
         """
         return self.thisptr.getActivationState()
 
+    def getActivationState(self):
+        return self.thisptr.getActivationState()
 
     def setActivationState(self, int newState):
         """
