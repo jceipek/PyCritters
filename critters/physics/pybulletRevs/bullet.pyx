@@ -834,6 +834,9 @@ cdef class Quaternion:
     """
     cdef btQuaternion* quaternion
 
+    def __cinit__(self):
+        self.quaternion = new btQuaternion()
+
     def __dealloc__(self):
         del self.quaternion
 
