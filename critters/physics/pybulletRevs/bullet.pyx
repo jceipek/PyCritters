@@ -973,6 +973,101 @@ cdef class Matrix3x3:
         return Vector3(v.getX(), v.getY(), v.getZ())
         
 
+    def getRow(self, int row):
+        """
+        Returns a vector representing the given row of this matrix.
+        Changes to the vector will not be reflected in the matrix,
+        but this will change in time.
+        """
+        cdef btVector3 v = self.thisptr.getRow(row)
+        return Vector3(v.getX(), v.getY(), v.getZ())        
+
+    
+    def setValue(self, btScalar xx, btScalar xy, btScalar xz,
+                       btScalar yx, btScalar yy, btScalar yz,
+                       btScalar zx, btScalar zy, btScalar zz):
+        """
+        Sets values in row-major form.
+        """
+        self.thisptr.setValue(xx, xy, xz, yx, yy, yz, zx, zy, zz)
+
+    
+    def setRotation(self, Quaternion rotation):
+        self.thisptr.setRotation(rotation.quaternion[0])
+    
+    
+    def setEulerYPR(self, btScalar yaw, btScalar pitch, btScalar roll):
+        self.thisptr.setEulerYPR(yaw, pitch, roll)
+    
+    
+    def setEulerZYX(self, btScalar x, btScalar y, btScalar z):
+        self.thisptr.setEulerZYX(x, y, z)
+        
+        
+    def setIdentity(self):
+        self.thisptr.setIdentity()
+    
+    
+    def getRotation(self):
+        cdef Quaternion rotation = Quaternion()
+        self.thisptr.getRotation(rotation.quaternion[0])
+        return rotation
+    
+    
+    def getEulerYPR(self):
+        cdef btScalar yaw, pitch, roll
+        self.thisptr.getEulerYPR(yaw, pitch, roll)
+        return yaw, pitch, roll
+    
+    
+    def getEulerZYX(self, int solutionNumber=1):
+        cdef btScalar x, y, z
+        self.thisptr.getEulerZYX(x, y, z, solutionNumber)
+        return x, y, z
+
+
+    def scaled(self, Vector3 scale):
+        cdef Matrix3x3 scaledMatrix = Matrix3x3()
+        scaledMatrix.thisptr[0] = self.thisptr.scaled(btVector3(scale.x, scale.y, scale.z))
+        return scaledMatrix
+    
+    
+    def determinant(self):
+        return self.thisptr.determinant()
+        
+        
+    def adjoint(self):
+        cdef Matrix3x3 m = Matrix3x3()
+        m.thisptr[0] = self.thisptr.adjoint()
+        return m
+
+    
+    def absolute(self):
+        """
+        Returns a copy of this matrix whose values are the absolute values of
+        those in this matrix.
+        """
+        cdef Matrix3x3 m = Matrix3x3()
+        m.thisptr[0] = self.thisptr.absolute()
+        return m
+        
+        
+    def transpose(self):
+        """
+        Returns a copy of this matrix whose values are the absolute values of
+        those in this matrix.
+        """
+        cdef Matrix3x3 m = Matrix3x3()
+        m.thisptr[0] = self.thisptr.transpose()
+        return m
+        
+        
+    def inverse(self):
+        cdef Matrix3x3 m = Matrix3x3()
+        m.thisptr[0] = self.thisptr.inverse()
+        return m
+                        
+
 
 cdef class CollisionShape:
     """
