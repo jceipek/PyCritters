@@ -765,6 +765,8 @@ cdef class Vector3:
         self.y = y
         self.z = z
 
+    def __getitem__(self, ind):
+        return [self.x, self.y, self.z][ind]
 
     def __repr__(self):
         return '<Vector x=%s y=%s z=%s>' % (self.x, self.y, self.z)
