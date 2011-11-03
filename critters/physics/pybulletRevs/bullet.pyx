@@ -1567,6 +1567,19 @@ cdef class CollisionObject:
         self._shape = collisionShape
 
 
+    def getInterpolationWorldTransform(self):
+        """
+        Get a copy of the interpolated (inter-timestep) transformation for this
+        CollisionObject as a Transform instance. This transform is calculated
+        by interpolating between two physically-calculated transformations
+        based on the current time, and is thus suitable for displaying graphics
+        smoothly.
+        """
+        cdef Transform transform = Transform()
+        transform.thisptr[0] = self.thisptr.getInterpolationWorldTransform()
+        return transform
+                
+
     def getWorldTransform(self):
         """
         Get a copy of the transformation for this CollisionObject as a Transform
