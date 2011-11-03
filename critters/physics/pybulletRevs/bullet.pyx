@@ -1713,7 +1713,8 @@ cdef class RigidBody(CollisionObject):
     def __init__(self,
                  MotionState motion = None,
                  CollisionShape shape = None,
-                 btScalar mass = 0.0):
+                 btScalar mass = 0.0,
+                 Vector3 localInertia = None):
         if motion is None:
             motion = DefaultMotionState()
         if shape is None:
@@ -1730,6 +1731,11 @@ cdef class RigidBody(CollisionObject):
         # calculated.
         if mass != 0.0:
             shape.thisptr.calculateLocalInertia(mass, inertia)
+
+        if localInertia is None:
+            shape.thisptr.calculateLocalInertia(mass, inertia)
+        else:
+            inertia = btVector3(localInertia.x, localInertia.y, localInertia.z)
 
         cdef btRigidBodyConstructionInfo* info
         info = new btRigidBodyConstructionInfo(
