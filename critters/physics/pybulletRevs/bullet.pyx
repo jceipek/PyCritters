@@ -1608,6 +1608,13 @@ cdef class CollisionObject:
     def getContactProcessingThreshold(self):
         return self.thisptr.getContactProcessingThreshold()
 
+
+    def getBroadphaseHandle(self):
+        cdef BroadphaseProxy proxy = BroadphaseProxy()
+        proxy.thisptr = self.thisptr.getBroadphaseHandle()
+        return proxy        
+
+
     def getActivationState(self):
         """
         Return the current activation state of this object.
