@@ -475,7 +475,10 @@ cdef extern from "btBulletCollisionCommon.h":
         void addCollisionObject(btCollisionObject*, short int, short int)
         void removeCollisionObject(btCollisionObject*)
 
+cdef extern from "BulletCollision/BroadphaseCollision/btOverlappingPairCache.h":
+    cdef cppclass btOverlappingPairCache:
 
+        void cleanProxyFromPairs(btBroadphaseProxy *proxy, btDispatcher *dispatcher)
 
 cdef extern from "btBulletDynamicsCommon.h":
     cdef cppclass btConstraintSolver:
@@ -492,7 +495,10 @@ cdef extern from "btBulletDynamicsCommon.h":
 
         void setGravity(btVector3)
         btVector3 getGravity()
-
+        
+        void addConstraint(btTypedConstraint*, bool)
+        void removeConstraint(btTypedConstraint*)
+        
         void addRigidBody(btRigidBody*)
         void removeRigidBody(btRigidBody*)
 
@@ -514,6 +520,225 @@ cdef extern from "bulletdebugdraw.h":
     cdef cppclass PythonDebugDraw(btIDebugDraw):
         PythonDebugDraw(PyObject *debugDraw)
 
+cdef extern from "BulletDynamics/Vehicle/btVehicleRaycaster.h" namespace "btVehicleRaycaster":
+
+    cdef cppclass btVehicleRaycasterResult:
+        btVector3 m_hitPointInWorld
+        btVector3 m_hitNormalInWorld
+        btScalar m_distFraction
+        
+
+cdef extern from "BulletDynamics/Vehicle/btVehicleRaycaster.h":  
+        
+    cdef cppclass btVehicleRaycaster:
+        pass
+            
+
+cdef extern from "BulletDynamics/Vehicle/btWheelInfo.h" namespace "btWheelInfo":
+    
+    # N.B. the namespace appears to be lost if we just put in "RaycastInfo",
+    # so we have to work around it like this. TODO file a bug with cython.
+    cdef cppclass btRaycastInfo "btWheelInfo::RaycastInfo":
+        btVector3   m_contactNormalWS
+        btVector3   m_contactPointWS
+        btScalar    m_suspensionLength
+        btVector3   m_hardPointWS
+        btVector3   m_wheelDirectionWS
+        btVector3   m_wheelAxleWS
+        bool    m_isInContact
+        void *  m_groundObject
+
+
+cdef extern from "BulletDynamics/Vehicle/btWheelInfo.h":    
+
+    cdef cppclass btWheelInfoConstructionInfo:
+        btVector3   m_chassisConnectionCS
+        btVector3   m_wheelDirectionCS
+        btVector3   m_wheelAxleCS
+        btScalar    m_suspensionRestLength
+        btScalar    m_maxSuspensionTravelCm
+        btScalar    m_wheelRadius
+        btScalar    m_suspensionStiffness
+        btScalar    m_wheelsDampingCompression
+        btScalar    m_wheelsDampingRelaxation
+        btScalar    m_frictionSlip
+        btScalar    m_maxSuspensionForce
+        bool    m_bIsFrontWheel
+    
+    cdef cppclass btWheelInfo:
+        btScalar    getSuspensionRestLength ()
+        btWheelInfo (btWheelInfoConstructionInfo &ci)
+        void    updateWheel (btRigidBody &chassis, btRaycastInfo &raycastInfo)        
+        btRaycastInfo   m_raycastInfo
+        btTransform     m_worldTransform
+        btVector3   m_chassisConnectionPointCS
+        btVector3   m_wheelDirectionCS
+        btVector3   m_wheelAxleCS
+        btScalar    m_suspensionRestLength1
+        btScalar    m_maxSuspensionTravelCm
+        btScalar    m_wheelsRadius
+        btScalar    m_suspensionStiffness
+        btScalar    m_wheelsDampingCompression
+        btScalar    m_wheelsDampingRelaxation
+        btScalar    m_frictionSlip
+        btScalar    m_steering
+        btScalar    m_rotation
+        btScalar    m_deltaRotation
+        btScalar    m_rollInfluence
+        btScalar    m_maxSuspensionForce
+        btScalar    m_engineForce
+        btScalar    m_brake
+        bool    m_bIsFrontWheel
+        void *  m_clientInfo
+        btScalar    m_clippedInvContactDotSuspension
+        btScalar    m_suspensionRelativeVelocity
+        btScalar    m_wheelsSuspensionForce
+        btScalar    m_skidInfo
+
+
+cdef extern from "BulletDynamics/Vehicle/btRaycastVehicle.h" namespace "btRaycastVehicle":
+
+    cdef cppclass btVehicleTuning:
+        btScalar m_suspensionStiffness
+        btScalar m_suspensionCompression
+        btScalar m_suspensionDamping
+        btScalar m_maxSuspensionTravelCm
+        btScalar m_frictionSlip
+        btScalar m_maxSuspensionForce
+
+
+cdef extern from "BulletDynamics/Vehicle/btRaycastVehicle.h":
+
+    cdef cppclass btDefaultVehicleRaycaster(btVehicleRaycaster):
+        btDefaultVehicleRaycaster(btDynamicsWorld* world)
+        void* castRay(btVector3& fromVector, btVector3& toVector, btVehicleRaycasterResult& result)
+            
+    cdef cppclass btRaycastVehicle(btActionInterface):
+        btRaycastVehicle(btVehicleTuning &tuning, btRigidBody *chassis, btVehicleRaycaster *raycaster)
+
+        btScalar rayCast(btWheelInfo &wheel)
+
+        btTransform& getWheelTransformWS(int wheelIndex) 
+        btTransform& getChassisWorldTransform()
+
+        void resetSuspension()
+
+        #void setRaycastWheelInfo(int wheelIndex, bool isInContact, btVector3 &hitPoint, btVector3 &hitNormal, btScalar depth)
+        btWheelInfo& getWheelInfo(int index) 
+        int getNumWheels() 
+        btWheelInfo& addWheel(btVector3 &connectionPointCS0, btVector3 &wheelDirectionCS0, btVector3 &wheelAxleCS, btScalar suspensionRestLength, btScalar wheelRadius, btVehicleTuning &tuning, bool isFrontWheel)
+
+        btScalar getSteeringValue(int wheel) 
+
+        void setSteeringValue(btScalar steering, int wheel)
+        void applyEngineForce(btScalar force, int wheel)
+        void setBrake(btScalar brake, int wheelIndex)
+        void setPitchControl(btScalar pitch)
+
+        void updateWheelTransform(int wheelIndex, bool interpolatedTransform)
+        void updateWheelTransformsWS(btWheelInfo &wheel, bool interpolatedTransform)
+        void updateVehicle(btScalar step)
+        void updateSuspension(btScalar deltaTime)
+        void updateFriction(btScalar timeStep)
+
+        btRigidBody* getRigidBody()
+
+        btVector3 getForwardVector() 
+        btScalar getCurrentSpeedKmHour() 
+        
+        void setCoordinateSystem(int rightIndex, int upIndex, int forwardIndex)    
+        int getRightAxis() 
+        int getUpAxis() 
+        int getForwardAxis() 
+
+
+cdef extern from "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h":
+
+    cdef cppclass btRotationalLimitMotor:
+        btRotationalLimitMotor ()
+        bool    isLimited ()
+        bool    needApplyTorques ()
+        int     testLimitValue (btScalar test_value)
+        
+        btScalar    m_loLimit
+        btScalar    m_hiLimit
+        btScalar    m_targetVelocity
+        btScalar    m_maxMotorForce
+        btScalar    m_maxLimitForce
+        btScalar    m_damping
+        btScalar    m_limitSoftness
+        btScalar    m_normalCFM
+        btScalar    m_stopERP
+        btScalar    m_stopCFM
+        btScalar    m_bounce
+        bool    m_enableMotor
+        btScalar    m_currentLimitError
+        btScalar    m_currentPosition
+        int     m_currentLimit
+        btScalar    m_accumulatedImpulse
+
+    cdef cppclass btGeneric6DofConstraint(btTypedConstraint):
+        
+        btGeneric6DofConstraint() # XXX won't compile without this
+        
+        btGeneric6DofConstraint(btRigidBody&, btRigidBody&, btTransform&, btTransform&, bool)
+        btGeneric6DofConstraint(btRigidBody&, btTransform&, bool)
+        void    calculateTransforms (btTransform &transA, btTransform &transB)
+        void    calculateTransforms ()
+        btTransform &   getCalculatedTransformA ()
+        btTransform &   getCalculatedTransformB ()
+        btTransform &   getFrameOffsetA ()
+        btTransform &   getFrameOffsetB ()
+        void    buildJacobian ()
+
+        void    updateRHS (btScalar timeStep)
+        btVector3   getAxis (int axis_index)
+        btScalar    getAngle (int axis_index)
+        btScalar    getRelativePivotPosition (int axis_index)
+        bool    testAngularLimitMotor (int axis_index)
+        void    setLinearLowerLimit (btVector3 &linearLower)
+        void    setLinearUpperLimit (btVector3 &linearUpper)
+        void    setAngularLowerLimit (btVector3 &angularLower)
+        void    setAngularUpperLimit (btVector3 &angularUpper)
+        btRotationalLimitMotor *    getRotationalLimitMotor (int index)
+        # TODO btTranslationalLimitMotor *  getTranslationalLimitMotor ()
+        void    setLimit (int axis, btScalar lo, btScalar hi)
+        bool    isLimited (int limitIndex)
+        void    calcAnchorPos()
+        bool    getUseFrameOffset ()
+        void    setUseFrameOffset (bool frameOffsetOnOff)
+        # XXX problem with default args again...
+        void    setParam (int num, btScalar value, int axis)
+        btScalar    getParam (int num, int axis)
+
+
+cdef extern from "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h":
+
+    cdef cppclass btGeneric6DofSpringConstraint(btGeneric6DofConstraint):
+
+        btGeneric6DofSpringConstraint() # XXX won't compile without this
+        
+        btGeneric6DofSpringConstraint (btRigidBody &rbA, btRigidBody &rbB, btTransform &frameInA, btTransform &frameInB, bool useLinearReferenceFrameA)
+        void    enableSpring (int index, bool onOff)
+        void    setStiffness (int index, btScalar stiffness)
+        void    setDamping (int index, btScalar damping)
+        void    setEquilibriumPoint ()
+        void    setEquilibriumPoint (int index)        
+
+
+cdef extern from "BulletDynamics/ConstraintSolver/btHinge2Constraint.h":
+
+    cdef cppclass btHinge2Constraint(btGeneric6DofSpringConstraint):
+
+        btHinge2Constraint (btRigidBody &rbA, btRigidBody &rbB, btVector3 &anchor, btVector3 &axis1, btVector3 &axis2)
+        btVector3 &     getAnchor ()
+        btVector3 &     getAnchor2 ()
+        btVector3 &     getAxis1 ()
+        btVector3 &     getAxis2 ()
+        btScalar    getAngle1 ()
+        btScalar    getAngle2 ()
+        void    setUpperLimit (btScalar ang1max)
+        void    setLowerLimit (btScalar ang1min)
 
 # Forward declare some things because of circularity in the API.
 cdef class CollisionObject
