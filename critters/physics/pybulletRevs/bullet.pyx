@@ -1805,7 +1805,21 @@ cdef class PairCachingGhostObject(CollisionObject):
      def __init__(self):
          self.thisptr = new btPairCachingGhostObject()
 
+cdef class CompoundShape(CollisionShape):
+    """
+    A compound shape ties a number of transformed collision shapes together.
+    """
 
+    def __init__(self, bool enableDynamicAabbTree=True):
+        self.thisptr = new btCompoundShape(enableDynamicAabbTree)
+
+    def addChildShape(self, Transform localTransform not None, CollisionShape shape):    
+        cdef btCompoundShape* cs = <btCompoundShape*>self.thisptr
+        cs.addChildShape(localTransform.thisptr[0], shape.thisptr)
+        
+    def removeChildShape(self, CollisionShape shape):
+        cdef btCompoundShape* cs = <btCompoundShape*>self.thisptr
+        cs.removeChildShape(shape.thisptr)
 
 cdef class KinematicCharacterController(CharacterControllerInterface):
     """
