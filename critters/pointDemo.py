@@ -4,7 +4,7 @@ import visualization.render
 from visualization.renderable import makeRenderable
 import physics.objects as objects
 
-from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
+from bullet.bullet import DiscreteDynamicsWorld, Vector3, Point2PointConstraint, AxisSweep3, SequentialImpulseConstraintSolver
 
 import pygame
 
@@ -30,22 +30,22 @@ box1 = objects.Box(Vector3(0, 10, 0), Vector3(9.0,5.0,5.0))
 rBox1 = makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
-box2 = objects.Box(Vector3(9.0, 15, 0), Vector3(9.0,5.0,5.0))
+box2 = objects.Box(Vector3(9.0, 15, -5.0), Vector3(9.0,5.0,5.0))
 rBox2 = makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
 dynamicsWorld.addRigidBody(box1.body)
 dynamicsWorld.addRigidBody(box2.body)
 
-hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,12.5,0),Vector3(0,0,1),Vector3(1,0,0))
+pointConstraint = Point2PointConstraint(box1.body, box2.body, Vector3(4.5,2.5,-2.5), Vector3(-4.5,-2.5,2.5))
 
-dynamicsWorld.addConstraint(hinge)
+dynamicsWorld.addConstraint(pointConstraint)
 
 r = visualization.render.Renderer(dynamicsWorld, debug=True)
 r.setup()
 
 running = True
-rot = 0.0
+rot = 0.2
 
 
 # ESC to quit; LEFT and RIGHT to change rotation speed.
