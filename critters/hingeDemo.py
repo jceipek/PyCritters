@@ -37,7 +37,10 @@ ents.add(rBox2)
 dynamicsWorld.addRigidBody(box1.body)
 dynamicsWorld.addRigidBody(box2.body)
 
-hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,12.5,0),Vector3(0,0,1),Vector3(1,0,0))
+hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,12.5,0),Vector3(0,0,1),Vector3(0,1,0))
+
+hinge.enableSpring(5,1)
+
 
 dynamicsWorld.addConstraint(hinge)
 
@@ -47,10 +50,16 @@ r.setup()
 running = True
 rot = 0.0
 
+import math
+
+magic = 0.0
 
 # ESC to quit; LEFT and RIGHT to change rotation speed.
 while running:
     step(dynamicsWorld)
+    
+    magic += 1.0
+    hinge.setStiffness(5,math.sin(magic)*-5000)
     
     r.render(ents)
     r.rotateCamera(rot)
