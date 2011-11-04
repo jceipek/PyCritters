@@ -1,5 +1,8 @@
-import time
 
+import sys
+sys.path.append('../critters')  #add critters to pythonpath to use as library
+
+import time
 import visualization.render
 from visualization.renderable import makeRenderable
 import physics.objects as objects
