@@ -1,10 +1,12 @@
-import time
+import sys
+sys.path.append('../critters')  #add critters to pythonpath to use as library
 
+import time
 import visualization.render
 from visualization.renderable import makeRenderable
 import physics.objects as objects
 
-from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
+from bullet.bullet import DiscreteDynamicsWorld, Vector3, Point2PointConstraint, AxisSweep3, SequentialImpulseConstraintSolver
 
 import pygame
 
@@ -22,6 +24,7 @@ broadphase = AxisSweep3(worldMin, worldMax)
 solver = SequentialImpulseConstraintSolver()
 
 dynamicsWorld = DiscreteDynamicsWorld(None, broadphase, solver)
+#dynamicsWorld.setGravity(Vector3(0,0,0))
 
 ground = objects.StaticPlane(Vector3(0,1,0), 0.0) #Y is up
 dynamicsWorld.addRigidBody(ground.body)
@@ -30,19 +33,29 @@ box1 = objects.Box(Vector3(0, 10, 0), Vector3(9.0,5.0,5.0))
 rBox1 = makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
-box2 = objects.Box(Vector3(9.0, 15, 0), Vector3(9.0,5.0,5.0))
+box2 = objects.Box(Vector3(0, 15, 0), Vector3(9.0,5.0,5.0))
 rBox2 = makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
 dynamicsWorld.addRigidBody(box1.body)
 dynamicsWorld.addRigidBody(box2.body)
 
-hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,12.5,0),Vector3(0,0,1),Vector3(0,1,0))
+pointConstraint = Point2PointConstraint(box1.body, box2.body, Vector3(0.0,2.5,0.0), Vector3(0.0,-2.5,0.0))
 
-hinge.enableSpring(5,1)
+dynamicsWorld.addConstraint(pointConstraint)
 
+#motors = [pointConstraint.getRotationalLimitMotor(i) for i in range(3)]
+#for motor in motors:
+#    motor.enableMotor = True
+#    motor.targetVelocity = 50000
+    
+#motors = [pointConstraint.getRotationalLimitMotor(i) for i in range(3)]
+#for m in motors:
+#    motor.enableMotor = True
+#    motor.targetVelocity = 50000
 
-dynamicsWorld.addConstraint(hinge)
+pointConstraint.enableSpring(3, 1)
+pointConstraint.setStiffness(3, 5000)
 
 r = visualization.render.Renderer(dynamicsWorld, debug=True)
 r.setup()
@@ -50,16 +63,13 @@ r.setup()
 running = True
 rot = 0.0
 
-import math
-
-magic = 0.0
 
 # ESC to quit; LEFT and RIGHT to change rotation speed.
 while running:
     step(dynamicsWorld)
     
-    magic += 1.0
-    hinge.setStiffness(5,math.sin(magic)*-5000)
+    #
+    
     
     r.render(ents)
     r.rotateCamera(rot)
