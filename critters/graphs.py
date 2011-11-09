@@ -48,6 +48,8 @@ def mutate(graph, createNode, createConnection, rates=DEFAULT_MUTATION_RATES):
     insertNewNode()
     createNewConnections()
 
+def crossover(graph1, graph2, createConnection, rates=None):
+    pass
     
 def garbageCollect(graph, shouldIgnore=None):
     shouldIgnore = shouldIgnore or (lambda _: False)
@@ -60,7 +62,7 @@ def garbageCollect(graph, shouldIgnore=None):
         else:
             break
     
-        
+     
 
     
     

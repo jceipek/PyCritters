@@ -148,6 +148,12 @@ class NeuralNetwork(object):
         newNN.conform(self.numInputs, self.numOutputs)
         return newNN
     
+    def crossover(self, other):
+        daughters = self.clone(), other.clone()
+        graphs.crossover(daughters[0].graph, daughters[1].graph, 
+                         NeuralConnection)
+        return daughters
+    
     def clear(self):
         for node in self.nodes: node.clear()
     
