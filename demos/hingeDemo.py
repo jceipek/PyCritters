@@ -47,6 +47,11 @@ hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,0,0),Vector3(0,0,1),V
 
 motors = [hinge.getRotationalLimitMotor(2)]
 
+hinge.getRotationalLimitMotor(0).hiLimit = 0
+hinge.getRotationalLimitMotor(0).loLimit = 0
+hinge.getRotationalLimitMotor(1).hiLimit = 0
+hinge.getRotationalLimitMotor(1).loLimit = 0
+
 for motor in motors:
     motor.enableMotor = True
     motor.targetVelocity = 10

@@ -45,7 +45,7 @@ class TheHolyGrail(object):
         for key in self.creatures.iterkeys():
             self.simulateCreature(key)
         '''
-    pass        
+    pass
     
     def simulateCreature(self,id):
         '''
@@ -56,7 +56,7 @@ class TheHolyGrail(object):
     
     def killLeastFit(self):
         '''
-        Kills the least fit members of the population by removing them from the creatures dictionary
+        Kills the least fit members of the opulation by removing them from the creatures dictionary
         '''
         pass
     
