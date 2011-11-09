@@ -3,7 +3,7 @@ import operator
 import random
 
 __all__ = ["sign", "product", "divide", "scalarMutate", "filterOut", "repeat",
-           "flatten", "clampRange"]
+           "flatten", "clampRange", "count"]
 
 def sign(x):
     """Returns the sign of a number.
@@ -61,3 +61,8 @@ def clampRange(rnge, value):
     if value < lower: return lower
     if value > upper: return upper
     return value
+
+def count(iterator):
+    n = 0
+    for _ in iterator: n += 1
+    return n

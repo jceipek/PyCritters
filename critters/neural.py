@@ -1,312 +1,172 @@
 
-from __future__ import print_function
 
 import networkx as nx
 import copy
 import operator
 import math
+import graphs
 from utils import *
 from random import random, choice, sample, randint, normalvariate
 
-def randomNeuralNetwork(numInputs, numOutputs, numUpperLayers, nodesPerLayer):
-    assert numUpperLayers >= 1
+def randomNeuralNetwork(numInputs, numOutputs, numInner):
+    nn = NeuralNetwork()
     
-    nn = NeuralNetwork(numInputs, numUpperLayers)
-    for layer in nn.upperLayers:
-        for _ in range(nodesPerLayer):
-            nn.addNode(randomNode(), layer)
-            
-    nn.connectAll()
-    nn.validate(numInputs, numOutputs)
+    inputs = [InputNode() for _ in range(numInputs)]
+    inner = randomNodes(numInner)
+    outputs = [OutputNode() for _ in range(numOutputs)]
+    
+    for node in (inputs + outputs + inner): nn.addNode(node)
+    
+    for node in inputs: 
+        nn.connectNode(node, numOutputs=randint(1, numOutputs + numInner))
+    for node in inner:
+        nn.connectNode(node, numInputs=randint(1, numInputs + numInner - 1), 
+                             numOutputs=randint(1, numOutputs + numInner - 1))
+    for node in outputs:
+        nn.connectNode(node, numInputs=randint(1, numInputs + numInner))
+        
     return nn
 
-
 class NeuralNetwork(object):
-    """A class used to consruct neural networks with multiple layers.
     
-    A neural network has (1) an input layer and (2) an upper layer that contains
-    inner (hidden) layers (2a).
+    DEFAULT_OUTPUT = 0.0
     
-    1) Consists of input nodes that take in a single input from a sensor and
-       return an output.
-       
-    2) Consists of all nodes not in the input layer
-    
-    ...
-    """
-    
-    INSERT_NODE_MUTATION_RATE = 0.25
-    REMOVE_NODE_MUTATION_RATE = 0.2
-    EDGE_MUTATION_RATE = 0.1
-    CROSSOVER_RATE = 1
-    
-    def __init__(self, numInputs, numUpperLayers=1):
-        self.graph = nx.DiGraph()
-        self.layers = [[] for _ in range(numUpperLayers + 1)]
-        for _ in range(numInputs): self.addNode(InputNode(), self.inputNodes)
+    def __init__(self, graph=None):
+        self.graph = graph or nx.MultiDiGraph()
         
     @property
-    def nodes(self): return flatten(self.layers)
+    def nodes(self): 
+        return self.graph.nodes_iter()
+    
+    @property
+    def inputNodes(self): 
+        return (node for node in self.nodes if node.isInput)
+    
+    @property
+    def outputNodes(self):
+        return (node for node in self.nodes if node.isOutput)
+    
+    @property
+    def innerNodes(self):
+        return (node for node in self.nodes
+                if not node.isOutput and not node.isInput)
         
     @property
-    def inputNodes(self): return self.layers[0]
+    def upperNodes(self):
+        return (node for node in self.nodes if not node.isInput)
     
     @property
-    def innerLayers(self): return self.layers[1:-1]
-        
-    @property
-    def outputNodes(self): return self.layers[-1]
+    def lowerNodes(self):
+        return (node for node in self.nodes if not node.isOutput)
     
     @property
-    def upperLayers(self): return self.layers[1:]
+    def numInputs(self): 
+        return count(self.inputNodes)
     
     @property
-    def upperNodes(self): return flatten(self.upperLayers)
-    
-    @property
-    def numInputs(self): return len(self.inputNodes)
-    
-    @property
-    def numOutputs(self): return len(self.outputNodes)
+    def numOutputs(self): 
+        return count(self.outputNodes)
     
     def process(self, inputs, dt=1):
         assert len(inputs) == self.numInputs
         
         for node, inpt in zip(self.inputNodes, inputs):
             node.process([inpt], dt)
+        hasOutputs = set(self.inputNodes)
+            
+        for node in self.upperNodes:
+            nodeInputs = [pred.output*self.getWeight(pred, node)
+                          for pred in self.graph.predecessors_iter(node)
+                          if pred in hasOutputs]
+            if nodeInputs:
+                node.process(nodeInputs, dt)
+                hasOutputs.add(node)
         
-        for layer in self.upperLayers:
-            for node in layer:
-                node.process([pred.output*self.getWeight(pred, node) 
-                              for pred in 
-                              self.graph.predecessors_iter(node)], dt)
-        
-        return [node.output for node in self.outputNodes]
+        outputs = []
+        for node in self.outputNodes:
+            if node in hasOutputs:
+                outputs.append(node.output)
+            else:
+                outputs.append(self.DEFAULT_OUTPUT)
+        return outputs
     
-    def clear(self):
-        for node in self.graph.nodes(): node.clear()
-    
-    def getWeight(self, inputNode, node):
-        return self.graph[inputNode][node]['weight']
-    
-    def setWeight(self, inputNode, node, value):
-        self.graph[inputNode][node]['weight'] = value
-    
-    def randomizeWeights(self, randomFunc=random):
-        for node in self.graph.nodes_iter():
-            for pred in self.graph.predecessors_iter(node):
-                self.setWeight(pred, node, randomFunc())
-                
-    def clone(self, clear=True):
-        newNN = copy.deepcopy(self)
-        if clear: newNN.clear()
-        return newNN
-    
-    def removeNode(self, node, layer=None):
+    def removeNode(self, node):
         """Removes a node and its connections from the NN. 
-        
-        Layer can be specified if it is known what layer the node is in.
         
         NOTE: This may leave the NN in an invalid state where input
         restrictions are not met.
         """
         self.graph.remove_node(node)
-        if layer:
-            layer.remove(node)
-        else:
-            for layer in self.layers:
-                try:
-                    layer.remove(node)
-                    break
-                except: pass
                 
-    def addNode(self, node, layer):
+    def addNode(self, node):
         """Adds a node to the graph at the given layer index.
         
         """
-        if node not in layer: 
-            self.graph.add_node(node)
-            layer.append(node)
-                
-    def connectNode(self, node, layer, forwards=True, backwards=True):
-        """Adds and connects node to the graph at the given layer index.
+        self.graph.add_node(node)
         
-        TODO: Document me!
-        """
-        self.addNode(node, layer)
-        layerIndex = self._layerIndex(layer)
+    def makeConnection(self, prev, node, weight=None):
+        connection = NeuralConnection(prev, node, weight)
+        self.graph.add_edge(prev, node, key=0, connection=connection)
         
-        if layerIndex > 0 and backwards:
-            for prev in self.layers[layerIndex-1]:
-                self.makeConnection(prev, node)
+    def connectNode(self, node, numInputs=0, numOutputs=0):
+        self.addNode(node)
         
-        if layerIndex < len(self.layers)-1 and forwards:
-            for nextNode in self.layers[layerIndex + 1]:
-                self.makeConnection(node, nextNode)
+        if numInputs:
+            lower = list(self.lowerNodes)
+            inputs = sample(lower, min(numInputs, len(lower)))
+            for inpt in inputs: self.makeConnection(inpt, node)
         
-    
-    def makeConnection(self, prev, node, weight=random):
-        """Adds a connection outputting from prev to node.
+        if numOutputs:
+            upper = list(self.upperNodes)
+            outputs = sample(upper, min(numOutputs, len(upper)))
+            for output in outputs: self.makeConnection(node, output)
         
-        Weight defaults to a random number but can be specified as a function
-        or as a scalar value.
+    def conform(self, numInputs, numOutputs):
         
-        Does nothing if the nodes are already connected.
-        """
-        if self.graph.has_edge(prev, node): return
-        
-        if callable(weight): weight = weight()
-        self.graph.add_edge(prev, node, weight=weight)
-        
-    def connectAll(self, layers=None, weight=random):
-        """Adds connections between all nodes, respecting node requirements.
-        
-        Weight defaults to a random number but can be specified as a function
-        or as a scalar value.
-        
-        If layers is specified as a list of list of nodes, then only those
-        layers are connected, otherwise all layers are connected.
-        """
-        layers = layers or self.layers
-        
-        for prevLayer, layer in zip(layers, layers[1:]):
-            for prev in prevLayer:
-                for node in layer:
-                    self.makeConnection(prev, node, weight)
-        
-    def _validNodeInputs(self, node):
-        return len(self.graph.predecessors(node)) >= 1
-        
-    def _validNodeOutputs(self, node):
-        return len(self.graph.successors(node)) >= 1
-    
-    def _validState(self, numInputs, numOutputs):
-        if numInputs != self.numInputs: return False
-        if numOutputs != self.numOutputs: return False
-        
-        for layerIndex, layer in enumerate(self.layers):
-            if layerIndex > 0:
-                if any(not self._validNodeInputs(node) for node in layer):
-                    return False
-            if layerIndex < len(self.layers) - 1:
-                if any(not self._validNodeOutputs(node) for node in layer):
-                    return False
-            
-        return True
-    
-    def _nextLayer(self, layer):
-        return self.layers[self._layerIndex(layer) + 1]
-    
-    def _prevLayer(self, layer):
-        return self.layers[self._layerIndex(layer) - 1]
-    
-    def _layerIndex(self, layer):
-        return self.layers.index(layer)
-    
-    def validate(self, numInputs, numOutputs):
-        if self._validState(numInputs, numOutputs): return
-        
-        def fixLayer(layer, diff, newNodeFunc):
+        def fixLayer(layer, diff, newNodeFunc, **connectParams):
             if diff > 0:
                 for _ in range(diff): 
-                    self.connectNode(newNodeFunc(), layer)
+                    self.connectNode(newNodeFunc(), **connectParams)
             else:
                 for node in sample(layer, abs(diff)): 
-                    self.removeNode(node, layer)
+                    self.removeNode(node)
                     
         inputDiff = numInputs - self.numInputs
-        if inputDiff: fixLayer(self.inputNodes, inputDiff, InputNode)
-        
-        def buildUpNode(layer, node):
-            prevLayer = self._prevLayer(layer)
-            if prevLayer:
-                for prev in prevLayer: self.makeConnection(prev, node)
-            else:
-                fixLayer(prevLayer, 1, randomNode)
-        
-        for layer in self.upperLayers:
-            for node in layer:
-                if not self.graph.predecessors(node): 
-                    buildUpNode(layer, node)
-                
-            # edge case, we get a layer with no nodes, so we add a node
-            # that should always work (any num of inputs).
-            if not layer: fixLayer(layer, 1, randomNode)
-            
-        for layer in self.layers[0:-1]:
-            for node in layer:
-                if not self.graph.successors(node):
-                    self.connectNode(node, layer, backwards=False)
+        if inputDiff: 
+            fixLayer(self.inputNodes, inputDiff, InputNode, numOuputs=5)
         
         outputDiff = numOutputs - self.numOutputs
         if outputDiff: 
-            fixLayer(self.outputNodes, outputDiff, randomNode)
+            fixLayer(self.outputNodes, outputDiff, randomNode, numInputs=5)
         
-        assert self._validState(numInputs, numOutputs)
+        graphs.garbageCollect(self.graph, 
+                              shouldIgnore=lambda n: isinstance(n, InputNode))
     
     def mutate(self):
-        nn = self.clone()
-        
-        #mutate nodes
-        for node in self.nodes: node.mutate()
-        
-        if random() < self.INSERT_NODE_MUTATION_RATE:
-            node = randomNode()
-            nn.connectNode(node, choice(nn.upperLayers))
-            
-        if random() < self.REMOVE_NODE_MUTATION_RATE:
-            nn.removeNode(choice(nn.upperNodes))
-        
-        for prev, node in self.graph.edges_iter():
-            if random() < self.EDGE_MUTATION_RATE:
-                current = self.getWeight(prev, node)
-                self.setWeight(prev, node, scalarMutate(current))
-                
-        nn.validate(self.numInputs, self.numOutputs)
-        return nn
+        newNN = self.clone()
+        graphs.mutate(newNN.graph, randomNode, NeuralConnection)
+        newNN.conform(self.numInputs, self.numOutputs)
+        return newNN
     
-    def crossover(self, other):
-        daughters = self.clone(), other.clone()
-        
-        if random() < self.CROSSOVER_RATE:
-            def chooseCrossoverPoint(nn):
-                return 1+choice(range(len(self.innerLayers)))
-            points = chooseCrossoverPoint(self), chooseCrossoverPoint(other)
-            
-            
-            def subgraph(nn, layers):
-                return nn.graph.subgraph(flatten(layers))
-            
-            def disconnect(nn, layers):
-                for layer in layers:
-                    for node in layer: 
-                        nn.removeNode(node)
-            
-            def mergeGraph(nn, subgraph):
-                nn.graph.add_nodes_from(subgraph.nodes_iter())
-                nn.graph.add_edges_from(subgraph.edges_iter(data=True))
-                
-            def connectLayers(nn, bottom, top):
-                nn.connectAll([bottom[-1], top[0]])
-                nn.connectAll([top[0], nn.outputNodes])
-            
-            bottoms = [d.layers[0:p] for d, p in zip(daughters, points)]
-            tops = [d.layers[p:-1] for d, p in zip(daughters, points)]
-            subgraphs = [subgraph(d, top) for d, top in zip(daughters, tops)]
-            
-            for d, top in zip(daughters, tops): disconnect(d, top)
-            
-            mergeGraph(daughters[0], subgraphs[1])
-            mergeGraph(daughters[1], subgraphs[0])
-            
-            connectLayers(daughters[0], bottoms[0], tops[1])
-            connectLayers(daughters[1], bottoms[1], tops[0])
-            
-            daughters[0].layers[points[0]:-1] = tops[1]
-            daughters[1].layers[points[1]:-1] = tops[0]
-        
-        return daughters
-
+    def clear(self):
+        for node in self.nodes: node.clear()
+    
+    def getWeight(self, inputNode, node):
+        return self.graph[inputNode][node][0]['connection'].weight
+    
+    def setWeight(self, inputNode, node, value):
+        self.graph[inputNode][node][0]['connection'].weight = value
+    
+    def randomizeWeights(self, randomFunc=random):
+        for node in self.graph.nodes_iter():
+            for pred in self.graph.predecessors_iter(node):
+                self.setWeight(pred, node, randomFunc())
+    
+    def clone(self, clear=True):
+        newNN = copy.deepcopy(self)
+        if clear: newNN.clear()
+        return newNN
+    
 
 def nodeTypes(includeInput=False):
     """Returns a list of Node classes (excluding Node)."""
@@ -326,6 +186,18 @@ def randomNodes(n=1, **kwgs):
 
 def randomNode(**kwgs):
     return randomNodes(n=1, **kwgs)[0]
+
+class NeuralConnection(object):
+    
+    def __init__(self, prev, node, weight=None):
+        self.prev = prev
+        self.node = node
+        self.weight = weight or random()
+        
+        self.id = 0 # never allow multiple edges
+        
+    def mutate(self):
+        self.weight = scalarMutate(self.weight)
  
 class Node(object):
     """The base class for a neural network node.
@@ -340,6 +212,7 @@ class Node(object):
     
     def __init__(self):
         self.output = 0
+        
     
     def clear(self):
         """Clears all state associated with a node.
@@ -375,6 +248,9 @@ class Node(object):
     def _pickInput(self, inputs, floatIndex):
         intIndex = int(round((len(inputs)-1)*floatIndex))
         return inputs[intIndex]
+    
+    isInput = False
+    isOutput = False
 
     
 class InputNode(Node):
@@ -387,11 +263,17 @@ class InputNode(Node):
     def mutate(self):
         return InputNode()
     
+    isInput = True
+    
 class SumNode(Node):
     """A node that returns the sum of all inputs."""
     
     def process(self, inputs, dt):
         self.output = sum(inputs)
+        
+class OutputNode(SumNode):
+    
+    isOutput = True
         
 class ProductNode(Node):
     """A node that returns the product of all inputs."""
@@ -474,8 +356,7 @@ class AbsNode(Node):
     
     def __init__(self, index=None):
         """Index defaults to a random number between 0 and 1."""
-        if index is None: index = random()
-        self.index = index
+        self.index = index or random()
     
     def process(self, inputs, dt):
         self.output = abs(self._pickInput(inputs, self.index))
@@ -483,6 +364,20 @@ class AbsNode(Node):
     def mutate(self):
         if random() < self.INDEX_MUTATION_RATE:
             self.index = clampRange((0, 1), scalarMutate(self.index))
+            
+class ConstantNode(Node):
+    
+    CONST_MUTATION_RATE = 0.2
+    
+    def __init__(self, const=None):
+        self.const = const or random()
+        
+    def process(self, inputs, dt):
+        self.output = self.const
+    
+    def mutate(self):
+        if random() < self.CONST_MUTATION_RATE:
+            self.const = scalarMutate(self.const)
         
 class IfNode(Node):
     """A node that will output the first input greater than 0.
@@ -500,10 +395,8 @@ class IfNode(Node):
 
 
 if __name__ == '__main__':
-    nn1 = randomNeuralNetwork(8, 5, 3, 10)
-    nn2 = randomNeuralNetwork(8, 5, 3, 10)
-    d1, d2 = nn1.crossover(nn2)
-    for _ in range(100): d1 = d1.mutate()
-    d1.validate(8, 5)
-    print(d1.process(range(8)))
-
+    nn = randomNeuralNetwork(3, 2, 10)
+    print(count(nn.inputNodes))
+    for _ in range(100): nn = nn.mutate()
+    print(count(nn.inputNodes))
+    print(nn.process(range(3)))
