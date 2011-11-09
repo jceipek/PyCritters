@@ -16,7 +16,7 @@ def step(world):
     world.stepSimulation(timeStep, 1, fixedTimeStep)
     now = time.time()
     delay = now % timeStep
-    time.sleep(delay)
+    time.sleep(delay*10)
     
 ents = set()
 worldMin = Vector3(-1000,-1000,-1000)
@@ -26,30 +26,30 @@ solver = SequentialImpulseConstraintSolver()
 
 dynamicsWorld = DiscreteDynamicsWorld(None, broadphase, solver)
 
-dynamicsWorld.setGravity(Vector3(0, 0, 0)) #turn gravity off
+dynamicsWorld.setGravity(Vector3(0, -9.8, 0)) #turn gravity off
 
 ground = objects.StaticPlane(Vector3(0,1,0), 0.0) #Y is up
 dynamicsWorld.addRigidBody(ground.body)
 
-shift = -7.5
-box1 = objects.Box(Vector3(0, 10+shift, 0), Vector3(9.0,5.0,5.0))
+
+box1 = objects.Box(Vector3(0, 2.5, 0), Vector3(9.0,5.0,5.0))
 rBox1 = makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
-box2 = objects.Box(Vector3(9.0, 15+shift, 0), Vector3(9.0,5.0,5.0))
+box2 = objects.Box(Vector3(9.0, 2.5, 0), Vector3(9.0,5.0,5.0))
 rBox2 = makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
 dynamicsWorld.addRigidBody(box1.body)
 dynamicsWorld.addRigidBody(box2.body)
 
-hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,12.5 + shift,0),Vector3(0,0,1),Vector3(0,1,0))
+hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,0,0),Vector3(0,0,1),Vector3(0,1,0))
 
 motors = [hinge.getRotationalLimitMotor(2)]
 
 for motor in motors:
     motor.enableMotor = True
-    motor.targetVelocity = -4294967292
+    motor.targetVelocity = 10
     motor.hiLimit = 90
     motor.loLimit = -90
     motor.maxMotorForce = 5
