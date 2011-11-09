@@ -11,8 +11,7 @@ from bullet.bullet import (
 
 class Box(object):
     
-    def __init__(self, position, size, mass=2.0, restitution=0.9):
-    
+    def __init__(self, position, size, mass=2.0, restitution=0.9):    
         self.size = size
         shape = BoxShape(size*0.5)
         transform = Transform()

@@ -1,19 +1,22 @@
-import time
 
+import sys
+sys.path.append('../critters')  #add critters to pythonpath to use as library
+
+import time
 import visualization.render
 from visualization.renderable import makeRenderable
 import physics.objects as objects
 
-from bullet.bullet import DiscreteDynamicsWorld, Vector3, Point2PointConstraint, AxisSweep3, SequentialImpulseConstraintSolver
+from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
 
 import pygame
 
 def step(world):
-    timeStep = fixedTimeStep = 1.0 / 60.0
+    timeStep = fixedTimeStep = 1.0 / 600.0
     world.stepSimulation(timeStep, 1, fixedTimeStep)
     now = time.time()
     delay = now % timeStep
-    time.sleep(delay)
+    time.sleep(delay*10)
     
 ents = set()
 worldMin = Vector3(-1000,-1000,-1000)
@@ -23,34 +26,57 @@ solver = SequentialImpulseConstraintSolver()
 
 dynamicsWorld = DiscreteDynamicsWorld(None, broadphase, solver)
 
+dynamicsWorld.setGravity(Vector3(0, -9.8, 0)) #turn gravity off
+
 ground = objects.StaticPlane(Vector3(0,1,0), 0.0) #Y is up
 dynamicsWorld.addRigidBody(ground.body)
 
-box1 = objects.Box(Vector3(0, 10, 0), Vector3(9.0,5.0,5.0))
+
+box1 = objects.Box(Vector3(0, 2.5, 0), Vector3(9.0,5.0,5.0))
 rBox1 = makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
-box2 = objects.Box(Vector3(9.0, 15, -5.0), Vector3(9.0,5.0,5.0))
+box2 = objects.Box(Vector3(9.0, 2.5, 0), Vector3(9.0,5.0,5.0))
 rBox2 = makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
 dynamicsWorld.addRigidBody(box1.body)
 dynamicsWorld.addRigidBody(box2.body)
 
-pointConstraint = Point2PointConstraint(box1.body, box2.body, Vector3(4.5,2.5,-2.5), Vector3(-4.5,-2.5,2.5))
+hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,0,0),Vector3(0,0,1),Vector3(0,1,0))
 
-dynamicsWorld.addConstraint(pointConstraint)
+motors = [hinge.getRotationalLimitMotor(2)]
+
+for motor in motors:
+    motor.enableMotor = True
+    motor.targetVelocity = 10
+    motor.hiLimit = 90
+    motor.loLimit = -90
+    motor.maxMotorForce = 5
+    print(motor.maxMotorForce)
+    #print(motor.currentPosition)
+
+
+dynamicsWorld.addConstraint(hinge)
 
 r = visualization.render.Renderer(dynamicsWorld, debug=True)
 r.setup()
 
 running = True
-rot = 0.2
+rot = 0.0
 
+import math
+
+magic = 0.0
 
 # ESC to quit; LEFT and RIGHT to change rotation speed.
 while running:
     step(dynamicsWorld)
+    
+    magic += 1.0
+    for i in range(len(motors)):
+        pass#print(str(i) +":" + str(motors[i].currentPosition))
+    #hinge.setStiffness(5,math.sin(magic)*-5000000)
     
     r.render(ents)
     r.rotateCamera(rot)

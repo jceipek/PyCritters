@@ -17,6 +17,7 @@ from OpenGL.GL import (
     GL_LINES, 
     GL_COLOR_BUFFER_BIT,  
     GL_DEPTH_BUFFER_BIT,
+    GL_LINE_SMOOTH,
     glEnable, 
     glPushMatrix,
     glPopMatrix,
@@ -51,7 +52,7 @@ class Renderer(object):
         pygame.display.set_mode((1024, 768),
                                 pygame.locals.OPENGL |
                                 pygame.locals.DOUBLEBUF)
-        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_DEPTH_TEST|GL_LINE_SMOOTH)
         gluPerspective(60.0, 640.0 / 480.0, 0.5, 1000.0)
         glTranslate(0, -15, -60)
     
