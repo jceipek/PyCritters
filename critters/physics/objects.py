@@ -11,9 +11,11 @@ from bullet.bullet import (
 
 class Box(object):
     
-    def __init__(self, position, size, mass=2.0, restitution=0.9):
+    def __init__(self, position, size, mass=None, density=1.0, restitution=0.9):
     
         self.size = size
+        if mass == None:
+            mass = density * self.size.x * self.size.y * self.size.z
         shape = BoxShape(size*0.5)
         transform = Transform()
         transform.setIdentity()
