@@ -8,7 +8,7 @@ class TheHolyGrail(object):
     '''
     classdocs
     '''
-    def __init__(self,params):
+    def __init__(self,params=None):
         '''
         Constructor
         '''
@@ -69,16 +69,14 @@ class TheHolyGrail(object):
         '''
         pass
     
-    def processMorphologyTree(self,rootNode,simulationEnvironment=None):
+    def processMorphologyTree(self,graph,simulationEnvironment=None):
         '''
         Creates the physics engine's representation of this morphology tree. If
         a simulation environment is passed in, this environment is used,
         otherwise one is created.
         '''
-        '''
         
-        '''
         pass
     
     def _processMorphologyTree(self,root):
-        
+        pass

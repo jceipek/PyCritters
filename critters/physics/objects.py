@@ -13,13 +13,20 @@ class PhysicsObject(object):
     '''A generic PhysicsObject with a unique readOnly identifier.
     
     This identifier is useful for creating collision groups.'''
-    __identifierCount = 0
 
+    _identifierCount = 0
+    print("Sould not execute twice")
+    
     def __init__(self):
-        self.__identifier = PhysicsObject.__identifierCount
-        PhysicsObject.__identifierCount += 1
+        self._identifier = PhysicsObject._identifierCount
+        PhysicsObject._identifierCount += 1
+        print(self, PhysicsObject._identifierCount)
 
-    identifier = property(lambda (self): self.__identifier)
+    @property
+    def identifier(self): return self._identifier
+    
+    def __str__(self):
+        return str(type(self).__name__) + '_' + str(self.identifier)
 
 class Box(PhysicsObject):
     '''A generic rectangular prism that uses pyBullet's RigidBody.
