@@ -30,22 +30,30 @@ dynamicsWorld = DiscreteDynamicsWorld(None, broadphase, solver)
 dynamicsWorld.setGravity(Vector3(0, -9.8, 0)) #turn gravity off
 
 ground = objects.StaticPlane(Vector3(0,1,0), 0.0) #Y is up
-dynamicsWorld.addRigidBody(ground.body)
+
 
 
 box1 = objects.Box(Vector3(0, 2.5, 0), Vector3(9.0,5.0,5.0))
 rBox1 = makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
-box2 = objects.Box(Vector3(9.0, 2.5, 0), Vector3(9.0,5.0,5.0))
+box2 = objects.Box(Vector3(5, 19.5, 0), Vector3(9.0,5.0,5.0))
 rBox2 = makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
-BODY_1_COLLISION_GROUP = 0b01
-BODY_2_COLLISION_GROUP = 0b01
-dynamicsWorld.addCollisionObject(box2.body,BODY_1_COLLISION_GROUP,BODY_2_COLLISION_GROUP)
-dynamicsWorld.addCollisionObject(box1.body,BODY_2_COLLISION_GROUP,BODY_1_COLLISION_GROUP)
+box3 = objects.Box(Vector3(2.5, 35.5, 0), Vector3(9.0,5.0,5.0))
+rBox3 = makeRenderable(box3, (255,0,0))
+ents.add(rBox3)
 
+BODY_3_COLLISION_GROUP = 0b1000
+BODY_2_COLLISION_GROUP = 0b100
+BODY_1_COLLISION_GROUP = 0b10
+GROUND_COLLISION_GROUP = 0b01
+
+dynamicsWorld.addRigidBody(ground.body,GROUND_COLLISION_GROUP,BODY_1_COLLISION_GROUP|BODY_2_COLLISION_GROUP|BODY_3_COLLISION_GROUP)
+dynamicsWorld.addRigidBody(box3.body,BODY_2_COLLISION_GROUP,GROUND_COLLISION_GROUP|BODY_3_COLLISION_GROUP)
+dynamicsWorld.addRigidBody(box2.body,BODY_1_COLLISION_GROUP,GROUND_COLLISION_GROUP)
+dynamicsWorld.addRigidBody(box1.body,BODY_3_COLLISION_GROUP,GROUND_COLLISION_GROUP|BODY_2_COLLISION_GROUP)
 hinge = Hinge2Constraint(box1.body, box2.body, Vector3(4.5,0,0),Vector3(0,0,1),Vector3(0,1,0))
 
 motors = [hinge.getRotationalLimitMotor(2)]
@@ -54,7 +62,7 @@ hinge.getRotationalLimitMotor(0).hiLimit = 0
 hinge.getRotationalLimitMotor(0).loLimit = 0
 hinge.getRotationalLimitMotor(1).hiLimit = 0
 hinge.getRotationalLimitMotor(1).loLimit = 0
-
+'''
 for motor in motors:
     motor.enableMotor = True
     motor.targetVelocity = 10
@@ -63,9 +71,9 @@ for motor in motors:
     motor.maxMotorForce = 500000
     print(motor.maxMotorForce)
     #print(motor.currentPosition)
+'''
 
-
-dynamicsWorld.addConstraint(hinge)
+#dynamicsWorld.addConstraint(hinge)
 r = visualization.render.Renderer(dynamicsWorld, debug=True)
 r.setup()
 print ('I am a alive')

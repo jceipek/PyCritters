@@ -57,7 +57,7 @@ for motor in motors:
     motor.targetVelocity = 10
     motor.hiLimit = 90
     motor.loLimit = -90
-    motor.maxMotorForce = 5
+    motor.maxMotorForce = 50
     print(motor.maxMotorForce)
     #print(motor.currentPosition)
 
