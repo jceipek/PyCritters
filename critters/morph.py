@@ -1,5 +1,3 @@
-
-
 import networkx as nx
 import neural
 import math
@@ -19,7 +17,9 @@ class Morphology(object):
         self.graph.add_edge(*connection.nodes, key=connection.id, 
                             connection=connection)
         
-    def createConnection(self, *nodes):
+    def createConnection(self, *nodes): 
+        #XXX Do you really want new nodes to be created every time
+        #we add a connection? - Julian
         self.addConnection(MorphConnection(tuple(nodes)))
 
 class MorphNode(object):
@@ -39,6 +39,9 @@ HINGE_JOINT = 0
         
 class MorphConnection(object):
     
+    #Class  
+    idCounter = 0
+    
     def __init__(self, nodes, joint=HINGE_JOINT, actuators=None, 
                  locations=None, recursionLimit=1):
         self.id = MorphConnection.idCounter
@@ -57,11 +60,32 @@ class MorphConnection(object):
         def randomLocation(): return 2*math.pi*random()
         return randomLocation(), randomLocation()
     
-MorphConnection.idCounter = 0
-    
 class Actuator(object):
     
     def __init__(self, strength=None, limits=(0.0, 1.0)):
         self.strength = strength or random()
         self.limits = limits
 
+
+def createSnake():
+    """Hardcoded test function that creates a snake creature
+    
+    (for testing purposes)
+    """
+    
+    snake = Morphology()
+    
+    head = MorphNode(1,1,1,nn=None)
+    middle = MorphNode(1,1,1,nn=None)
+    tail = MorphNode(1,1,1,nn=None)
+    
+    #Put these back in if the createConnection function
+    #doesn't add nodes
+    #snake.addNode(head) 
+    #snake.addNode(middle)
+    #snake.addNode(tail)
+    
+    snake.createConnection(self, head, middle)
+    snake.createConnection(self, middle, tail)
+
+    return snake

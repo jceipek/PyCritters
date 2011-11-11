@@ -45,26 +45,40 @@ class TheHolyGrail(object):
         for key in self.creatures.iterkeys():
             self.simulateCreature(key)
         '''
-    pass        
+    pass
     
     def simulateCreature(self,id):
         '''
-        Makes a simulation with the creature of id id, simulates that creature, evaluates the fitness function
-        and updates the fitness values in the creatures dictionary
+        Makes a simulation with the creature of id id, simulates that creature,
+        evaluates the fitness function and updates the fitness values in the
+        creatures dictionary
         '''
         pass
     
     def killLeastFit(self):
         '''
-        Kills the least fit members of the population by removing them from the creatures dictionary
+        Kills the least fit members of the opulation by removing them from the creatures dictionary
         '''
         pass
     
     def generateNextPopulation(self):
         '''
-        Creates a new creatures dictionary by breeding the most fit creatures from the last generation.
-        This may include aSexual reproduction, but no references to the same objects will exist in the new dictionary.
+        Creates a new creatures dictionary by breeding the most fit creatures
+        from the last generation. This may include aSexual reproduction, but no
+        references to the same objects will exist in the new dictionary.
         '''
         pass
     
+    def processMorphologyTree(self,rootNode,simulationEnvironment=None):
+        '''
+        Creates the physics engine's representation of this morphology tree. If
+        a simulation environment is passed in, this environment is used,
+        otherwise one is created.
+        '''
+        '''
+        
+        '''
+        pass
     
+    def _processMorphologyTree(self,root):
+        

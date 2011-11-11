@@ -9,10 +9,32 @@ from bullet.bullet import (
     DefaultMotionState, RigidBody,
     BoxShape, StaticPlaneShape)
 
-class Box(object):
+class PhysicsObject(object):
+    '''A generic PhysicsObject with a unique readOnly identifier.
     
-    def __init__(self, position, size, mass=2.0, restitution=0.9):    
+    This identifier is useful for creating collision groups.'''
+    __identifierCount = 0
+
+    def __init__(self):
+        self.__identifier = PhysicsObject.__identifierCount
+        PhysicsObject.__identifierCount += 1
+
+    identifier = property(lambda (self): self.__identifier)
+        
+
+class Box(PhysicsObject):
+    '''A generic rectangular prism that uses pyBullet's RigidBody.
+    
+    It has a width, height, and depth specified by the Vector3 size,
+    a Vector3 position. The density keyword argument is used only
+    when the mass is None, in which case the volume and density determine
+    the mass. The restitution coefficient determines how "bouncy" collisions are.
+    If it is below 1.0, collisions will be inelastic.'''
+    def __init__(self, position, size, mass=None, density=1.0, restitution=0.9):
+        PhysicsObject.__init__(self) # Handle unique identification
         self.size = size
+        if mass == None:
+            mass = density * self.size.x * self.size.y * self.size.z
         shape = BoxShape(size*0.5)
         transform = Transform()
         transform.setIdentity()
@@ -27,10 +49,13 @@ class Box(object):
         self.motion = motion
         
 
-class StaticPlane(object):
-
+class StaticPlane(PhysicsObject):
+    '''A generic plane that extends infinitely in all directions.
+    
+    It is specified by a Vector3 normalVec and a scalar distance
+    to the global origin.'''
     def __init__(self, normalVec, distToOrigin):
-        # Vector3, scalar
+        PhysicsObject.__init__(self) # Handle unique identification
         shape = StaticPlaneShape(normalVec, distToOrigin)
         
         self.body = RigidBody(None, shape, 0.0)
