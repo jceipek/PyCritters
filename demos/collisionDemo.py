@@ -51,17 +51,6 @@ cm.ignoreCollision(box2,box1)
 cm.addPhysicsObject(ground)
 cm.calculateCollisionGroups()
 
-GROUND_COLLISION_GROUP = 0b01
-BODY_1_COLLISION_GROUP = 0b10
-BODY_2_COLLISION_GROUP = 0b100
-BODY_3_COLLISION_GROUP = 0b1000
-
-'''
-dynamicsWorld.addRigidBody(ground.body,GROUND_COLLISION_GROUP,BODY_1_COLLISION_GROUP|BODY_2_COLLISION_GROUP|BODY_3_COLLISION_GROUP)
-dynamicsWorld.addRigidBody(box3.body,BODY_3_COLLISION_GROUP,GROUND_COLLISION_GROUP|BODY_1_COLLISION_GROUP)
-dynamicsWorld.addRigidBody(box2.body,BODY_1_COLLISION_GROUP,GROUND_COLLISION_GROUP)
-dynamicsWorld.addRigidBody(box1.body,BODY_1_COLLISION_GROUP,GROUND_COLLISION_GROUP|BODY_3_COLLISION_GROUP)
-'''
 dynamicsWorld.addRigidBody(ground.body,cm.getCollisionFilterGroup(ground),cm.getCollisionFilterMask(ground))
 dynamicsWorld.addRigidBody(box3.body,cm.getCollisionFilterGroup(box3),cm.getCollisionFilterMask(box3))
 dynamicsWorld.addRigidBody(box2.body,cm.getCollisionFilterGroup(box2),cm.getCollisionFilterMask(box2))
@@ -100,13 +89,9 @@ magic = 0.0
 
 # ESC to quit; LEFT and RIGHT to change rotation speed.
 while running:
-    print ('I am a alive')
     step(dynamicsWorld)
     
     magic += 1.0
-    for i in range(len(motors)):
-        pass#print(str(i) +":" + str(motors[i].currentPosition))
-    #hinge.setStiffness(5,math.sin(magic)*-5000000)
     
     r.render(ents)
     r.rotateCamera(rot)
