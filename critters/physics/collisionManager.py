@@ -32,15 +32,26 @@ class CollisionManager(object):
                 if t_id in self.ignores:
                     raise ValueError('The list of PhysicsObjects may not contain clones, alternatively, identifiers were not unique.')        
                 self.ignores[t_id] = [] #each PhysicsObject ignores no collisions by default
+                
+                
+    def addPhysicsObject(self,physObj):
+        '''
+        Adds a PhysicsObject to the collisionManager but does not imply any
+        relations. This is especially useful for things like the ground.
+        '''
+        if len(self.ignores) < CollisionManager.MAX_SIZE:
+            self.ignores[physObj.identifier] = []
+        else:
+            raise ValueError('The maximum number of Rigid Bodies which may be mapped is 16')        
+        
     def ignoreCollision(self,physObj1,physObj2):
         '''
         Registers physObj1 and physObj2 to have their collisions be ignored by the physics engine. 
-        This operation is atomic, if the length is exceeded, the recent changes are undone and the
-        object is returned to the same state BEFORE the function call.
+        This operation is atomic; if it fails it will not have any side effects
         '''
         _added1 = False
-        id1 = physObj1.identifer
-        id2 = physObj2.identifer
+        id1 = physObj1.identifier
+        id2 = physObj2.identifier
         if not id1 in self.ignores:
             if len(self.ignores) < CollisionManager.MAX_SIZE:
                 self.ignores[id1] = []
@@ -65,24 +76,26 @@ class CollisionManager(object):
         for item in self.ignores.iterkeys():
             self.bits[item] = last
             last =last <<1 #move on to the next bit
-            #test for out of range needs to be added
+            #TODO test for out of range
     
     def getCollisionFilterGroup(self,physObj):
         '''
         @return: the calculated collisionFilterGroup for the physObj, an integer between 01 and 2^16 -1
         '''
-        if not physObj.identifer in self.bits:
+        if not physObj.identifier in self.bits:
             raise ValueError('The Collision Groups must be calculated before this function is invoked')            
-        return self.bits[physObj.identifer]
+        return self.bits[physObj.identifier]
 
     def getCollisionFilterMask(self,physObj):
         '''
         @return: the calculated collisionFilterMask, the result of binary or'ing all PhysicsObjects this physObj has been told to ignore
         '''
-        if not physObj.identifer in self.bits:
+        if not physObj.identifier in self.bits:
             raise ValueError('The Collision Groups must be calculated before this function is invoked')            
         else:
-            return reduce(lambda x,y: x|y,self.bits[physObj.identifer])
+            #itemsToColideWith is the list of all elements which must be or'ed to create the mask
+            toColideWith = [self.bits[item] for item in self.bits.iterkeys() if item not in self.ignores[physObj.identifier]]
+            return reduce(lambda x,y: x|y,toColideWith)
 
 if __name__ =='__main__':
     import random
