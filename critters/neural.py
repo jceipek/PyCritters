@@ -27,12 +27,31 @@ def randomNeuralNetwork(numInputs, numOutputs, numInner):
         
     return nn
 
+def simpleSineNetwork(numInputs, numOutputs):
+    nn = NeuralNetwork()
+    
+    inputs = [InputNode() for _ in range(numInputs)]
+    inner = [SineNode(1.0) for _ in range(numOutputs)]
+    outputs = [OutputNode() for _ in range(numOutputs)]
+    
+    for node in (inputs + outputs + inner): nn.addNode(node)
+    
+    for inpt in inputs: 
+        for sine in inner: nn.makeConnection(inpt, sine)
+    
+    for i in range(numOutputs):
+        nn.makeConnection(inner[i], outputs[i], weight=1.0)
+        
+    return nn
+    
+
 class NeuralNetwork(object):
     
     DEFAULT_OUTPUT = 0.0
     
     def __init__(self, graph=None):
         self.graph = graph or nx.MultiDiGraph()
+        self._hasOutputs = set()
         
     @property
     def nodes(self): 
@@ -70,21 +89,25 @@ class NeuralNetwork(object):
     def process(self, inputs, dt=1):
         assert len(inputs) == self.numInputs
         
+        def registerOutput(node):
+            if not node in self._hasOutputs:
+                self._hasOutputs.add(node)
+        
         for node, inpt in zip(self.inputNodes, inputs):
             node.process([inpt], dt)
-        hasOutputs = set(self.inputNodes)
+            registerOutput(node)
             
         for node in self.upperNodes:
             nodeInputs = [pred.output*self.getWeight(pred, node)
                           for pred in self.graph.predecessors_iter(node)
-                          if pred in hasOutputs]
+                          if pred in self._hasOutputs]
             if nodeInputs:
                 node.process(nodeInputs, dt)
-                hasOutputs.add(node)
+                registerOutput(node)
         
         outputs = []
         for node in self.outputNodes:
-            if node in hasOutputs:
+            if node in self._hasOutputs:
                 outputs.append(node.output)
             else:
                 outputs.append(self.DEFAULT_OUTPUT)
@@ -156,6 +179,7 @@ class NeuralNetwork(object):
     
     def clear(self):
         for node in self.nodes: node.clear()
+        self._hasOutputs = set()
     
     def getWeight(self, inputNode, node):
         return self.graph[inputNode][node][0]['connection'].weight
@@ -304,6 +328,7 @@ class SumThresholdNode(Node):
     
     def __init__(self, threshold=None):
         """Threshold defaults to a random number between 0 and 1."""
+        Node.__init__(self)
         if threshold is None: threshold = random()
         self.threshold = threshold
         
@@ -328,6 +353,7 @@ class SignOfNode(Node):
     
     def __init__(self, index=None):
         """Index defaults to a random number between 0 and 1."""
+        Node.__init__(self)
         if index is None: index = random()
         self.index = index
     
@@ -362,6 +388,7 @@ class AbsNode(Node):
     
     def __init__(self, index=None):
         """Index defaults to a random number between 0 and 1."""
+        Node.__init__(self)
         self.index = index or random()
     
     def process(self, inputs, dt):
@@ -376,13 +403,14 @@ class ConstantNode(Node):
     CONST_MUTATION_RATE = 0.2
     
     def __init__(self, const=None):
+        Node.__init__(self)
         self.const = const or random()
         
     def process(self, inputs, dt):
         self.output = self.const
     
     def mutate(self):
-        if random() < self.CONST_MUTATION_RATE:
+        if random() < ConstantNode.CONST_MUTATION_RATE:
             self.const = scalarMutate(self.const)
         
 class IfNode(Node):
@@ -399,10 +427,30 @@ class IfNode(Node):
         
         self.output = 0
 
+class SineNode(Node):
+    
+    PERIOD_MUTATION_RATE = 0.2
+    
+    def __init__(self, period=None):
+        Node.__init__(self)
+        self.period = period or (0.5 + 2*random())
+        self.t = 0
+        
+    def clear(self):
+        Node.clear(self)
+        self.t = 0
+        
+    def process(self, inputs, dt):
+        self.t += dt
+        self.output = math.sin(self.t/self.period)
+        
+    def mutate(self):
+        if random() < SineNode.PERIOD_MUTATION_RATE:
+            self.period = scalarMutate(self.period)
+        
 
 if __name__ == '__main__':
-    nn = randomNeuralNetwork(3, 2, 10)
-    print(count(nn.inputNodes))
-    for _ in range(100): nn = nn.mutate()
-    print(count(nn.inputNodes))
-    print(nn.process(range(3)))
+    nn = simpleSineNetwork(2, 3)
+    for _ in range(10):
+        print(nn.process([0, 0], dt=0.5))
+    
