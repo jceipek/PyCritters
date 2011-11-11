@@ -10,6 +10,9 @@ from bullet.bullet import (
     BoxShape, StaticPlaneShape)
 
 class PhysicsObject(object):
+    '''A generic PhysicsObject with a unique readOnly identifier.
+    
+    This identifier is useful for creating collision groups.'''
     __identifierCount = 0
 
     def __init__(self):
@@ -19,8 +22,14 @@ class PhysicsObject(object):
     identifier = property(lambda (self): self.__identifier)
         
 
-class Boxi(PhysicsObject):
+class Box(PhysicsObject):
+    '''A generic rectangular prism that uses pyBullet's RigidBody.
     
+    It has a width, height, and depth specified by the Vector3 size,
+    a Vector3 position. The density keyword argument is used only
+    when the mass is None, in which case the volume and density determine
+    the mass. The restitution coefficient determines how "bouncy" collisions are.
+    If it is below 1.0, collisions will be inelastic.'''
     def __init__(self, position, size, mass=None, density=1.0, restitution=0.9):
         PhysicsObject.__init__()
         self.size = size
