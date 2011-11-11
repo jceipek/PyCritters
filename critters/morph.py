@@ -54,15 +54,15 @@ class Morphology(object):
             except KeyError: pass
             
             graph = nx.Graph()
-            root = copy.deepcopy(node)
+            root = node.clone()
             graph.add_node(root)
             
-            for _, neighbor, data in self.graph.out_edges_iter(data=True):
+            for _, neighbor, data in self.graph.out_edges_iter(node, data=True):
                 connection = data['connection']
                 
-                if node is neighbor:
+                if node == neighbor:
                     subDepth = depth + 1
-                    if connection.recursionLimit >= subDepth: continue
+                    if subDepth >= connection.recursionLimit: continue
                 else:
                     subDepth = 0
                 
@@ -73,9 +73,11 @@ class Morphology(object):
                 
                 graph.add_edge(root, subroot, { 'connection': connection })
             
-            cache[key] = root, graph
+            value = root, graph
+            cache[key] = value
+            return value
         
-        return expandNode(next(self.nodes), 0)[0]
+        return expandNode(next(self.nodes), 0)[1]
 
 class MorphNode(object):
     
@@ -89,6 +91,9 @@ class MorphNode(object):
         #TODO: random numbers here:
         return neural.randomNeuralNetwork(2, 2, 5)
     
+    def clone(self):
+        newNN = self.nn.clone()
+        return MorphNode(self.width, self.height, self.depth, newNN)
         
 HINGE_JOINT = 0
         
@@ -144,3 +149,17 @@ def createSnake():
     snake.createConnection(self, middle, tail)
 
     return snake
+
+if __name__ == '__main__':
+    snake = Morphology()
+    
+    head = MorphNode()
+    middle = MorphNode()
+    tail = MorphNode()
+    
+    snake.createConnection(head, middle)
+    snake.addConnection(MorphConnection((middle, middle), recursionLimit=3))
+    snake.createConnection(middle, tail)
+    
+    expanded = snake.expand()
+    for node in expanded: print(node)
