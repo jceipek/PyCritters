@@ -85,7 +85,7 @@ def createSnake():
     #snake.addNode(middle)
     #snake.addNode(tail)
     
-    snake.createConnection(self, head, middle)
-    snake.createConnection(self, middle, tail)
+    snake.createConnection(head, middle)
+    snake.createConnection(middle, tail)
 
     return snake

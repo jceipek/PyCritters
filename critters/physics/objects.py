@@ -20,7 +20,6 @@ class PhysicsObject(object):
         PhysicsObject.__identifierCount += 1
 
     identifier = property(lambda (self): self.__identifier)
-        
 
 class Box(PhysicsObject):
     '''A generic rectangular prism that uses pyBullet's RigidBody.
