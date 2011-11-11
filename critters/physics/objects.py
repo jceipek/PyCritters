@@ -13,14 +13,13 @@ class PhysicsObject(object):
     '''A generic PhysicsObject with a unique readOnly identifier.
     
     This identifier is useful for creating collision groups.'''
-
-    _identifierCount = 0
-    print("Sould not execute twice")
     
+
+    _identifierCount = 0    
+
     def __init__(self):
         self._identifier = PhysicsObject._identifierCount
         PhysicsObject._identifierCount += 1
-        print(self, PhysicsObject._identifierCount)
 
     @property
     def identifier(self): return self._identifier

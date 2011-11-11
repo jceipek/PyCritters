@@ -6,13 +6,13 @@ Created on Nov 11, 2011
 import time
 from critters.visualization import (render,renderable)
 from critters.physics.collisionManager import CollisionManager
-from critters.physics.objects import StaticPlane
 from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
 import pygame
 
 class SimulationEnvironment(object):
     '''
-    This object represents a simulation environment, encapsulating a dynamics world and a collisionManager as well as a ground
+    This object represents a simulation environment, encapsulating a dynamics world and a collisionManager.
+    This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
     def __init__(self,vis=True):
@@ -27,9 +27,7 @@ class SimulationEnvironment(object):
         broadphase = AxisSweep3(worldMin, worldMax)
         solver = SequentialImpulseConstraintSolver()
         self.dw = DiscreteDynamicsWorld(None, broadphase, solver)
-        
-        self.ground = StaticPlane(Vector3(0,1,0), 0.0) #TODO allow as param
-        self.addPhysicsObject(self.ground)
+
         
         if vis:
             self.r = render.Renderer(self.dw, debug=True)
