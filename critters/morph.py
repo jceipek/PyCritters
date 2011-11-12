@@ -11,6 +11,8 @@ class Morphology(object):
         self.graph = nx.MultiDiGraph()
         
     def addNode(self, node):
+        # Note: if the node is already in the graph, it will
+        # not be added again.
         self.graph.add_node(node)
         
     def addConnection(self, connection):
@@ -19,12 +21,6 @@ class Morphology(object):
                             connection=connection)
         
     def createConnection(self, *nodes): 
-        #XXX Do you really want new nodes to be created every time
-        #we add a connection? - Julian
-        # They aren't... the graph.add_node function does nothing if the node 
-        # is already in the graph. Its just a safe call to catch a case where
-        # a connection is added between nodes not already in the graph.
-        # Maybe change this to an error? - Chase
         self.addConnection(MorphConnection(tuple(nodes)))
         
     @property
@@ -126,6 +122,18 @@ class Actuator(object):
         self.strength = strength or random()
         self.limits = limits
 
+def createBox():
+    """Hardcoded test function that creates a simple box creature
+    
+    (for testing purposes)
+    """
+    
+    box = Morphology()
+    node = MorphNode(1,1,1,nn=None)
+    box.addNode(node)
+
+    return box
+
 
 def createSnake():
     """Hardcoded test function that creates a snake creature
@@ -138,12 +146,6 @@ def createSnake():
     head = MorphNode(1,1,1,nn=None)
     middle = MorphNode(1,1,1,nn=None)
     tail = MorphNode(1,1,1,nn=None)
-    
-    #Put these back in if the createConnection function
-    #doesn't add nodes
-    #snake.addNode(head) 
-    #snake.addNode(middle)
-    #snake.addNode(tail)
     
     snake.createConnection(head, middle)
     snake.createConnection(middle, tail)

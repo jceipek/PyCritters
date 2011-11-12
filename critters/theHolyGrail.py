@@ -80,3 +80,11 @@ class TheHolyGrail(object):
     
     def _processMorphologyTree(self,root):
         pass
+
+if __name__ == '__main__':
+    import morph
+    box = morph.createBox()
+    grail = TheHolyGrail()
+    simEnv = grail.processMorphologyTree(box)
+    simEnv.run()
+     
