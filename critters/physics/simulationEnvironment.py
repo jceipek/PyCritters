@@ -98,7 +98,7 @@ class SimulationEnvironment(object):
                     elif event.key == pygame.K_RIGHT:
                         rot += 0.1
     
-    def simulate(self, timeToRun)                    
+    def simulate(self, timeToRun):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
