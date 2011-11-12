@@ -17,7 +17,7 @@ class SimulationEnvironment(object):
     This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
-    def __init__(self,vis=True):
+    def __init__(self, vis=True):
         '''
         Initializes an Empty Simulation Environment containing only the ground.
         '''
@@ -35,7 +35,7 @@ class SimulationEnvironment(object):
             self.r = render.Renderer(self.dw, debug=True)
             self.r.setup()
         
-    def addPhysicsObject(self,physObj,color=None):
+    def addPhysicsObject(self, physObj,color=None):
         '''
         Adds a PhysicsObject to this SimulationEnvironment, adding it to the collision manager and to the renderables
         '''
@@ -97,9 +97,14 @@ class SimulationEnvironment(object):
                         rot -= 0.1
                     elif event.key == pygame.K_RIGHT:
                         rot += 0.1
+    
+    def simulate(self, timeToRun)                    
+        '''
+        TODO: add a simulate function which accepts the amount of time to simulate
+        and returns the final state of the environment    
+        '''
+        pass
         
-        
-
 if __name__ =='__main__':
     print("Not intended to be run as a script")
             

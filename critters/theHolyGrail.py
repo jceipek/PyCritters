@@ -4,6 +4,7 @@ Created on Nov 8, 2011
 @author: wdolphin
 '''
 
+from physics.simulationEnvironment import SimulationEnvironment
 class TheHolyGrail(object):
     '''
     classdocs
@@ -69,14 +70,18 @@ class TheHolyGrail(object):
         '''
         pass
     
-    def processMorphologyTree(self,graph,simulationEnvironment=None):
+    def processMorphologyTree(self,graph,simEnv=None):
         '''
         Creates the physics engine's representation of this morphology tree. If
         a simulation environment is passed in, this environment is used,
-        otherwise one is created.
+        otherwise one is created. A reference to this simulation environment is
+        returned for later simulation
         '''
-        
-        pass
+        if simEnv == None:
+            simEnv = SimulationEnvironment()
+        start = graph.nodes[0] #we can begin at any arbitrary node.
+            
+        return simEnv
     
     def _processMorphologyTree(self,root):
         pass
