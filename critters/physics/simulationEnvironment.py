@@ -3,9 +3,11 @@ Created on Nov 11, 2011
 
 @author: wdolphin
 '''
+import sys
+sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-from critters.visualization import (render,renderable)
-from critters.physics.collisionManager import CollisionManager
+from visualization import render,renderable
+from physics.collisionManager import CollisionManager
 from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
 import pygame
 
@@ -99,5 +101,5 @@ class SimulationEnvironment(object):
         
 
 if __name__ =='__main__':
-    print("Don't do it")
+    print("Not intended to be run as a script")
             
