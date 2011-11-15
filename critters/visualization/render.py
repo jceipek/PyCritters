@@ -54,7 +54,7 @@ class Renderer(object):
                                 pygame.locals.DOUBLEBUF)
         glEnable(GL_DEPTH_TEST|GL_LINE_SMOOTH)
         gluPerspective(60.0, 640.0 / 480.0, 0.5, 1000.0)
-        glTranslate(0, -15, -60)
+        glTranslate(0, -4, -60)
     
     def render(self, iterableObjects):
         """Draws all of the renderable objects passed in as an iterable.

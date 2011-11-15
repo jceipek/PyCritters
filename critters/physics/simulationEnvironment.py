@@ -31,7 +31,7 @@ class SimulationEnvironment(object):
         broadphase = AxisSweep3(worldMin, worldMax)
         solver = SequentialImpulseConstraintSolver()
         self.dw = DiscreteDynamicsWorld(None, broadphase, solver)
-        self.ground =StaticPlane(Vector3(0,1,0), 0.0) #TODO: this may need to be added after items are added to this simev
+        self.ground =StaticPlane(Vector3(0,1,0), -5.0) #TODO: this may need to be added after items are added to this simev
         self.addPhysicsObject(self.ground)
         
         if vis:

@@ -8,8 +8,9 @@ Created on Nov 8, 2011
 import math
 
 from physics.simulationEnvironment import SimulationEnvironment
-from physics.objects import Box
-from bullet.bullet import Vector3, Quaternion, PhysicsObject
+from physics.objects import Box, PhysicsObject
+from bullet.bullet import Vector3, Quaternion
+from morph import MorphNode
 
 class TheHolyGrail(object):
     '''
@@ -92,13 +93,13 @@ class TheHolyGrail(object):
         start = nodeList[0] #we can begin at any arbitrary node.
         startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin
         simEnv.addPhysicsObject(startPhys)
-        for node1 in graph.neighbors(start): 
-            self._addNextPhysicsObject(start,node1,graph,simEnv)
-        
+        for node1 in graph.neighbors(start):
+            self._addNextPhysicsObject(startPhys,start,node1,graph,simEnv)
+
         return simEnv
 
     
-    def _addNextPhysicsObject(self,node1,node2,graph,simEnv):
+    def _addNextPhysicsObject(self,node1phys, node1,node2,graph,simEnv):
         '''
         @precondition node1 must be in the simEnv
         Adds node2 into the physics world with position determined by connection,
@@ -112,14 +113,15 @@ class TheHolyGrail(object):
         #add the hinge between n1 and n2
         #TODO manage motor in hinge
         #add n1 and n2 to ignore collisions between eachother
-        c = graph.getEdgeData(node1,node2)['connection']
-                        
+        c = graph.get_edge_data(node1,node2)[0]['connection']
+        self._placeWithRespectTo(node1phys,node2,c,simEnv)
+        '''
         for node3 in graph.neighbors(node2):
             if node3 != node1: 
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
-
-    def _placeWithRespectTo(placedPhysicsObject, secondMorphNode, connection, simEnv):
-        rootGlobalVector = placedPhysicsObject.body.getOrigin()
+        '''
+    def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
+        rootGlobalVector = placedPhysicsObject.motion.getWorldTransform().getOrigin()
         rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(placedPhysicsObject, connection.locations[0])
         
         #Connection point
@@ -131,12 +133,13 @@ class TheHolyGrail(object):
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
 
-        newPhysObj = Box(newGlobalVector, Vector3(secondMorphNode.width, secondMorphNode.height, secondMorphNode.depth))
-
+        newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newGlobalVector)
+        
         simEnv.addPhysicsObject(newPhysObj)
+        simEnv.ignoreCollision(placedPhysicsObject,newPhysObj)
 
 
-    def _getVector3FromValue(self,value,node):
+    def _getVector3FromValue(self, node, value):
         '''
         @params value: an integer  value for 0 to 64
         @retrun vector3: a vector3 representing the point in local space that
@@ -152,18 +155,18 @@ class TheHolyGrail(object):
         val3 = modded
         
         w,h,d = (1,1,1)
-        if node isinstance MorphNode:
+        if isinstance(node, MorphNode):
            w,h,d = node.width, node.height, node.depth 
         else :
-            if node isinstance PhysicsObject:
-                dims = node.body.size
+            if isinstance(node, PhysicsObject):
+                dims = node.size
                 w,h,d = dims.x, dims.y, dims.z
         
-        transalationalVector = Vector3(w/2.0,h/2.0,d/2.0)
+        translationalVector = Vector3(w/2.0,h/2.0,d/2.0)
         #theunshifted vector only provides values from 0 to (width,height,depth)
         #we must shift this vector to the corner of the box to have it actually
         #represent all points in local space
-        unshifted = Vector3(val1*node.width,val2*node.height,val3*node.depth)
+        unshifted = Vector3(val1*w,val2*h,val3*d)
         return  unshifted + translationalVector
 
     def _makePhysicsObjectFromNode(self,aNode,pos=None):
@@ -180,9 +183,10 @@ class TheHolyGrail(object):
 
 if __name__ == '__main__':
     import morph
-    #box = morph.createBox()
+    iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
-    #simEnv = grail.processMorphologyTree(box)
-    #simEnv.run()
-    for i in range(64):
-        print(grail._getVector3FromValue(i,None))
+    simEnv = grail.processMorphologyTree(iWorm)
+    for val in simEnv.objectList:
+        print(val)
+    simEnv.run()
+
