@@ -2,7 +2,7 @@
 import operator
 import random
 
-__all__ = ["sign", "product", "divide", "scalarMutate", "filterOut", "repeat",
+__all__ = ["sign", "product", "divide", "filterOut", "repeat",
            "flatten", "clampRange", "count"]
 
 def sign(x):
@@ -34,17 +34,6 @@ def divide(numbers, divideByZero=0):
         return reduce(operator.div, numbers, 1)
     except ZeroDivisionError:
         return divideByZero
-    
-def scalarMutate(aVal):
-    """Mutates a scalar value using Sims-esque methods.
-    
-    The value is mutated by adding mods random numbers from a
-    Gaussian distribution so that small adjustments are more likely
-    than large mutations. The scale of the adjustment is relative to the
-    original value (sigma is |original value|^(1/2)).
-    """
-    #FIXME: The mutations here may be too large
-    return aVal + random.normalvariate(0.0, abs(aVal)**0.5)
 
 def filterOut(base, toRemove):
     return [x for x in base if x not in toRemove]
@@ -56,11 +45,10 @@ def repeat(x, call=False):
 def flatten(lst):
     return [x for sublist in lst for x in sublist]
 
-def clampRange(rnge, value):
+def clampRange(rnge, value, inclusive=False):
     lower, upper = rnge
-    if value < lower: return lower
-    if value > upper: return upper
-    return value
+    if inclusive: upper += 1
+    return (value - lower) % (upper - lower) + lower
 
 def count(iterator):
     n = 0

@@ -2,9 +2,9 @@
 
 import networkx as nx
 import copy
-import operator
 import math
 import graphs
+from mutations import *
 from utils import *
 from random import random, choice, sample, randint, normalvariate
 
@@ -31,7 +31,7 @@ def simpleSineNetwork(numInputs, numOutputs):
     nn = NeuralNetwork()
     
     inputs = [InputNode() for _ in range(numInputs)]
-    inner = [SineNode(1.0) for _ in range(numOutputs)]
+    inner = [SineNode() for _ in range(numOutputs)]
     outputs = [OutputNode() for _ in range(numOutputs)]
     
     for node in (inputs + outputs + inner): nn.addNode(node)
@@ -40,7 +40,7 @@ def simpleSineNetwork(numInputs, numOutputs):
         for sine in inner: nn.makeConnection(inpt, sine)
     
     for i in range(numOutputs):
-        nn.makeConnection(inner[i], outputs[i], weight=1.0)
+        nn.makeConnection(inner[i], outputs[i])
         
     return nn
     
@@ -219,15 +219,17 @@ def randomNode(**kwgs):
 
 class NeuralConnection(object):
     
+    _weightValue = MutableFloat(range=(-1.0, 1.0))
+    
     def __init__(self, prev, node, weight=None):
         self.prev = prev
         self.node = node
-        self.weight = weight or random()
+        self.weight = weight or self._weightValue()
         
         self.id = 0 # never allow multiple edges
         
     def mutate(self):
-        self.weight = scalarMutate(self.weight)
+        self.weight = self._weightValue(self.weight)
  
 class Node(object):
     """The base class for a neural network node.
@@ -289,9 +291,6 @@ class InputNode(Node):
     def process(self, inputs, dt):
         assert len(inputs) == 1
         self.output = inputs[0]
-        
-    def mutate(self):
-        return InputNode()
     
     isInput = True
     
@@ -324,20 +323,18 @@ class SumThresholdNode(Node):
     cleared when clear is called. The threshold may be changed by a mutation.
     """
     
-    THRESHOLD_MUTATE_RATE = 0.2
+    _thresholdValue = MutableFloat(range=(0.0, 1.0))
     
     def __init__(self, threshold=None):
         """Threshold defaults to a random number between 0 and 1."""
         Node.__init__(self)
-        if threshold is None: threshold = random()
-        self.threshold = threshold
+        self.threshold = threshold or self._thresholdValue()
         
     def process(self, inputs, dt):
         self.output = int(sum(inputs) >= self.threshold)
         
     def mutate(self):
-        if random() < self.THRESHOLD_MUTATE_RATE:
-            self.threshold = scalarMutate(self.threshold)
+        self.threshold = self._thresholdValue(self.threshold)
         
 class GreaterThanNode(Node):
     """A node that returns true if i+1>i for i inputs."""
@@ -349,20 +346,18 @@ class GreaterThanNode(Node):
 class SignOfNode(Node):
     """A node with one input that will return the sign of the input (-1,0,1)."""
     
-    INDEX_MUTATION_RATE = 0.2
+    _indexValue = MutableFloat(range=(0.0, 1.0), rate=0.1)
     
     def __init__(self, index=None):
         """Index defaults to a random number between 0 and 1."""
         Node.__init__(self)
-        if index is None: index = random()
-        self.index = index
+        self.index = index or self._indexValue()
     
     def process(self, inputs, dt):
         self.output = sign(self._pickInput(inputs, self.index))
         
     def mutate(self):
-        if random() < self.INDEX_MUTATION_RATE:
-            self.index = clampRange((0, 1), scalarMutate(self.index))
+        self.index = self._indexValue(self.index)
 
 class MinNode(Node):
     """A node that will return its smallest value input."""
@@ -384,7 +379,7 @@ class AbsNode(Node):
     index.
     """
     
-    INDEX_MUTATION_RATE = 0.2
+    _indexValue = MutableFloat(range=(0.0, 1.0), rate=0.1)
     
     def __init__(self, index=None):
         """Index defaults to a random number between 0 and 1."""
@@ -395,23 +390,21 @@ class AbsNode(Node):
         self.output = abs(self._pickInput(inputs, self.index))
         
     def mutate(self):
-        if random() < self.INDEX_MUTATION_RATE:
-            self.index = clampRange((0, 1), scalarMutate(self.index))
+        self.index = self._indexValue(self.index)
             
 class ConstantNode(Node):
     
-    CONST_MUTATION_RATE = 0.2
+    _constantValue = MutableFloat(range=(-4.0, 4.0))
     
     def __init__(self, const=None):
         Node.__init__(self)
-        self.const = const or random()
+        self.const = const or self._constantValue()
         
     def process(self, inputs, dt):
         self.output = self.const
     
     def mutate(self):
-        if random() < ConstantNode.CONST_MUTATION_RATE:
-            self.const = scalarMutate(self.const)
+        self.const = self._constantValue(self.const)
         
 class IfNode(Node):
     """A node that will output the first input greater than 0.
@@ -429,11 +422,11 @@ class IfNode(Node):
 
 class SineNode(Node):
     
-    PERIOD_MUTATION_RATE = 0.2
+    _periodValue = MutableFloat(range=(0.01, 2*math.pi))
     
     def __init__(self, period=None):
         Node.__init__(self)
-        self.period = period or (0.5 + 2*random())
+        self.period = period or self._periodValue()
         self.t = 0
         
     def clear(self):
@@ -445,8 +438,7 @@ class SineNode(Node):
         self.output = math.sin(self.t/self.period)
         
     def mutate(self):
-        if random() < SineNode.PERIOD_MUTATION_RATE:
-            self.period = scalarMutate(self.period)
+        self.period = self._periodValue(self.period)
         
 
 if __name__ == '__main__':

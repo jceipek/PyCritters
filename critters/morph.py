@@ -2,8 +2,11 @@ import networkx as nx
 import neural
 import math
 import copy
+import graphs
 
-from random import random
+from utils import *
+from mutations import *
+from random import random, choice
 
 class Morphology(object):
     
@@ -38,8 +41,8 @@ class Morphology(object):
         self.graph.remove_node(node)
         
     def clone(self):
-        newNN = copy.deepcopy(self)
-        return newNN
+        newMorph = copy.deepcopy(self)
+        return newMorph
     
     def expand(self):
         cache = {}
@@ -74,14 +77,49 @@ class Morphology(object):
             return value
         
         return expandNode(next(self.nodes), 0)[1]
+    
+    def mutate(self):
+        newMorph = self.clone()
+        graphs.mutate(newMorph.graph, MorphNode, MorphConnection)
+        return newMorph
+    
+    def crossover(self, other):
+        daughters = self.clone(), other.clone()
+        graphs.crossover(daughters[0].graph, daughters[1].graph, 
+                         MorphConnection)
+        return daughters
 
 class MorphNode(object):
     
-    def __init__(self, width=1, height=1, depth=1, nn=None):
-        self.width = width
-        self.height = height
-        self.depth = depth
+    CROSSOVER_RATE = 0.4
+    
+    _dimensionsValue = MutableFloat(range=(0.1, 5.0), rate=0.1)
+    
+    def __init__(self, dimensions=None, nn=None):
+        self.dimensions = dimensions or self._dimensionsValue(repeat=3)
         self.nn = nn or self._createNetwork()
+        
+    @property
+    def width(self): return self.dimensions[0]
+    
+    @property
+    def height(self): return self.dimensions[1]
+    
+    @property
+    def depth(self): return self.dimensions[2]
+    
+    def mutate(self):
+        self.dimensions = self._dimensionsValue(self.dimensions)
+        self.nn = self.nn.mutate()
+        
+    def crossover(self, other):
+        d1, d2 = self.clone(), other.clone()
+        
+        if random() < MorphNode.CROSSOVER_RATE:
+            d1.dimensions, d2.dimensions = d2.dimensions, d1.dimensions
+            d1.nn, d2.nn = d1.nn.crossover(d2.nn)
+        
+        return d1, d2
         
     def _createNetwork(self):
         #TODO: random numbers here:
@@ -89,39 +127,56 @@ class MorphNode(object):
     
     def clone(self):
         newNN = self.nn.clone()
-        return MorphNode(self.width, self.height, self.depth, newNN)
+        return MorphNode(self.dimensions, newNN)
         
-HINGE_JOINT = 0
         
 class MorphConnection(object):
     
-    #Class  
     idCounter = 0
     
+    HINGE_JOINT = 0
+    JOINT_TYPES = [HINGE_JOINT]
+    
+    _jointValue = MutableChoice(choices=JOINT_TYPES)
+    _locationValue = MutableFloat(range=(0, 2*math.pi), rate=0.1)
+    _numChannelsValue = MutableInt(range=(1, 3), rate=0.05)
+    _recursionLimitValue = MutableInt(range=(1, 4), rate=0.05)
+    
     def __init__(self, nodes, joint=HINGE_JOINT, actuators=None, 
-                 locations=None, recursionLimit=1):
+                 locations=None, numChannels=None, recursionLimit=1):
         self.id = MorphConnection.idCounter
         MorphConnection.idCounter += 1
         
         self.nodes = nodes
         self.joint = joint
         self.actuators = actuators or self._createActuators()
-        self.locations = locations or self._createLocations()
+        self.locations = locations or self._locationValue(repeat=2)
+        self.numChannels = numChannels or self._numChannelsValue()
         self.recursionLimit = recursionLimit
+        
+    def mutate(self):
+        self.joint = self._jointValue(self.joint)
+        self.locations = self._locationValue(self.locations)
+        self.numChannels = self._numChannelsValue(self.numChannels)
+        self.recursionLimit = self._recursionLimitValue(self.recursionLimit)
+            
+        for actuator in self.actuators: actuator.mutate()
         
     def _createActuators(self):
         return Actuator(), Actuator()
     
-    def _createLocations(self):
-        def randomLocation(): return 2*math.pi*random()
-        return randomLocation(), randomLocation()
-    
 class Actuator(object):
     
+    _strengthValue = MutableFloat(range=(0.0, 1.0))
+    
     def __init__(self, strength=None, limits=(0.0, 1.0)):
-        self.strength = strength or random()
+        self.strength = self._strengthValue()
         self.limits = limits
-
+        
+    def mutate(self):
+        #TODO: Mutate limits?
+        self.strength = self._strengthValue(self.strength)
+    
 def createBox():
     """Hardcoded test function that creates a simple box creature
     
@@ -165,3 +220,9 @@ if __name__ == '__main__':
     
     expanded = snake.expand()
     for node in expanded: print(node)
+    print "----"
+    s2 = snake.mutate()
+    for node in s2.expand(): print(node)
+    print "----"
+    s3, s4 = snake.crossover(s2)
+    for node in s3.expand(): print(s3)
