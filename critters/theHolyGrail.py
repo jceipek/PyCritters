@@ -1,12 +1,15 @@
+
 '''
 Created on Nov 8, 2011
 
 @author: wdolphin
 '''
 
+import math
+
 from physics.simulationEnvironment import SimulationEnvironment
-from physics.objects import Box, PhysicsObject
-from bullet.bullet import Vector3
+from physics.objects import Box
+from bullet.bullet import Vector3, Quaternion, PhysicsObject
 
 class TheHolyGrail(object):
     '''
@@ -112,8 +115,26 @@ class TheHolyGrail(object):
         c = graph.getEdgeData(node1,node2)['connection']
                         
         for node3 in graph.neighbors(node2):
-            if node3 != node1: #TODO ensure that != works as expected
+            if node3 != node1: 
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
+
+    def _placeWithRespectTo(placedPhysicsObject, secondMorphNode, connection, simEnv):
+        rootGlobalVector = placedPhysicsObject.body.getOrigin()
+        rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(placedPhysicsObject, connection.locations[0])
+        
+        #Connection point
+        globalConnectionVector = rootGlobalVector + rootLocalConnectionVector 
+        angleOfMapping = math.acos(globalConnectionVector.dot(rootGlobalVector))
+        newGlobalVector = globalConnectionVector + self._getVector3FromValue(secondMorphNode, connection.locations[1])
+        
+        axisOfRotation = globalConnectionVector.cross(rootGlobalVector)
+
+        rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
+
+        newPhysObj = Box(newGlobalVector, Vector3(secondMorphNode.width, secondMorphNode.height, secondMorphNode.depth))
+
+        simEnv.addPhysicsObject(newPhysObj)
+
 
     def _getVector3FromValue(self,value,node):
         '''
