@@ -5,7 +5,7 @@ Created on Nov 8, 2011
 '''
 
 from physics.simulationEnvironment import SimulationEnvironment
-from physics.objects import Box
+from physics.objects import Box, PhysicsObject
 from bullet.bullet import Vector3
 
 class TheHolyGrail(object):
@@ -87,12 +87,13 @@ class TheHolyGrail(object):
         graph = morphology.graph
         nodeList = graph.nodes()
         start = nodeList[0] #we can begin at any arbitrary node.
-        startPhys = self._makePhysicsObjectFromNode(start)
+        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin
         simEnv.addPhysicsObject(startPhys)
+        for node1 in graph.neighbors(start): 
+            self._addNextPhysicsObject(start,node1,graph,simEnv)
+        
         return simEnv
-    
-    def _processMorphNode(self,morphNode,lastPhysObj,graph,simEnv):
-        pass    
+
     
     def _addNextPhysicsObject(self,node1,node2,graph,simEnv):
         '''
@@ -101,7 +102,6 @@ class TheHolyGrail(object):
         holding the position of node1 constant.
         This function assumes there are no cycles in the graph.
         '''
-
         #find connection c between n1 n2
         #compute the position of n2 given the position of n1 and the connection c
         #put n2 into simEnv
@@ -110,7 +110,7 @@ class TheHolyGrail(object):
         #TODO manage motor in hinge
         #add n1 and n2 to ignore collisions between eachother
         c = graph.getEdgeData(node1,node2)['connection']
-        
+                        
         for node3 in graph.neighbors(node2):
             if node3 != node1: #TODO ensure that != works as expected
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
@@ -118,21 +118,33 @@ class TheHolyGrail(object):
     def _getVector3FromValue(self,value,node):
         '''
         @params value: an integer  value for 0 to 64
-        @retrun vector3: a vector3 representing the point in space this integer
-        maps to
-        '''
-        '''
-        Split up node into 4 x 4 x 4 cube
+        @retrun vector3: a vector3 representing the point in local space that
+        this integer maps to
         '''
         modded = value % 64
         val1 = modded//16
+        
         modded = modded - (val1*16)
         val2= modded//4
+        
         modded=modded-(val2*4)
         val3 = modded
         
-        return (val1*node.width,val2*node.height,val3*node.depth)
+        w,h,d = (1,1,1)
+        if node isinstance MorphNode:
+           w,h,d = node.width, node.height, node.depth 
+        else :
+            if node isinstance PhysicsObject:
+                dims = node.body.size
+                w,h,d = dims.x, dims.y, dims.z
         
+        transalationalVector = Vector3(w/2.0,h/2.0,d/2.0)
+        #theunshifted vector only provides values from 0 to (width,height,depth)
+        #we must shift this vector to the corner of the box to have it actually
+        #represent all points in local space
+        unshifted = Vector3(val1*node.width,val2*node.height,val3*node.depth)
+        return  unshifted + translationalVector
+
     def _makePhysicsObjectFromNode(self,aNode,pos=None):
         '''
         Creates a Physics Object from a given morphNode. If position is None,

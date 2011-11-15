@@ -8,12 +8,14 @@ sys.path.append('../')  #add critters to pythonpath to use as library
 import time
 from visualization import render,renderable
 from physics.collisionManager import CollisionManager
+from physics.objects import StaticPlane
 from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
 import pygame
 
 class SimulationEnvironment(object):
     '''
-    This object represents a simulation environment, encapsulating a dynamics world and a collisionManager.
+    This object represents a simulation environment, encapsulating a dynamics
+    world and a collisionManager.
     This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
@@ -29,12 +31,13 @@ class SimulationEnvironment(object):
         broadphase = AxisSweep3(worldMin, worldMax)
         solver = SequentialImpulseConstraintSolver()
         self.dw = DiscreteDynamicsWorld(None, broadphase, solver)
-
+        self.ground =StaticPlane(Vector3(0,1,0), 0.0) #TODO: this may need to be added after items are added to this simev
+        self.addPhysicsObject(self.ground)
         
         if vis:
             self.r = render.Renderer(self.dw, debug=True)
             self.r.setup()
-        
+     
     def addPhysicsObject(self, physObj,color=None):
         '''
         Adds a PhysicsObject to this SimulationEnvironment, adding it to the collision manager and to the renderables
@@ -77,7 +80,6 @@ class SimulationEnvironment(object):
         '''
         self.cM.calculateCollisionGroups()
         for o in self.objectList:
-            print(o)
             self.dw.addRigidBody(o.body,self.cM.getCollisionFilterGroup(o),self.cM.getCollisionFilterMask(o))
 
             
