@@ -113,13 +113,26 @@ class TheHolyGrail(object):
         
         for node3 in graph.neighbors(node2):
             if node3 != node1: #TODO ensure that != works as expected
-                self._addNextPhysicsObject(self,node2,node3,graph,simEnv):
-    
-    def _getVector3FromValue(value,node):
-        hexVal = hex(value%64)[2:]
+                self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
+
+    def _getVector3FromValue(self,value,node):
+        '''
+        @params value: an integer  value for 0 to 64
+        @retrun vector3: a vector3 representing the point in space this integer
+        maps to
+        '''
+        '''
+        Split up node into 4 x 4 x 4 cube
+        '''
+        modded = value % 64
+        val1 = modded//16
+        modded = modded - (val1*16)
+        val2= modded//4
+        modded=modded-(val2*4)
+        val3 = modded
         
-           
-    
+        return (val1*node.width,val2*node.height,val3*node.depth)
+        
     def _makePhysicsObjectFromNode(self,aNode,pos=None):
         '''
         Creates a Physics Object from a given morphNode. If position is None,
@@ -134,8 +147,9 @@ class TheHolyGrail(object):
 
 if __name__ == '__main__':
     import morph
-    box = morph.createBox()
+    #box = morph.createBox()
     grail = TheHolyGrail()
-    simEnv = grail.processMorphologyTree(box)
-    simEnv.run()
-    
+    #simEnv = grail.processMorphologyTree(box)
+    #simEnv.run()
+    for i in range(64):
+        print(grail._getVector3FromValue(i,None))
