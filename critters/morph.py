@@ -184,8 +184,7 @@ def createBox():
     """
     
     box = Morphology()
-    node = MorphNode(1,1,1,nn=None)
-    box.addNode(node)
+    box.addNode(MorphNode())
 
     return box
 
@@ -198,9 +197,9 @@ def createSnake():
     
     snake = Morphology()
     
-    head = MorphNode(1,1,1,nn=None)
-    middle = MorphNode(1,1,1,nn=None)
-    tail = MorphNode(1,1,1,nn=None)
+    head = MorphNode()
+    middle = MorphNode()
+    tail = MorphNode()
     
     snake.createConnection(head, middle)
     snake.createConnection(middle, tail)
