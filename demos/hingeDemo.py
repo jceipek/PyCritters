@@ -3,8 +3,8 @@ import sys
 sys.path.append('../critters')  #add critters to pythonpath to use as library
 
 import time
-import visualization.render
-from visualization.renderable import makeRenderable
+from visualization import renderable,render
+
 import physics.objects as objects
 
 from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
@@ -33,11 +33,11 @@ dynamicsWorld.addRigidBody(ground.body)
 
 
 box1 = objects.Box(Vector3(0, 2.5, 0), Vector3(9.0,5.0,5.0))
-rBox1 = makeRenderable(box1, (255,0,0))
+rBox1 = renderable.makeRenderable(box1, (255,0,0))
 ents.add(rBox1)
 
 box2 = objects.Box(Vector3(9.0, 2.5, 0), Vector3(9.0,5.0,5.0))
-rBox2 = makeRenderable(box2, (255,0,0))
+rBox2 = renderable.makeRenderable(box2, (255,0,0))
 ents.add(rBox2)
 
 dynamicsWorld.addRigidBody(box1.body)
@@ -64,7 +64,7 @@ for motor in motors:
 
 dynamicsWorld.addConstraint(hinge)
 
-r = visualization.render.Renderer(dynamicsWorld, debug=True)
+r = render.Renderer(dynamicsWorld, debug=True)
 r.setup()
 
 running = True

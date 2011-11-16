@@ -38,7 +38,7 @@ class Renderer(object):
 
     def __init__(self, world, debug=False):
         self.world = world
-        self.cameraAngle = 0.0
+        self.cameraAngleY,self.cameraAngleZ = 0.0,0.0
         self.debug = debug
         if self.debug:
             self.debugDrawer = DebugDrawer()
@@ -54,7 +54,7 @@ class Renderer(object):
                                 pygame.locals.DOUBLEBUF)
         glEnable(GL_DEPTH_TEST|GL_LINE_SMOOTH)
         gluPerspective(60.0, 640.0 / 480.0, 0.5, 1000.0)
-        glTranslate(0, -15, -60)
+        glTranslate(0, -4, -60)
     
     def render(self, iterableObjects):
         """Draws all of the renderable objects passed in as an iterable.
@@ -68,13 +68,16 @@ class Renderer(object):
         for renderable in iterableObjects:
             renderable.render()
             
-        glRotate(self.cameraAngle,0,1,0)
-            
+        glRotate(self.cameraAngleY,0,1,0) #rotate about the y axis
+        glRotate(self.cameraAngleZ,1,0,0)#rotate about the x axis
         pygame.display.flip()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
          
-    def rotateCamera(self, angle):
-        self.cameraAngle = angle
+    def rotateCamera(self, angleY=0.0,angleZ=0.0):
+        '''
+        '''
+        self.cameraAngleY = angleY
+        self.cameraAngleZ = angleZ
             
     def debugDraw(self):
         self.debugDrawer.reset()

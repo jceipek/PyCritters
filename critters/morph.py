@@ -206,6 +206,16 @@ def createSnake():
 
     return snake
 
+def createInchWorm():
+    iWorm = Morphology()
+    
+    head = MorphNode(dimensions=(2,2,2))
+    tail = MorphNode(dimensions=(2,2,2))
+    iWorm.addConnection(MorphConnection((head,tail),locations=(60,5)))
+
+    return iWorm
+
+
 if __name__ == '__main__':
     snake = Morphology()
     

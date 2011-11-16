@@ -32,7 +32,7 @@ class CollisionManager(object):
                 if t_id in self.ignores:
                     raise ValueError('The list of PhysicsObjects may not contain clones, alternatively, identifiers were not unique.')        
                 self.ignores[t_id] = [] #each PhysicsObject ignores no collisions by default
-                
+
                 
     def addPhysicsObject(self,physObj):
         '''
