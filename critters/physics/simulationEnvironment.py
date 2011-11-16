@@ -20,7 +20,7 @@ class SimulationEnvironment(object):
     This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
-    def __init__(self, vis=True):
+    def __init__(self, vis=True,groundDistToOrigin=0):
         '''
         Initializes an Empty Simulation Environment containing only the ground.
         '''
@@ -33,7 +33,7 @@ class SimulationEnvironment(object):
         broadphase = AxisSweep3(worldMin, worldMax)
         solver = SequentialImpulseConstraintSolver()
         self.dW = DiscreteDynamicsWorld(None, broadphase, solver)
-        self.ground =StaticPlane(Vector3(0,1,0), 0.0) #TODO: this may need to be added after items are added to this simev
+        self.ground =StaticPlane(Vector3(0,1,0), groundDistToOrigin) #TODO: this may need to be added after items are added to this simev
         self.addPhysicsObject(self.ground)
         
         if vis:

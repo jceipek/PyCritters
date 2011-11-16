@@ -91,7 +91,7 @@ class TheHolyGrail(object):
         graph = morphology.graph
         nodeList = graph.nodes()
         start = nodeList[0] #we can begin at any arbitrary node.
-        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin
+        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin shifted up to stop collision with the ground
         simEnv.addPhysicsObject(startPhys)
         for node1 in graph.neighbors(start):
             self._addNextPhysicsObject(startPhys,start,node1,graph,simEnv)
@@ -122,12 +122,13 @@ class TheHolyGrail(object):
         '''
     def _placeWithRespectTo(self, placedPhysicsObject, secondMorphNode, connection, simEnv):
         rootGlobalVector = placedPhysicsObject.motion.getWorldTransform().getOrigin()
-        rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(placedPhysicsObject, connection.locations[0])
-        
+        print('rootGlobalVector',rootGlobalVector)
+        rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
+        print('rootLocalConnectionVector',rootLocalConnectionVector)
         #Connection point
         globalConnectionVector = rootGlobalVector + rootLocalConnectionVector 
         angleOfMapping = math.acos(globalConnectionVector.dot(rootGlobalVector))
-        newGlobalVector = globalConnectionVector + self._getVector3FromValue(secondMorphNode, connection.locations[1])
+        newGlobalVector = globalConnectionVector + self._getVector3FromValue(connection.locations[1],secondMorphNode, )
         
         axisOfRotation = globalConnectionVector.cross(rootGlobalVector)
 
@@ -139,7 +140,7 @@ class TheHolyGrail(object):
         simEnv.ignoreCollision(placedPhysicsObject,newPhysObj)
 
 
-    def _getVector3FromValue(self, node, value):
+    def _getVector3FromValue(self, value, node=None):
         '''
         @params value: an integer  value for 0 to 64
         @retrun vector3: a vector3 representing the point in local space that
@@ -147,26 +148,30 @@ class TheHolyGrail(object):
         '''
         modded = value % 64
         val1 = modded//16
+        frac1= val1/4.0 #as a fraction of the maximum number of points
         
         modded = modded - (val1*16)
-        val2= modded//4
+        val2 = modded//4
+        frac2 = val2/4.0#as a fraction of the maximum number of points
         
-        modded=modded-(val2*4)
+        modded = modded-(val2*4)
         val3 = modded
+        frac3 = val3/4.0#as a fraction of the maximum number of points
         
         w,h,d = (1,1,1)
-        if isinstance(node, MorphNode):
+        if node ==None:
+            w,h,d =(1,1,1)
+        elif isinstance(node, MorphNode):
            w,h,d = node.width, node.height, node.depth 
-        else :
-            if isinstance(node, PhysicsObject):
-                dims = node.size
-                w,h,d = dims.x, dims.y, dims.z
-        
-        translationalVector = Vector3(w/2.0,h/2.0,d/2.0)
+        elif isinstance(node, PhysicsObject):
+           dims = node.size
+           w,h,d = dims.x, dims.y, dims.z
+    
+        translationalVector = Vector3(-w/2.0,-h/2.0,-d/2.0)
         #theunshifted vector only provides values from 0 to (width,height,depth)
         #we must shift this vector to the corner of the box to have it actually
-        #represent all points in local space
-        unshifted = Vector3(val1*w,val2*h,val3*d)
+        #represent all points in local space, thus we subtract the halfboxextents
+        unshifted = Vector3(frac1*w,frac2*h,frac3*d)
         return  unshifted + translationalVector
 
     def _makePhysicsObjectFromNode(self,aNode,pos=None):
@@ -183,8 +188,10 @@ if __name__ == '__main__':
     import morph
     iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
-    simEnv = grail.processMorphologyTree(iWorm)
+    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5))
     for val in simEnv.objectList:
         print(val)
+    for i in range(64):
+        print(grail._getVector3FromValue(i))
     simEnv.run()
 
