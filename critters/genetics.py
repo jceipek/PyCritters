@@ -31,8 +31,11 @@ class Population(object):
         return len(self.individuals)
     
     @property
-    def averageFitness(self):
+    def meanFitness(self):
         return sum(self.scores.values())/float(self.size)
+    
+    def __getitem__(self, index):
+        return self.individuals[index]
         
 class FitnessCalculator(object):
     
@@ -85,13 +88,13 @@ class Spartans(ReproductionMechanism):
         ReproductionMechanism.__init__(self, createRandomIndividual)
         self.numSpartans = numSpartans
         
-    def _getSpartans(self, scores):
+    def getSpartans(self, scores):
         ranked = sorted(scores.iteritems(), key=operator.itemgetter(1), 
-                        reversed=True)
-        return ranked[:self.numSpartans]
+                        reverse=True)
+        return map(operator.itemgetter(0), ranked[:self.numSpartans])
         
     def newGeneration(self, population):
-        spartans = self._getSpartans(population.scores)
+        spartans = self.getSpartans(population.scores)
         
         newIndividuals = spartans
         for _ in range(population.size - len(newIndividuals)):
@@ -99,6 +102,79 @@ class Spartans(ReproductionMechanism):
         
         return Population(newIndividuals)
         
+class Evolution(object):
     
+    def __init__(self, reproductionMechanism, fitnessCalculator, 
+                 populationSize=300):
+        self.reproductionMechanism = reproductionMechanism
+        self.fitnessCalculator = fitnessCalculator
+        self.populationSize = populationSize
+    
+    @property
+    def latestGeneration(self): return self.populations[-1]
+    
+    @property
+    def basePopulation(self): return self.populations[0]
+    
+    @property
+    def numGenerations(self): return len(self.populations)
+    
+    def populate(self):
+        self.populations = []
+        base = self.reproductionMechanism.newPopulation(self.populationSize)
+        base.calculateFitness(self.fitnessCalculator)
+        self.populations.append(base)
+    
+    def run(self, maxSteps=100, onGeneration=None):
+        def doGeneration():
+            previousGen = self.latestGeneration
+            nextGen = self.reproductionMechanism.newGeneration(previousGen)
+            nextGen.calculateFitness(self.fitnessCalculator)
+            self.populations.append(nextGen)
+            
+        for _ in range(maxSteps):
+            doGeneration()
+            if onGeneration and \
+                    onGeneration(self.latestGeneration, self.numGenerations):
+                break
+    
+if __name__ == '__main__':
+    import mutations
+    
+    class TestIndividual(Individual):
+        
+        _numValue = mutations.MutableFloat(range=(0.0, 1.0), stdDev=0.01)
+        
+        def __init__(self, num=None):
+            self.num = num or self._numValue()
+            
+        @property
+        def genotype(self): return self.num
+        
+        @property
+        def phenotype(self): return 5*self.num
+        
+        def mutate(self): 
+            return TestIndividual(self._numValue(self.num))
+        
+        def crossover(self, other):
+            avg = (self.num + other.num) / 2.0
+            return TestIndividual(avg), TestIndividual(avg)
+        
+    class TestCompetition(IndividualCompetition):
+        
+        def __init__(self, target=2.5):
+            self.target = target
+            
+        def _doCalculation(self, individual):
+            return self.target**2 - (individual.phenotype - self.target)**2
+        
+    evo = Evolution(Spartans(100, TestIndividual), TestCompetition(), 300)
+    evo.populate()
+    evo.run(10)
+    print evo.basePopulation.meanFitness, evo.latestGeneration.meanFitness
+    print evo.basePopulation[0].num, evo.latestGeneration[200].num
+            
+        
     
     

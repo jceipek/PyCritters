@@ -120,25 +120,54 @@ class TheHolyGrail(object):
             if node3 != node1: 
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
         '''
-    def _placeWithRespectTo(self, placedPhysicsObject, secondMorphNode, connection, simEnv):
-        rootGlobalVector = placedPhysicsObject.motion.getWorldTransform().getOrigin()
-        print('rootGlobalVector',rootGlobalVector)
-        rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
-        print('rootLocalConnectionVector',rootLocalConnectionVector)
-        #Connection point
-        globalConnectionVector = rootGlobalVector + rootLocalConnectionVector 
-        angleOfMapping = math.acos(globalConnectionVector.dot(rootGlobalVector))
-        newGlobalVector = globalConnectionVector + self._getVector3FromValue(connection.locations[1],secondMorphNode, )
+    def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
         
-        axisOfRotation = globalConnectionVector.cross(rootGlobalVector)
+        staticObjGlobalPos = placedPhysicsObject.body.getWorldTransform().getOrigin()
+        
+        connectionGlobalPos = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
+#        print('connectionGlobalPos',connectionGlobalPos)
+
+        seconObjConnectionLocalPos = self._getVector3FromValue(connection.locations[1],secondMorphNode)
+#        print('seconObjConnectionLocalPos',seconObjConnectionLocalPos)
+        
+        #newGlobalVector = connectionGlobalPos - seconObjConnectionLocalPos
+        secondObjGlobalPos = connectionGlobalPos - seconObjConnectionLocalPos
+
+#        print('secondObjGlobalPos',secondObjGlobalPos)
+        axisOfRotation = connectionGlobalPos.cross(seconObjConnectionLocalPos)
+#        print('axisOfRotation',axisOfRotation)
+
+        angleOfMapping = math.acos(connectionGlobalPos.dot(seconObjConnectionLocalPos))
+#        print('angleOfMapping',angleOfMapping)
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
-
-        newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newGlobalVector)
+ 
+        secondPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=seconObjConnectionLocalPos)
         
-        simEnv.addPhysicsObject(newPhysObj)
-        simEnv.ignoreCollision(placedPhysicsObject,newPhysObj)
+        secondObjTrans =secondPhysObj.body.getWorldTransform()
+        secondObjTrans.setRotation(rotationQuat)
+        #secondObjTrans.setRotation(Quaternion.fromAxisAngle(Vector3(0,0,0),math.pi/4.0))
+        secondPhysObj.body.setWorldTransform(secondObjTrans)
 
+        simEnv.addPhysicsObject(secondPhysObj)
+ 
+        simEnv.ignoreCollision(placedPhysicsObject,secondPhysObj)
+        simEnv.addHinge(placedPhysicsObject, secondPhysObj, connectionGlobalPos,axisOfRotation,connectionGlobalPos)
+        hinge =simEnv.getConstraint(placedPhysicsObject,secondPhysObj)
+        motor = hinge.getRotationalLimitMotor(2) #get the Z rotational motor
+
+        #Constrain all axis of rotation other than the Z to a maximum and minimum of 0 
+        hinge.getRotationalLimitMotor(0).hiLimit = 0
+        hinge.getRotationalLimitMotor(0).loLimit = 0
+        hinge.getRotationalLimitMotor(1).hiLimit = 0
+        hinge.getRotationalLimitMotor(1).loLimit = 0
+
+        #enable Z axis motor, configure limits of the hinge and set a maxMotorForce
+        motor.enableMotor = True
+        motor.targetVelocity = 10
+        motor.hiLimit = 90
+        motor.loLimit = -90
+        motor.maxMotorForce = 50
 
     def _getVector3FromValue(self, value, node=None):
         '''
@@ -188,10 +217,8 @@ if __name__ == '__main__':
     import morph
     iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
-    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5))
+    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=True))
     for val in simEnv.objectList:
         print(val)
-    for i in range(64):
-        print(grail._getVector3FromValue(i))
     simEnv.run()
 
