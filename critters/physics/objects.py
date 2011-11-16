@@ -35,7 +35,7 @@ class Box(PhysicsObject):
     when the mass is None, in which case the volume and density determine
     the mass. The restitution coefficient determines how "bouncy" collisions are.
     If it is below 1.0, collisions will be inelastic.'''
-    def __init__(self, position, size, mass=None, density=1.0, restitution=0.9):
+    def __init__(self, position, size, mass=None, density=1.0, restitution=0.9,nn=None):
         PhysicsObject.__init__(self) # Handle unique identification
         self.size = size
         if mass == None:
@@ -52,7 +52,7 @@ class Box(PhysicsObject):
         self.body.setRestitution(restitution)
         
         self.motion = motion
-        
+        self.nn = None #TODO: may need to change this abstraction
 
 class StaticPlane(PhysicsObject):
     '''A generic plane that extends infinitely in all directions.

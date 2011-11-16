@@ -20,7 +20,7 @@ simEnv.addPhysicsObject(box3)
 
 simEnv.ignoreCollision(box3,box2)
 simEnv.ignoreCollision(box1,box2)
-for obj in simEnv.objectList:
+for obj in simEnv.objectDict.itervalues():
     print(obj)
 
 simEnv.run()

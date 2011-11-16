@@ -209,7 +209,7 @@ class TheHolyGrail(object):
         '''
         if pos == None:
             pos = Vector3(0,0,0)
-        return Box(pos,Vector3(aNode.width,aNode.height,aNode.depth))
+        return Box(pos,Vector3(aNode.width,aNode.height,aNode.depth),nn=aNode.nn)
         
 
 if __name__ == '__main__':
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
     simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=True))
-    for val in simEnv.objectList:
+    for val in simEnv.objectDict.itervalues():
         print(val)
     simEnv.run()
 
