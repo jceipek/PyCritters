@@ -64,7 +64,8 @@ class TheHolyGrail(object):
     
     def killLeastFit(self):
         '''
-        Kills the least fit members of the opulation by removing them from the creatures dictionary
+        Kills the least fit members of the population by removing them from 
+        the creatures dictionary
         '''
         pass
     
@@ -119,7 +120,7 @@ class TheHolyGrail(object):
             if node3 != node1: 
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
         '''
-    def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
+    def _placeWithRespectTo(self, placedPhysicsObject, secondMorphNode, connection, simEnv):
         rootGlobalVector = placedPhysicsObject.motion.getWorldTransform().getOrigin()
         rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(placedPhysicsObject, connection.locations[0])
         
