@@ -122,39 +122,51 @@ class TheHolyGrail(object):
     def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
         
         staticObjGlobalPos = placedPhysicsObject.body.getWorldTransform().getOrigin()
-        #print('staticObjGlobalPos',staticObjGlobalPos)
-        rootLocalConnectionVector = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
-        #print('rootLocalConnectionVector',rootLocalConnectionVector)
         
-        
-        globalConnectionVector = staticObjGlobalPos + rootLocalConnectionVector
-        print('globalConnectionVector',globalConnectionVector)
+        connectionGlobalPos = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
+#        print('connectionGlobalPos',connectionGlobalPos)
 
-        newLocalConnectionVector = self._getVector3FromValue(connection.locations[1],secondMorphNode)
-        print('newLocalConnectionVector',newLocalConnectionVector)
+        seconObjConnectionLocalPos = self._getVector3FromValue(connection.locations[1],secondMorphNode)
+#        print('seconObjConnectionLocalPos',seconObjConnectionLocalPos)
         
-        #newGlobalVector = globalConnectionVector - newLocalConnectionVector
-        secondObjGlobalPos = globalConnectionVector - newLocalConnectionVector
-        print('secondObjGlobalPos',secondObjGlobalPos)
-        axisOfRotation = globalConnectionVector.cross(newLocalConnectionVector)
-        print('axisOfRotation',axisOfRotation)
+        #newGlobalVector = connectionGlobalPos - seconObjConnectionLocalPos
+        secondObjGlobalPos = connectionGlobalPos - seconObjConnectionLocalPos
 
-        angleOfMapping = math.acos(globalConnectionVector.dot(newLocalConnectionVector))
-        print('angleOfMapping',angleOfMapping)
+#        print('secondObjGlobalPos',secondObjGlobalPos)
+        axisOfRotation = connectionGlobalPos.cross(seconObjConnectionLocalPos)
+#        print('axisOfRotation',axisOfRotation)
+
+        angleOfMapping = math.acos(connectionGlobalPos.dot(seconObjConnectionLocalPos))
+#        print('angleOfMapping',angleOfMapping)
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
  
-        newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newLocalConnectionVector)
+        secondPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=seconObjConnectionLocalPos)
         
-        newTrans =newPhysObj.body.getWorldTransform()
-        newTrans.setRotation(rotationQuat)
-        #newTrans.setRotation(Quaternion.fromAxisAngle(Vector3(0,0,0),math.pi/4.0))
-        newPhysObj.body.setWorldTransform(newTrans)
-        #print('newPhysObjTransform',newPhysObj.body.getWorldTransform().getOrigin(),newPhysObj.body.getWorldTransform().getRotation().getAxis(),newPhysObj.body.getWorldTransform().getRotation().getAngle())
-        simEnv.addPhysicsObject(newPhysObj)
- 
-        simEnv.ignoreCollision(placedPhysicsObject,newPhysObj)
+        secondObjTrans =secondPhysObj.body.getWorldTransform()
+        secondObjTrans.setRotation(rotationQuat)
+        #secondObjTrans.setRotation(Quaternion.fromAxisAngle(Vector3(0,0,0),math.pi/4.0))
+        secondPhysObj.body.setWorldTransform(secondObjTrans)
 
+        simEnv.addPhysicsObject(secondPhysObj)
+ 
+        simEnv.ignoreCollision(placedPhysicsObject,secondPhysObj)
+        simEnv.addHinge(placedPhysicsObject, secondPhysObj, connectionGlobalPos,axisOfRotation,connectionGlobalPos)
+        hinge =simEnv.getConstraint(placedPhysicsObject,secondPhysObj)
+        motor = hinge.getRotationalLimitMotor(2) #get the Z rotational motor
+
+        #Constrain all axis of rotation other than the Z to a maximum and minimum of 0 
+        hinge.getRotationalLimitMotor(0).hiLimit = 0
+        hinge.getRotationalLimitMotor(0).loLimit = 0
+        hinge.getRotationalLimitMotor(1).hiLimit = 0
+        hinge.getRotationalLimitMotor(1).loLimit = 0
+
+        #enable Z axis motor, configure limits of the hinge and set a maxMotorForce
+        motor.enableMotor = True
+        motor.targetVelocity = 10
+        motor.hiLimit = 90
+        motor.loLimit = -90
+        motor.maxMotorForce = 50
 
     def _getVector3FromValue(self, value, node=None):
         '''
@@ -204,7 +216,7 @@ if __name__ == '__main__':
     import morph
     iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
-    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=False))
+    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=True))
     for val in simEnv.objectList:
         print(val)
     simEnv.run()
