@@ -24,8 +24,9 @@ class SimulationEnvironment(object):
         '''
         Initializes an Empty Simulation Environment containing only the ground.
         '''
-        self.objectList = [] #store every physicsObject in this environment
-        self.constraintList = dict() #map from a tuple of ids to a constraint
+        
+        self.objectList = [] #store every physicsObject in this environment TODO: make a property
+        self.constraintList = dict() #map from a tuple of ids to a constraint #TODO: connect nn to these constraints/motors
         self.cM = CollisionManager()
         self.ents = set()
         worldMin = Vector3(-1000,-1000,-1000) #TODO allow as param
