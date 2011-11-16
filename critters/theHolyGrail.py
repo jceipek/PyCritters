@@ -144,7 +144,7 @@ class TheHolyGrail(object):
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
  
-        newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newGlobalVector)
+        newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newLocalConnectionVector)
         
         newTrans =newPhysObj.body.getWorldTransform()
         newTrans.setRotation(rotationQuat)
