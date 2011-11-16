@@ -1,4 +1,3 @@
-
 '''
 Created on Nov 8, 2011
 
@@ -178,8 +177,6 @@ class TheHolyGrail(object):
             pos = Vector3(0,0,0)
         return Box(pos,Vector3(aNode.width,aNode.height,aNode.depth))
         
-    def _processMorphologyTree(self,root):
-        pass
 
 if __name__ == '__main__':
     import morph
