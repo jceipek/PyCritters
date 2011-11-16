@@ -20,7 +20,7 @@ class SimulationEnvironment(object):
     This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
-    def __init__(self, vis=True,groundDistToOrigin=0):
+    def __init__(self, vis=True,groundDistToOrigin=0,gravity=True):
         '''
         Initializes an Empty Simulation Environment containing only the ground.
         '''
@@ -36,6 +36,10 @@ class SimulationEnvironment(object):
         self.ground =StaticPlane(Vector3(0,1,0), groundDistToOrigin) #TODO: this may need to be added after items are added to this simev
         self.addPhysicsObject(self.ground)
         
+        if gravity:
+            self.dW.setGravity(Vector3(0, -9.8, 0))
+        else:
+            self.dW.setGravity(Vector3(0, 0, 0)) #turn gravity off
         if vis:
             self.r = render.Renderer(self.dW, debug=True)
             self.r.setup()

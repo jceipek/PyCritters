@@ -211,7 +211,7 @@ def createInchWorm():
     
     head = MorphNode(dimensions=(2,2,2))
     tail = MorphNode(dimensions=(2,2,2))
-    iWorm.addConnection(MorphConnection((head,tail),locations=(0,0)))
+    iWorm.addConnection(MorphConnection((head,tail),locations=(60,5)))
 
     return iWorm
 

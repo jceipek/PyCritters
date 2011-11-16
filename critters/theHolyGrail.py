@@ -120,22 +120,35 @@ class TheHolyGrail(object):
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
         '''
     def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
-        rootGlobalVector = placedPhysicsObject.motion.getWorldTransform().getOrigin()
+        rootGlobalVector = placedPhysicsObject.body.getWorldTransform().getOrigin()
         print('rootGlobalVector',rootGlobalVector)
         rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
         print('rootLocalConnectionVector',rootLocalConnectionVector)
         #Connection point
-        globalConnectionVector = rootGlobalVector + rootLocalConnectionVector 
-        angleOfMapping = math.acos(globalConnectionVector.dot(rootGlobalVector))
-        newGlobalVector = globalConnectionVector + self._getVector3FromValue(connection.locations[1],secondMorphNode, )
-        
-        axisOfRotation = globalConnectionVector.cross(rootGlobalVector)
+        globalConnectionVector = rootGlobalVector + rootLocalConnectionVector
+        print('globalConnectionVector',globalConnectionVector)
+
+        newLocalConnectionVector = self._getVector3FromValue(connection.locations[1],secondMorphNode)
+        print('newLocalConnectionVector',newLocalConnectionVector)
+        newGlobalVector = globalConnectionVector - newLocalConnectionVector
+        print('newGlobalVector',newGlobalVector)
+        axisOfRotation = globalConnectionVector.cross(newLocalConnectionVector)
+        print('axisOfRotation',axisOfRotation)
+
+        angleOfMapping = math.acos(globalConnectionVector.dot(newLocalConnectionVector))
+        print('angleOfMapping',angleOfMapping)
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
-
+ 
         newPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=newGlobalVector)
         
+        newTrans =newPhysObj.body.getWorldTransform()
+        newTrans.setRotation(rotationQuat)
+        #newTrans.setRotation(Quaternion.fromAxisAngle(Vector3(0,0,0),math.pi/4.0))
+        newPhysObj.body.setWorldTransform(newTrans)
+        #print('newPhysObjTransform',newPhysObj.body.getWorldTransform().getOrigin(),newPhysObj.body.getWorldTransform().getRotation().getAxis(),newPhysObj.body.getWorldTransform().getRotation().getAngle())
         simEnv.addPhysicsObject(newPhysObj)
+ 
         simEnv.ignoreCollision(placedPhysicsObject,newPhysObj)
 
 
@@ -187,10 +200,8 @@ if __name__ == '__main__':
     import morph
     iWorm = morph.createInchWorm()
     grail = TheHolyGrail()
-    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5))
+    simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=False))
     for val in simEnv.objectList:
         print(val)
-    for i in range(64):
-        print(grail._getVector3FromValue(i))
     simEnv.run()
 
