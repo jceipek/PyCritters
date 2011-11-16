@@ -121,13 +121,13 @@ class TheHolyGrail(object):
         '''
     def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
         
-        staticObjGlobalPos = placedPhysicsObject.body.getWorldTransform().getOrigin()
-        #print('staticObjGlobalPos',staticObjGlobalPos)
-        rootLocalConnectionVector = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
+        rootGlobalVector = placedPhysicsObject.body.getWorldTransform().getOrigin()
+        #print('rootGlobalVector',rootGlobalVector)
+        rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
         #print('rootLocalConnectionVector',rootLocalConnectionVector)
         
         
-        globalConnectionVector = staticObjGlobalPos + rootLocalConnectionVector
+        globalConnectionVector = rootGlobalVector + rootLocalConnectionVector
         print('globalConnectionVector',globalConnectionVector)
 
         newLocalConnectionVector = self._getVector3FromValue(connection.locations[1],secondMorphNode)
