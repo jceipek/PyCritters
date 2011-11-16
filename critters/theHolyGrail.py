@@ -120,18 +120,22 @@ class TheHolyGrail(object):
                 self._addNextPhysicsObject(self,node2,node3,graph,simEnv)
         '''
     def _placeWithRespectTo(self,placedPhysicsObject, secondMorphNode, connection, simEnv):
+        
         rootGlobalVector = placedPhysicsObject.body.getWorldTransform().getOrigin()
-        print('rootGlobalVector',rootGlobalVector)
+        #print('rootGlobalVector',rootGlobalVector)
         rootLocalConnectionVector = rootGlobalVector + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
-        print('rootLocalConnectionVector',rootLocalConnectionVector)
-        #Connection point
+        #print('rootLocalConnectionVector',rootLocalConnectionVector)
+        
+        
         globalConnectionVector = rootGlobalVector + rootLocalConnectionVector
         print('globalConnectionVector',globalConnectionVector)
 
         newLocalConnectionVector = self._getVector3FromValue(connection.locations[1],secondMorphNode)
         print('newLocalConnectionVector',newLocalConnectionVector)
-        newGlobalVector = globalConnectionVector - newLocalConnectionVector
-        print('newGlobalVector',newGlobalVector)
+        
+        #newGlobalVector = globalConnectionVector - newLocalConnectionVector
+        secondObjGlobalPos = globalConnectionVector - newLocalConnectionVector
+        print('secondObjGlobalPos',secondObjGlobalPos)
         axisOfRotation = globalConnectionVector.cross(newLocalConnectionVector)
         print('axisOfRotation',axisOfRotation)
 
