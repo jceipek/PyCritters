@@ -123,11 +123,11 @@ class TheHolyGrail(object):
         
         staticObjGlobalPos = placedPhysicsObject.body.getWorldTransform().getOrigin()
         #print('staticObjGlobalPos',staticObjGlobalPos)
-        connectionGlobalPos = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
-        #print('connectionGlobalPos',connectionGlobalPos)
+        rootLocalConnectionVector = staticObjGlobalPos + self._getVector3FromValue(connection.locations[0],placedPhysicsObject)
+        #print('rootLocalConnectionVector',rootLocalConnectionVector)
         
         
-        globalConnectionVector = staticObjGlobalPos + connectionGlobalPos
+        globalConnectionVector = staticObjGlobalPos + rootLocalConnectionVector
         print('globalConnectionVector',globalConnectionVector)
 
         newLocalConnectionVector = self._getVector3FromValue(connection.locations[1],secondMorphNode)
