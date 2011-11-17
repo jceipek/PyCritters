@@ -15,14 +15,16 @@ box2 = Box(Vector3(9.0, 2.5, 0), Vector3(9.0,5.0,5.0))
 simEnv.addPhysicsObject(box1)
 simEnv.addPhysicsObject(box2)
 
-simEnv.addHinge(box1, box2, Vector3(4.5,0,0),Vector3(0,0,1),Vector3(0,1,0))
+simEnv.addHinge(box1, box2, Vector3(4.5,0,0),Vector3(0,1,0),Vector3(1,0,0))
 
 hinge =simEnv.getConstraint(box1,box2)
 motor = hinge.getRotationalLimitMotor(2) #get the Z rotational motor
 
 #Constrain all axis of rotation other than the Z to a maximum and minimum of 0 
+
 hinge.getRotationalLimitMotor(0).hiLimit = 0
 hinge.getRotationalLimitMotor(0).loLimit = 0
+
 hinge.getRotationalLimitMotor(1).hiLimit = 0
 hinge.getRotationalLimitMotor(1).loLimit = 0
 

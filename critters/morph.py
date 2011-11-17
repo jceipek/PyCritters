@@ -206,12 +206,15 @@ def createSnake():
 
     return snake
 
-def createInchWorm():
+def createInchWorm(rand=False):
     iWorm = Morphology()
     
     head = MorphNode(dimensions=(2,2,2))
     tail = MorphNode(dimensions=(2,2,2))
-    iWorm.addConnection(MorphConnection((head,tail),locations=(60,5)))
+    conLocations=(60,5)
+    if rand:
+        conLocations = None
+    iWorm.addConnection(MorphConnection((head,tail),locations=conLocations))
 
     return iWorm
 
