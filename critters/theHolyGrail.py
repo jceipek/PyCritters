@@ -137,7 +137,7 @@ class TheHolyGrail(object):
         axisOfRotation = connectionGlobalPos.cross(seconObjConnectionLocalPos)
 #        print('axisOfRotation',axisOfRotation)
 
-        angleOfMapping = math.acos(connectionGlobalPos.normalized().dot(seconObjConnectionLocalPos.normalized()))+math.pi
+        angleOfMapping = math.acos(connectionGlobalPos.normalized().dot(seconObjConnectionLocalPos.normalized()))
 #        print('angleOfMapping',angleOfMapping)
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
