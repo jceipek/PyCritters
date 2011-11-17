@@ -24,9 +24,9 @@ class RenderableConnection(Renderable):
 
     def render(self):
         glBegin(GL_LINES)
-            glColor(self.color)
-            glVertex(self.anchor)
-            glVertex(self.anchor2)
+        glColor(self.color)
+        glVertex(self.anchor)
+        glVertex(self.anchor2)
         glEnd()
 
 def makeRenderable(obj, color):

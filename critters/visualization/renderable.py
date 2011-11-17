@@ -24,12 +24,12 @@ class RenderableConnection(Renderable):
 
     def render(self):
         glBegin(GL_LINES)
-            glColor(self.color)
-            glVertex(self.anchor)
-            glVertex(self.anchor2)
+        glColor(self.color)
+        glVertex(*self.anchor)
+        glVertex(*self.anchor2)
         glEnd()
 
 def makeRenderable(obj, color):
-    if(isInstance(obj, Hinge2Constraint)):
+    if(isinstance(obj, Hinge2Constraint)):
         return RenderableConnection(obj, color)
     return Renderable(obj, color)
