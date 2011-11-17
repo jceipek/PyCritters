@@ -67,7 +67,7 @@ class Renderer(object):
         
         for renderable in iterableObjects:
             renderable.render()
-            
+
         glRotate(self.cameraAngleY,0,1,0) #rotate about the y axis
         glRotate(self.cameraAngleZ,1,0,0)#rotate about the x axis
         pygame.display.flip()
@@ -87,6 +87,7 @@ class Renderer(object):
             glColor(*line[6:])
             glVertex(*line[:3])
             glVertex(*line[3:6])
+
         if self.debugDrawer.contacts:
             pass #print 'Contact!', debug.contacts
         glEnd()

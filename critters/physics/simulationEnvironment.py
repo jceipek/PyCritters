@@ -55,7 +55,7 @@ class SimulationEnvironment(object):
             color = (255,0,0)
         self.ents.add(renderable.makeRenderable(physObj, color))
     
-    def addHinge(self,physObj1,physObj2,globalLoc,unit1=None,unit2=None):
+    def addHinge(self, physObj1, physObj2, globalLoc, unit1=None, unit2=None):
         '''
         Adds a hinge between physObj1 and physObj2 at globalLoc with degrees of 
         freedom about the vectors unit1 and unit2
@@ -66,7 +66,7 @@ class SimulationEnvironment(object):
             unit1 = Vector3(0,0,1)
         if unit2 == None:
             unit2 = Vector3(0,1,0)
-        hinge = Hinge2Constraint(physObj1.body, physObj2.body,globalLoc,unit1,unit2)
+        hinge = Hinge2Constraint(physObj1.body, physObj2.body, globalLoc, unit1, unit2)
         self.addConstraint(hinge,physObj1,physObj2)
         
     def ignoreCollision(self,po1,po2):
@@ -81,7 +81,10 @@ class SimulationEnvironment(object):
         '''
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = constraint
         
-        self.ents.add(renderable.makeRenderable(constraint, (255,0,0)))
+        connectionGlobalPos = constraint.getAnchor()
+        po1LocalPos = connectionGlobalPos - po1.body.getWorldTransform().getOrigin()
+        po2LocalPos = connectionGlobalPos - po2.body.getWorldTransform().getOrigin()
+        self.ents.add(renderable.makeRenderable((po1, po2, po1LocalPos, po2LocalPos)))
         self.dW.addConstraint(constraint)
 
     def getConstraint(self,po1,po2):
