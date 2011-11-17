@@ -91,7 +91,7 @@ class TheHolyGrail(object):
         graph = morphology.graph
         nodeList = graph.nodes()
         start = nodeList[0] #we can begin at any arbitrary node.
-        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin shifted up to stop collision with the ground
+        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,5.0,0)) #place first object at the origin shifted up to stop collision with the ground
         simEnv.addPhysicsObject(startPhys)
         for node1 in graph.neighbors(start):
             self._addNextPhysicsObject(startPhys,start,node1,graph,simEnv)
@@ -137,14 +137,14 @@ class TheHolyGrail(object):
         axisOfRotation = connectionGlobalPos.cross(seconObjConnectionLocalPos)
 #        print('axisOfRotation',axisOfRotation)
 
-        angleOfMapping = math.acos(connectionGlobalPos.dot(seconObjConnectionLocalPos))
+        angleOfMapping = math.acos(connectionGlobalPos.normalized().dot(seconObjConnectionLocalPos.normalized()))+math.pi
 #        print('angleOfMapping',angleOfMapping)
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
  
         secondPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=seconObjConnectionLocalPos)
         
-        secondObjTrans =secondPhysObj.body.getWorldTransform()
+        secondObjTrans = secondPhysObj.body.getWorldTransform()
         secondObjTrans.setRotation(rotationQuat)
         #secondObjTrans.setRotation(Quaternion.fromAxisAngle(Vector3(0,0,0),math.pi/4.0))
         secondPhysObj.body.setWorldTransform(secondObjTrans)
@@ -153,7 +153,7 @@ class TheHolyGrail(object):
  
         simEnv.ignoreCollision(placedPhysicsObject,secondPhysObj)
         simEnv.addHinge(placedPhysicsObject, secondPhysObj, connectionGlobalPos,axisOfRotation,connectionGlobalPos)
-        hinge =simEnv.getConstraint(placedPhysicsObject,secondPhysObj)
+        hinge = simEnv.getConstraint(placedPhysicsObject,secondPhysObj)
         motor = hinge.getRotationalLimitMotor(2) #get the Z rotational motor
 
         #Constrain all axis of rotation other than the Z to a maximum and minimum of 0 
