@@ -81,7 +81,7 @@ class SimulationEnvironment(object):
         '''
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = constraint
         
-        self.ents.add(renderable.makeRenderable(constraint, (255,0,0))
+        self.ents.add(renderable.makeRenderable(constraint, (255,0,0)))
         self.dW.addConstraint(constraint)
 
     def getConstraint(self,po1,po2):
