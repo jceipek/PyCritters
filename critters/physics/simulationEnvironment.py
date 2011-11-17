@@ -80,6 +80,8 @@ class SimulationEnvironment(object):
         #TODO need to add abstraction here...
         '''
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = constraint
+        
+        self.ents.add(renderable.makeRenderable(constraint, (255,0,0))
         self.dW.addConstraint(constraint)
 
     def getConstraint(self,po1,po2):
@@ -99,10 +101,16 @@ class SimulationEnvironment(object):
         '''
         timeStep = fixedTimeStep = 1.0 / 600.0
         for id1,id2 in self.constraintDict.iterkeys():
-            #get the two different nn's
-            #give them access to the actuator
+            break
+            nn1 = self.objectDict[id1].nn
+            nn2 = self.objectDict[id2].nn
+            inputs1=inputs2=None
+            outputs1=nn1.process(inputs1,timeStep)
+            outputs2=nn2.process(inputs2,timeStep)
+            
+            #give them access to the actuators
             #somehow combine their outputs
-            pass
+            
         self.dW.stepSimulation(timeStep, 1, fixedTimeStep)
         now = time.time()
         delay = now % timeStep
