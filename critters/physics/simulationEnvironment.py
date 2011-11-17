@@ -25,8 +25,8 @@ class SimulationEnvironment(object):
         Initializes an Empty Simulation Environment containing only the ground.
         '''
         
-        self.objectList = [] #store every physicsObject in this environment TODO: make a property
-        self.constraintList = dict() #map from a tuple of ids to a constraint #TODO: connect nn to these constraints/motors
+        self.objectDict = dict() #map from id to physicsObject for every PO in this environment TODO: make a property
+        self.constraintDict = dict() #map from a frozenset of ids to a constraint #TODO: connect nn to these constraints/motors
         self.cM = CollisionManager()
         self.ents = set()
         worldMin = Vector3(-1000,-1000,-1000) #TODO allow as param
@@ -49,23 +49,25 @@ class SimulationEnvironment(object):
         '''
         Adds a PhysicsObject to this SimulationEnvironment, adding it to the collision manager and to the renderables
         '''
-        self.objectList.append(physObj)
+        self.objectDict[physObj.identifier] = physObj
         self.cM.addPhysicsObject(physObj)
         if color == None:
             color = (255,0,0)
         self.ents.add(renderable.makeRenderable(physObj, color))
     
     def addHinge(self,physObj1,physObj2,globalLoc,unit1=None,unit2=None):
-        if not physObj1 in self.objectList or not physObj2 in self.objectList:
+        '''
+        Adds a hinge between physObj1 and physObj2 at globalLoc with degrees of 
+        freedom about the vectors unit1 and unit2
+        '''
+        if not physObj1.identifier in self.objectDict or not physObj2.identifier in self.objectDict:
             raise ValueError('PhysicsObjects must be in the SimulationEnvironment')
         if unit1 == None:
             unit1 = Vector3(0,0,1)
         if unit2 == None:
             unit2 = Vector3(0,1,0)
         hinge = Hinge2Constraint(physObj1.body, physObj2.body,globalLoc,unit1,unit2)
-        self.constraintList[(physObj1.identifier,physObj2.identifier)] = hinge
-        self.constraintList[(physObj2.identifier,physObj1.identifier)] = hinge
-        self.dW.addConstraint(hinge)
+        self.addConstraint(hinge,physObj1,physObj2)
         
     def ignoreCollision(self,po1,po2):
         '''
@@ -77,33 +79,45 @@ class SimulationEnvironment(object):
         '''
         #TODO need to add abstraction here...
         '''
-        self.constraintList[(po1.identifier,po2.identifier)] = constraint
-        self.constraintList[(po2.identifier,po1.identifier)] = constraint
+        self.constraintDict[frozenset([po1.identifier,po2.identifier])] = constraint
+        
+        self.ents.add(renderable.makeRenderable(constraint, (255,0,0)))
         self.dW.addConstraint(constraint)
 
     def getConstraint(self,po1,po2):
         '''
         Returns the constraint (if any) found between the two PhysicsObjects po1 and po2.
-        If the state is somehow inconsistent, i.e. if the ordering of PhysicsObjects matters
-        None is returned.
+        If no constraint is found, None is returned
         '''
-        val1= self.constraintList[(po1.identifier,po2.identifier)] 
-        val2=self.constraintList[(po2.identifier,po1.identifier)]
-        if val1 != val2:
-            return None #TODO: throw exception or handle mismanaged state
-        return val1 
+        try:
+            return self.constraintDict[frozenset([po1.identifier,po2.identifier])] 
+        except:
+            return None
+
         
     def step(self,rot=0,rotUp=0):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window
         '''
         timeStep = fixedTimeStep = 1.0 / 600.0
+        for id1,id2 in self.constraintDict.iterkeys():
+            break
+            nn1 = self.objectDict[id1].nn
+            nn2 = self.objectDict[id2].nn
+            inputs1=inputs2=None
+            outputs1=nn1.process(inputs1,timeStep)
+            outputs2=nn2.process(inputs2,timeStep)
+            
+            #give them access to the actuators
+            #somehow combine their outputs
+            
         self.dW.stepSimulation(timeStep, 1, fixedTimeStep)
         now = time.time()
         delay = now % timeStep
         time.sleep(delay)
         self.r.render(self.ents)
         self.r.rotateCamera(rot,rotUp)
+        
         
     def _run(self):
         '''
@@ -112,7 +126,7 @@ class SimulationEnvironment(object):
         should not be invoked by the user
         '''
         self.cM.calculateCollisionGroups()
-        for o in self.objectList:
+        for o in self.objectDict.itervalues():
             self.dW.addRigidBody(o.body,self.cM.getCollisionFilterGroup(o),self.cM.getCollisionFilterMask(o))
 
             
