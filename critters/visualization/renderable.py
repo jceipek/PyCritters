@@ -16,20 +16,19 @@ class RenderableBox(Renderable):
     pass
     
 class RenderableConnection(Renderable):
-    def __init__(self, hinge, color):
+    def __init__(self, po1, po2, local1, local2, color):
+        if color == None: color = (1.0, 0.0, 0.0)
         Renderable.__init__(self, hinge, color)
-        self.anchor = hinge.getAnchor()
-        self.anchor2 = hinge.getAnchor2()
-
 
     def render(self):
         glBegin(GL_LINES)
-        glColor(self.color)
-        glVertex(*self.anchor)
-        glVertex(*self.anchor2)
+        v1 = po1.body.getWorldTransform().getOrigin() - local1
+        v2 = po2.body.getWorldTransform().getOrigin() - local2
+        glVertex(*v1)
+        glVertex(*v2)
         glEnd()
 
-def makeRenderable(obj, color):
-    if(isinstance(obj, Hinge2Constraint)):
-        return RenderableConnection(obj, color)
+def makeRenderable(obj, color=None):
+    if(isinstance(obj, tuple)):
+        return RenderableConnection(*obj, color)
     return Renderable(obj, color)
