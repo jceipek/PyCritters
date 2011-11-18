@@ -1,5 +1,4 @@
 sudo apt-get install swig
 svn checkout http://pybox2d.googlecode.com/svn/trunk/ pybox2d-read-only
 cd pybox2d-read-only
-python setup.py build
 sudo python setup.py install
