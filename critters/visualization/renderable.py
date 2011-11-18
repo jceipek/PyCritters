@@ -24,8 +24,8 @@ class RenderableConnection(Renderable):
 
     def render(self):
         glBegin(GL_LINES)
-        v1 = self.po1.body.getWorldTransform().getOrigin() - self.local1
-        v2 = self.po2.body.getWorldTransform().getOrigin() - self.local2
+        v1 = self.po1.body.getWorldTransform().getOrigin() + self.local1
+        v2 = self.po2.body.getWorldTransform().getOrigin() + self.local2
         glVertex(*v1)
         glVertex(*v2)
         glEnd()

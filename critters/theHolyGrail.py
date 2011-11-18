@@ -91,7 +91,7 @@ class TheHolyGrail(object):
         graph = morphology.graph
         nodeList = graph.nodes()
         start = nodeList[0] #we can begin at any arbitrary node.
-        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,5.0,0)) #place first object at the origin shifted up to stop collision with the ground
+        startPhys = self._makePhysicsObjectFromNode(start,Vector3(0,0,0)) #place first object at the origin shifted up to stop collision with the ground
         simEnv.addPhysicsObject(startPhys)
         for node1 in graph.neighbors(start):
             self._addNextPhysicsObject(startPhys,start,node1,graph,simEnv)
@@ -142,7 +142,7 @@ class TheHolyGrail(object):
 
         rotationQuat = Quaternion.fromAxisAngle(axisOfRotation, angleOfMapping)
  
-        secondPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=seconObjConnectionLocalPos)
+        secondPhysObj = self._makePhysicsObjectFromNode(secondMorphNode, pos=secondObjGlobalPos)
         
         secondObjTrans = secondPhysObj.body.getWorldTransform()
         secondObjTrans.setRotation(rotationQuat)
@@ -163,18 +163,54 @@ class TheHolyGrail(object):
         hinge.getRotationalLimitMotor(1).loLimit = 0
 
         #enable Z axis motor, configure limits of the hinge and set a maxMotorForce
+        
         motor.enableMotor = True
-        motor.targetVelocity = 10
+        motor.targetVelocity = 1
         motor.hiLimit = 90
         motor.loLimit = -90
-        motor.maxMotorForce = 50
-
+        motor.maxMotorForce = 10
+    
+    
+    def _getEdgeVector3FromValue(self,value,node=None):
+        '''
+        Only returns poitns on the edges of the boxes. Might need to test this...
+        '''
+        w,h,d = (1,1,1)
+        if node ==None:
+            w,h,d =(1,1,1)
+        elif isinstance(node, MorphNode):
+           w,h,d = node.width, node.height, node.depth 
+        elif isinstance(node, PhysicsObject):
+           dims = node.size
+           w,h,d = dims.x, dims.y, dims.z    
+        value=int(round(value))
+        print value
+        #hardcoded values, not good style but was the easiest to write quickly
+        frac1, frac2, frac3 = [
+        (1,0,-1),
+        (-1,0,-1),
+        (0,1,-1),
+        (0,-1,-1),
+        
+        (1,0,1),
+        (-1,0,1),
+        (0,1,1),
+        (0,-1,1),
+        
+        (1,1,0),
+        (-1,-1,0),
+        (-1,1,0),
+        (1,-1,0)][value%12]
+        return Vector3(frac1*w*0.5,frac2*h*0.5,frac3*d*0.5)
+    
     def _getVector3FromValue(self, value, node=None):
         '''
         @params value: an integer  value for 0 to 64
         @retrun vector3: a vector3 representing the point in local space that
         this integer maps to
         '''
+        return self._getEdgeVector3FromValue(value,node) #currently use the edgeVersion for testing
+        
         modded = value % 64
         val1 = modded//16
         frac1= val1/4.0 #as a fraction of the maximum number of points
@@ -187,6 +223,7 @@ class TheHolyGrail(object):
         val3 = modded
         frac3 = val3/4.0#as a fraction of the maximum number of points
         
+       
         w,h,d = (1,1,1)
         if node ==None:
             w,h,d =(1,1,1)
@@ -215,7 +252,7 @@ class TheHolyGrail(object):
 
 if __name__ == '__main__':
     import morph
-    iWorm = morph.createInchWorm()
+    iWorm = morph.createInchWorm(True)
     grail = TheHolyGrail()
     simEnv = grail.processMorphologyTree(iWorm,SimulationEnvironment(groundDistToOrigin=-5,gravity=True))
     for val in simEnv.objectDict.itervalues():

@@ -98,7 +98,8 @@ class SimulationEnvironment(object):
             return None
 
         
-    def step(self, rot=0, rotUp=0, zoomMag=0):
+
+    def step(self, rot=0, rotUp=0, zoomMag=0, visOnly=False):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window
         '''
@@ -113,8 +114,8 @@ class SimulationEnvironment(object):
             
             #give them access to the actuators
             #somehow combine their outputs
-            
-        self.dW.stepSimulation(timeStep, 1, fixedTimeStep)
+        if not visOnly:
+            self.dW.stepSimulation(timeStep, 1, fixedTimeStep)
         now = time.time()
         delay = now % timeStep
         time.sleep(delay)
@@ -134,14 +135,15 @@ class SimulationEnvironment(object):
             self.dW.addRigidBody(o.body,self.cM.getCollisionFilterGroup(o),self.cM.getCollisionFilterMask(o))
 
             
-    def run(self):
+    def run(self, visOnly=False):
         self._run()
         rot = 0
         rotUp = 0
         zoomMag = 0
         running = True
         while running:
-            self.step(rot, rotUp, zoomMag)
+
+            self.step(rot, rotUp, zoomMag, visOnly)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
