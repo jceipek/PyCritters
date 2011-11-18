@@ -98,7 +98,7 @@ class SimulationEnvironment(object):
             return None
 
         
-    def step(self,rot=0,rotUp=0):
+    def step(self, rot=0, rotUp=0, zoomMag=0):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window
         '''
@@ -120,6 +120,7 @@ class SimulationEnvironment(object):
         time.sleep(delay)
         self.r.render(self.ents)
         self.r.rotateCamera(rot,rotUp)
+        self.r.zoomCamera(zoomMag)
         
         
     def _run(self):
@@ -136,10 +137,11 @@ class SimulationEnvironment(object):
     def run(self):
         self._run()
         rot = 0
-        rotUp=0
+        rotUp = 0
+        zoomMag = 0
         running = True
         while running:
-            self.step(rot,rotUp)
+            self.step(rot, rotUp, zoomMag)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -151,9 +153,14 @@ class SimulationEnvironment(object):
                     elif event.key == pygame.K_RIGHT:
                         rot += 0.1
                     elif event.key == pygame.K_UP:
-                        rotUp+=0.1
+                        rotUp += 0.1
                     elif event.key == pygame.K_DOWN:
-                        rotUp-=0.1
+                        rotUp -= 0.1
+                    elif event.key == pygame.K_PLUS:    
+                        zoomMag += 0.1
+                    elif event.key == pygame.K_MINUS:    
+                        zoomMag -= 0.1
+
     
     def simulate(self, timeToRun):
         '''

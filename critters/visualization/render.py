@@ -38,7 +38,7 @@ class Renderer(object):
 
     def __init__(self, world, debug=False):
         self.world = world
-        self.cameraAngleY,self.cameraAngleZ = 0.0,0.0
+        self.cameraAngleY,self.cameraAngleZ,self.cameraZoom = 0.0,0.0,0.0
         self.debug = debug
         if self.debug:
             self.debugDrawer = DebugDrawer()
@@ -68,8 +68,11 @@ class Renderer(object):
         for renderable in iterableObjects:
             renderable.render()
 
-        glRotate(self.cameraAngleY,0,1,0) #rotate about the y axis
-        glRotate(self.cameraAngleZ,1,0,0)#rotate about the x axis
+        glRotate(self.cameraAngleY, 0, 1 ,0) #rotate about the y axis
+        glRotate(self.cameraAngleZ, 1, 0, 0)#rotate about the x axis
+
+        #glTranslate(0, -4, -60)
+
         pygame.display.flip()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
          
@@ -78,7 +81,11 @@ class Renderer(object):
         '''
         self.cameraAngleY = angleY
         self.cameraAngleZ = angleZ
-            
+
+    def zoomCamera(self, magnitude=0.0):
+        self.cameraZoom = magnitude
+        
+
     def debugDraw(self):
         self.debugDrawer.reset()
         self.world.debugDrawWorld()
