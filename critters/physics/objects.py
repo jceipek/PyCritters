@@ -4,10 +4,7 @@ It is intended to be very bare-bones and does not supply these primatives
 with mesh, texture, lighting, or even color information.
 '''
 
-from bullet.bullet import (
-    Vector3, Transform,
-    DefaultMotionState, RigidBody,
-    BoxShape, StaticPlaneShape)
+
 
 class PhysicsObject(object):
     '''A generic PhysicsObject with a unique readOnly identifier.
