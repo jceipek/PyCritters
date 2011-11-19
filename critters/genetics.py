@@ -169,11 +169,11 @@ if __name__ == '__main__':
         def _doCalculation(self, individual):
             return self.target**2 - (individual.phenotype - self.target)**2
         
-    evo = Evolution(Spartans(100, TestIndividual), TestCompetition(), 300)
+    evo = Evolution(Spartans(5, TestIndividual), TestCompetition(), 10)
     evo.populate()
     evo.run(10)
     print evo.basePopulation.meanFitness, evo.latestGeneration.meanFitness
-    print evo.basePopulation[0].num, evo.latestGeneration[200].num
+    print evo.basePopulation[0].num, evo.latestGeneration[0].num
             
         
     
