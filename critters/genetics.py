@@ -2,13 +2,11 @@
 import operator
 import random
 
-class Individual(object):
+class Genotype(object):
     
     @property
-    def genotype(self): assert False
-    
-    @property
-    def phenotype(self): assert False
+    def phenotype(self): 
+        assert False
         
     def mutate(self):
         assert False
@@ -141,15 +139,12 @@ class Evolution(object):
 if __name__ == '__main__':
     import mutations
     
-    class TestIndividual(Individual):
+    class TestIndividual(Genotype):
         
         _numValue = mutations.MutableFloat(range=(0.0, 1.0), stdDev=0.01)
         
         def __init__(self, num=None):
             self.num = num or self._numValue()
-            
-        @property
-        def genotype(self): return self.num
         
         @property
         def phenotype(self): return 5*self.num
