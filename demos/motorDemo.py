@@ -3,10 +3,9 @@
 """
 """
 import pygame
-from pygame.locals import *
-
 import Box2D # The main library
-from Box2D.b2 import * # This maps Box2D.b2Vec2 to vec2 (and so on)
+from Box2D import b2# This maps Box2D.b2Vec2 to vec2 (and so on)
+import math
 
 # --- constants ---
 # Box2D deals with meters, but we want to display pixels, 
@@ -24,30 +23,37 @@ clock=pygame.time.Clock()
 
 # --- pybox2d world setup ---
 # Create the world
-world=world(gravity=(0,-9.8),doSleep=True)
+world=b2.world(gravity=(0,-0),doSleep=True)
 
 # And a static body to hold the ground shape
 ground_body=world.CreateStaticBody(
     position=(0,1),
-    shapes=polygonShape(box=(50,1)),
+    shapes=b2.polygonShape(box=(50,1)),
     )
 
 
 # Create a dynamic body
-box1=world.CreateDynamicBody(position=(10,3), angle=0.0)
-box2=world.CreateDynamicBody(position=(14,5), angle=0.0)
+box1=world.CreateDynamicBody(position=(10,3+5), angle=0.0)
+box2=world.CreateDynamicBody(position=(14,5+5), angle=0.0)
 
 rj=world.CreateRevoluteJoint(
     bodyA=box1, 
     bodyB=box2, 
-    anchor=(12,4),)
+    anchor=(12,4+5),
+    lowerAngle = -.5 * b2.pi, # -90 degrees
+    upperAngle = .5 * b2.pi, #  45 degrees
+    enableLimit = True,
+    maxMotorTorque = 200.0,
+    motorSpeed = 1,
+    enableMotor = True,
+    )
 
 # And add a box fixture onto it (with a nonzero density, so it will move)
-box1.CreatePolygonFixture(box=(2,1), density=1, friction=0.3)
+box1.CreatePolygonFixture(box=(2,1), density=1000, friction=0.3)
 box2.CreatePolygonFixture(box=(2,1), density=1, friction=0.3)
 colors = {
-    staticBody  : (255,255,255,255),
-    dynamicBody : (127,127,127,255),
+    b2.staticBody  : (255,255,255,255),
+    b2.dynamicBody : (127,127,127,255),
     }
 
 # --- main game loop ---
@@ -55,7 +61,7 @@ running=True
 while running:
     # Check the event queue
     for event in pygame.event.get():
-        if event.type==QUIT or (event.type==KEYDOWN and event.key==K_ESCAPE):
+        if event.type==pygame.QUIT or (event.type==pygame.KEYDOWN and event.key==pygame.K_ESCAPE):
             # The user closed the window or pressed escape
             running=False
 

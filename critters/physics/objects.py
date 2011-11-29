@@ -4,8 +4,6 @@ It is intended to be very bare-bones and does not supply these primatives
 with mesh, texture, lighting, or even color information.
 '''
 
-
-
 class PhysicsObject(object):
     '''A generic PhysicsObject with a unique readOnly identifier.
     
