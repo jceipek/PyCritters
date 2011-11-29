@@ -31,11 +31,10 @@ class DynamicPhysicsObject(PhysicsObject):
 
 class Rect(DynamicPhysicsObject):
     '''A generic rectangular prism that uses Box2D's CreatePolygonFixture.
-    
     It takes in a Box2D world, position and size tuples, and angle,
     density, and friction floats.
     ''' 
-    def __init__(self, position, size, angle=0.0, density=1.0, friction=0.3):
+    def __init__(self, position, size=(1,1), angle=0.0, density=1.0, friction=0.3):
         PhysicsObject.__init__(self) # Handle unique identification
         self.size = size
         self.position = position
@@ -45,7 +44,6 @@ class Rect(DynamicPhysicsObject):
 
 class StaticRect(StaticPhysicsObject):
     '''A generic plane that extends infinitely in all directions.
-    
     It takes in a Box2D world and position and size tuples.'''
     def __init__(self, position, size):
         PhysicsObject.__init__(self) # Handle unique identification

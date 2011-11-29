@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-from visualization import render, renderable
+from visualization import render
 import physics.objects
 import pygame
 from Box2D import b2 
@@ -22,7 +22,6 @@ class SimulationEnvironment(object):
         self.objectDict = dict() #map from id to physicsObject
                                  # for every PO in this environment 
                                  #TODO: make a property
-        self.ents = set()
 
         #World Creation with gravity
         shouldSleep = True
@@ -64,8 +63,6 @@ class SimulationEnvironment(object):
         if color == None:
             color = (255,0,0)
         
-        if self.vis:
-            self.ents.add(renderable.makeRenderable(physObj, color))
     
     def addHinge(self, physObj1, physObj2, globalLoc):
         '''
@@ -89,11 +86,6 @@ class SimulationEnvironment(object):
                                                motorSpeed = 0,
                                                enableMotor = True)
 
-    def ignoreCollision(self,po1,po2):
-        '''
-        Selects the two physics objects to have their collisions ignored by the physics engine.
-        '''
-        self.cM.ignoreCollision(po1,po2)
 
     def addConstraint(self, constraint, po1, po2, globalLoc):
         '''
@@ -119,15 +111,11 @@ class SimulationEnvironment(object):
             return None
 
         
-    def step(self, offset, ppm, visOnly=False):
+    def step(self):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window.
-
-        offset is a tuple used for panning, and ppm is the size of the physical
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
-        timeStep = fixedTimeStep = 1.0 / 600.0
-        
         '''for id1,id2 in self.constraintDict.iterkeys():
             break
             nn1 = self.objectDict[id1].nn
@@ -139,9 +127,7 @@ class SimulationEnvironment(object):
             #give them access to the actuators
             #somehow combine their outputs
         '''
-        if not visOnly:
-            self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
-
+        self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
     def run(self, visOnly=False):
         vOffset = 0
@@ -150,10 +136,9 @@ class SimulationEnvironment(object):
         running = True
 
         while running:
-            self.step((hOffset, vOffset), PPM, visOnly)
-
+            self.step()
             if self.vis:
-                self.r.render(self.ents)
+                self.r.render((hOffset, vOffset), PPM)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
