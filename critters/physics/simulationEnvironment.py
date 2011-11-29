@@ -87,8 +87,6 @@ class SimulationEnvironment(object):
                                                maxMotorTorque = 200.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
-        
-
 
     def ignoreCollision(self,po1,po2):
         '''
@@ -142,8 +140,7 @@ class SimulationEnvironment(object):
         '''
         if not visOnly:
             self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
-        self.r.render(self.ents)
-        
+
 
     def run(self, visOnly=False):
         vOffset = 0
@@ -154,7 +151,8 @@ class SimulationEnvironment(object):
         while running:
             self.step((hOffset, vOffset), PPM, visOnly)
 
-            self.r.render(self.ents)
+            if self.vis:
+                self.r.render(self.ents)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
