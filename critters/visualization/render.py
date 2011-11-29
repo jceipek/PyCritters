@@ -16,7 +16,7 @@ class Renderer(object):
     
     def setup(self):
         pygame.init()
-        pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.display.set_mode((Renderer.SCREEN_WIDTH, Renderer.SCREEN_HEIGHT))
     
     def render(self, offset, PPM):
         """Draws all objects in self.world
