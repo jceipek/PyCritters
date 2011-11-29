@@ -6,6 +6,7 @@ import physics.objects
 import pygame
 from Box2D import b2 
 import math
+import morph 
 
 class SimulationEnvironment(object):
     '''
@@ -99,12 +100,12 @@ class SimulationEnvironment(object):
         #TODO need to add abstraction here...
         '''
 
-        if constraint.joint == MorphConnection.HINGE_JOINT:
+        if constraint.joint == morph.MorphConnection.HINGE_JOINT:
             joint = self.addHinge(po1, po2, globalLoc)
         else:
             raise "Unimplemented Constraint Type!"
 
-        # Assumes that there is only one joint between two physics objects
+        # Note: Assumes that there is only one joint between two physics objects
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = joint
         
     def getConstraint(self,po1,po2):
