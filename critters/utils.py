@@ -1,9 +1,10 @@
 
 import operator
 import random
+import functools
 
 __all__ = ["sign", "product", "divide", "filterOut", "repeat",
-           "flatten", "clampRange", "count"]
+           "flatten", "clampRange", "count", "cached"]
 
 def sign(x):
     """Returns the sign of a number.
@@ -54,3 +55,14 @@ def count(iterator):
     n = 0
     for _ in iterator: n += 1
     return n
+
+def cached(fn):
+    cacheVar =  fn.__name__ + '__cache'
+    
+    def wrapper(*args, **kwgs):
+        self = args[0]
+        if not hasattr(self, cacheVar):
+            setattr(self, cacheVar, fn(*args, **kwgs))
+        return getattr(self, cacheVar)
+    
+    return functools.update_wrapper(wrapper, fn)

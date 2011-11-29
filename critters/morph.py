@@ -121,7 +121,7 @@ class MorphConnection(object):
     JOINT_TYPES = [HINGE_JOINT]
     
     _jointValue = MutableChoice(choices=JOINT_TYPES)
-    _locationValue = MutableFloat(range=(0, 2*math.pi), rate=0.1)
+    _locationValue = MutableInt(range=(0, 3), rate=0.1)
     _recursionLimitValue = MutableInt(range=(1, 4), rate=0.05)
     
     def __init__(self, nodes, joint=HINGE_JOINT, actuators=None, 
