@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-from visualization import render, renderable
+from visualization import render
 import physics.objects
 import pygame
 from Box2D import b2 
@@ -21,7 +21,6 @@ class SimulationEnvironment(object):
         self.objectDict = dict() #map from id to physicsObject
                                  # for every PO in this environment 
                                  #TODO: make a property
-        self.ents = set()
 
         #World Creation with gravity
         shouldSleep = True
@@ -63,8 +62,6 @@ class SimulationEnvironment(object):
         if color == None:
             color = (255,0,0)
         
-        if self.vis:
-            self.ents.add(renderable.makeRenderable(physObj, color))
     
     def addHinge(self, physObj1, physObj2, globalLoc):
         '''
@@ -88,11 +85,6 @@ class SimulationEnvironment(object):
                                                motorSpeed = 0,
                                                enableMotor = True)
 
-    def ignoreCollision(self,po1,po2):
-        '''
-        Selects the two physics objects to have their collisions ignored by the physics engine.
-        '''
-        self.cM.ignoreCollision(po1,po2)
 
     def addConstraint(self, constraint, po1, po2, globalLoc):
         '''
@@ -150,9 +142,8 @@ class SimulationEnvironment(object):
 
         while running:
             self.step((hOffset, vOffset), PPM, visOnly)
-
             if self.vis:
-                self.r.render(self.ents)
+                self.r.render()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False

@@ -1,9 +1,3 @@
-from OpenGL.GL import (
-    GL_LINES,
-    glColor,
-    glBegin, glEnd, glVertex)
-from bullet.bullet import Hinge2Constraint
-
 class Renderable(object):
     def __init__(self, obj, color):
         self.color = color
