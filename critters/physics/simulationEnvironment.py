@@ -73,11 +73,11 @@ class SimulationEnvironment(object):
         if not physObj1.identifier in self.objectDict or not physObj2.identifier in self.objectDict:
             raise ValueError('PhysicsObjects must be in the SimulationEnvironment')
         
-        b1 = self.objectDict[pysObj1.identifier]
-        b2 = self.objectDict[pysObj2.identifier]
+        bod1 = self.objectDict[physObj1.identifier]
+        bod2 = self.objectDict[physObj2.identifier]
         
-        joint = self.world.CreateRevoluteJoint(bodyA=b1,
-                                               bodyB=b2,
+        joint = self.world.CreateRevoluteJoint(bodyA=bod1,
+                                               bodyB=bod2,
                                                anchor=globalLoc,
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
@@ -85,7 +85,7 @@ class SimulationEnvironment(object):
                                                maxMotorTorque = 200.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
-
+        return joint
 
     def addConstraint(self, constraint, po1, po2, globalLoc):
         '''
@@ -99,6 +99,8 @@ class SimulationEnvironment(object):
 
         # Note: Assumes that there is only one joint between two physics objects
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = joint
+        
+        return joint
         
     def getConstraint(self,po1,po2):
         '''
