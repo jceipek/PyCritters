@@ -42,7 +42,7 @@ class Rect(DynamicPhysicsObject):
         self.density = density
         self.friction = friction
 
-class Hinge(DynamicsPhysicsObject):
+class Hinge(DynamicPhysicsObject):
     def __init__(self,physObj1, local1, physObj2, local2, neuralNet):
         self.physObj1 = physObj1
         self.physObj2 = physObj2
