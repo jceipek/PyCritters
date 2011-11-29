@@ -43,11 +43,14 @@ class Rect(DynamicPhysicsObject):
         self.friction = friction
 
 class Hinge(DynamicsPhysicsObject):
-    def __init__(self,physObj1, local1, physObj2, local2)
+    def __init__(self,physObj1, local1, physObj2, local2, neuralNet)
         self.physObj1 = physObj1
         self.physObj2 = physObj2
         self.local1 = local1
         self.local2 = local2
+        
+    def applyTorque(self,torqueScalar):
+        pass
         
 class StaticRect(StaticPhysicsObject):
     '''A generic plane that extends infinitely in all directions.
