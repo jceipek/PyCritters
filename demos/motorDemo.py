@@ -3,7 +3,6 @@
 """
 """
 import pygame
-import Box2D # The main library
 from Box2D import b2# This maps Box2D.b2Vec2 to vec2 (and so on)
 import math
 

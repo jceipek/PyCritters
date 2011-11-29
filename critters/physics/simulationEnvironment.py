@@ -73,11 +73,11 @@ class SimulationEnvironment(object):
         if not physObj1.identifier in self.objectDict or not physObj2.identifier in self.objectDict:
             raise ValueError('PhysicsObjects must be in the SimulationEnvironment')
         
-        b1 = self.objectDict[pysObj1.identifier]
-        b2 = self.objectDict[pysObj2.identifier]
+        bod1 = self.objectDict[physObj1.identifier]
+        bod2 = self.objectDict[physObj2.identifier]
         
-        joint = self.world.CreateRevoluteJoint(bodyA=b1,
-                                               bodyB=b2,
+        joint = self.world.CreateRevoluteJoint(bodyA=bod1,
+                                               bodyB=bod2,
                                                anchor=globalLoc,
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
@@ -85,7 +85,7 @@ class SimulationEnvironment(object):
                                                maxMotorTorque = 200.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
-
+        return joint
 
     def addConstraint(self, constraint, po1, po2, globalLoc):
         '''
@@ -99,6 +99,8 @@ class SimulationEnvironment(object):
 
         # Note: Assumes that there is only one joint between two physics objects
         self.constraintDict[frozenset([po1.identifier,po2.identifier])] = joint
+        
+        return joint
         
     def getConstraint(self,po1,po2):
         '''
@@ -133,12 +135,16 @@ class SimulationEnvironment(object):
         vOffset = 0
         hOffset = 0
         PPM = 20.0
+        panningRate = 5
         running = True
-
+        if self.vis:
+            clock = pygame.time.Clock()
+            pygame.key.set_repeat(1, 5)
         while running:
             self.step()
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
+                clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -146,17 +152,17 @@ class SimulationEnvironment(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_LEFT:
-                        hOffset -= 0.1
+                        hOffset -= panningRate 
                     elif event.key == pygame.K_RIGHT:
-                        hOffset += 0.1
+                        hOffset += panningRate 
                     elif event.key == pygame.K_UP:
-                        vOffset += 0.1
+                        vOffset -= panningRate 
                     elif event.key == pygame.K_DOWN:
-                        vOffset -= 0.1
-                    elif event.key == pygame.K_PLUS:
-                        PPM += 1.0
+                        vOffset += panningRate 
                     elif event.key == pygame.K_MINUS:
-                        PPM -= 1.0
+                        PPM += 1
+                    elif event.key == pygame.K_EQUALS:
+                        PPM -= 1
 
 
     def simulate(self, timeToRun):
