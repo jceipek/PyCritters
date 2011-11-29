@@ -2,13 +2,11 @@
 import operator
 import random
 
-class Individual(object):
+class Genotype(object):
     
     @property
-    def genotype(self): assert False
-    
-    @property
-    def phenotype(self): assert False
+    def phenotype(self): 
+        assert False
         
     def mutate(self):
         assert False
@@ -141,15 +139,12 @@ class Evolution(object):
 if __name__ == '__main__':
     import mutations
     
-    class TestIndividual(Individual):
+    class TestIndividual(Genotype):
         
         _numValue = mutations.MutableFloat(range=(0.0, 1.0), stdDev=0.01)
         
         def __init__(self, num=None):
             self.num = num or self._numValue()
-            
-        @property
-        def genotype(self): return self.num
         
         @property
         def phenotype(self): return 5*self.num
@@ -169,11 +164,11 @@ if __name__ == '__main__':
         def _doCalculation(self, individual):
             return self.target**2 - (individual.phenotype - self.target)**2
         
-    evo = Evolution(Spartans(100, TestIndividual), TestCompetition(), 300)
+    evo = Evolution(Spartans(5, TestIndividual), TestCompetition(), 10)
     evo.populate()
     evo.run(10)
     print evo.basePopulation.meanFitness, evo.latestGeneration.meanFitness
-    print evo.basePopulation[0].num, evo.latestGeneration[200].num
+    print evo.basePopulation[0].num, evo.latestGeneration[0].num
             
         
     
