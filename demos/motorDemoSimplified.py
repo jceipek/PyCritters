@@ -10,10 +10,11 @@ from physics.simulationEnvironment import SimulationEnvironment
 from physics import objects 
 
 
-simEnv = SimulationEnvironment(vis=True, gravity=True)
+simEnv = SimulationEnvironment(vis=True, gravity=False)
 
-cube = objects.Rect((5,5), (1,1))
+cube1 = objects.Rect((1.0,10.5), (1,1))
 
-simEnv.addPhysicsObject(cube)
+simEnv.addPhysicsObject(cube1)
+
 
 simEnv.run()
