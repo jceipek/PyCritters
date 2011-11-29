@@ -133,6 +133,7 @@ class SimulationEnvironment(object):
         vOffset = 0
         hOffset = 0
         PPM = 20.0
+        panningRate = 5
         running = True
         if self.vis:
             clock = pygame.time.Clock()
@@ -149,13 +150,13 @@ class SimulationEnvironment(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_LEFT:
-                        hOffset -= 1
+                        hOffset -= panningRate 
                     elif event.key == pygame.K_RIGHT:
-                        hOffset += 1
+                        hOffset += panningRate 
                     elif event.key == pygame.K_UP:
-                        vOffset -= 1
+                        vOffset -= panningRate 
                     elif event.key == pygame.K_DOWN:
-                        vOffset += 1
+                        vOffset += panningRate 
                     elif event.key == pygame.K_MINUS:
                         PPM += 1
                     elif event.key == pygame.K_EQUALS:
