@@ -24,40 +24,33 @@ class PhysicsObject(object):
     def __str__(self):
         return str(type(self).__name__) + '_' + str(self.identifier)
 
-class Box(PhysicsObject):
-    '''A generic rectangular prism that uses pyBullet's RigidBody.
+class StaticPhysicsObject(PhysicsObject):
+    pass
+
+class DynamicPhysicsObject(PhysicsObject):
+    pass
+
+
+class Rect(DynamicPhysicsObject):
+    '''A generic rectangular prism that uses Box2D's CreatePolygonFixture.
     
-    It has a width, height, and depth specified by the Vector3 size,
-    a Vector3 position. The density keyword argument is used only
-    when the mass is None, in which case the volume and density determine
-    the mass. The restitution coefficient determines how "bouncy" collisions are.
-    If it is below 1.0, collisions will be inelastic.'''
-    def __init__(self, position, size, mass=None, density=1.0, restitution=0.9,nn=None):
+    It takes in a Box2D world, position and size tuples, and angle,
+    density, and friction floats.
+    ''' 
+    def __init__(self, position, size, angle=0.0, density=1.0, friction=0.3):
         PhysicsObject.__init__(self) # Handle unique identification
         self.size = size
-        if mass == None:
-            mass = density * self.size.x * self.size.y * self.size.z
-        shape = BoxShape(size*0.5)
-        transform = Transform()
-        transform.setIdentity()
-        transform.setOrigin(position)
-        
-        motion = DefaultMotionState()
-        motion.setWorldTransform(transform)
-        
-        self.body = RigidBody(motion, shape, mass)
-        self.body.setRestitution(restitution)
-        
-        self.motion = motion
-        self.nn = None #TODO: may need to change this abstraction
+        self.position = position
+        self.angle = angle
+        self.density = density
+        self.friction = friction
 
-class StaticPlane(PhysicsObject):
+class StaticRect(StaticPhysicsObject):
     '''A generic plane that extends infinitely in all directions.
     
-    It is specified by a Vector3 normalVec and a scalar distance
-    to the global origin.'''
-    def __init__(self, normalVec, distToOrigin):
+    It takes in a Box2D world and position and size tuples.'''
+    def __init__(self, position, size):
         PhysicsObject.__init__(self) # Handle unique identification
-        shape = StaticPlaneShape(normalVec, distToOrigin)
         
-        self.body = RigidBody(None, shape, 0.0)
+        self.size = size
+        self.position = position

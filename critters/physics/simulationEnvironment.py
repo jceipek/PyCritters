@@ -1,56 +1,61 @@
-'''
-Created on Nov 11, 2011
-
-@author: wdolphin
-'''
 import sys
 sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-from visualization import render,renderable
-from physics.collisionManager import CollisionManager
-from physics.objects import StaticPlane
-from bullet.bullet import DiscreteDynamicsWorld, Vector3, Hinge2Constraint, AxisSweep3, SequentialImpulseConstraintSolver
+from visualization import render, renderable
+import physics.objects
 import pygame
+from Box2D import b2 
 import math
 
 class SimulationEnvironment(object):
     '''
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
-    This /should/ include a ground body, but that currently does not work, as multiple imports have different references to Types
     '''
     
-    def __init__(self, vis=True,groundDistToOrigin=0,gravity=True):
+    def __init__(self, vis=True, gravity=True):
         '''
         Initializes an Empty Simulation Environment containing only the ground.
         '''
         
-        self.objectDict = dict() #map from id to physicsObject for every PO in this environment TODO: make a property
-        self.constraintDict = dict() #map from a frozenset of ids to a constraint #TODO: connect nn to these constraints/motors
-        self.cM = CollisionManager()
+        self.objectDict = dict() #map from id to physicsObject
+                                 # for every PO in this environment 
+                                 #TODO: make a property
         self.ents = set()
-        worldMin = Vector3(-1000,-1000,-1000) #TODO allow as param
-        worldMax = Vector3(1000,1000,1000) #TODO allow as param
-        broadphase = AxisSweep3(worldMin, worldMax)
-        solver = SequentialImpulseConstraintSolver()
-        self.dW = DiscreteDynamicsWorld(None, broadphase, solver)
-        self.ground =StaticPlane(Vector3(0,1,0), groundDistToOrigin) #TODO: this may need to be added after items are added to this simev
-        self.addPhysicsObject(self.ground)
-        
-        if gravity:
-            self.dW.setGravity(Vector3(0, -9.8, 0))
+
+        #World Creation with gravity
+        shouldSleep = True
+        if gravity == None:
+            self.world = b2.world(gravity=(0,0), doSleep=shouldSleep)
+        elif isinstance(gravity, tuple):
+            self.world = b2.world(gravity=gravity, doSleep=shouldSleep)
+        elif gravity == True:
+            self.world = b2.world(gravity=(0,-9.8), doSleep=shouldSleep)
         else:
-            self.dW.setGravity(Vector3(0, 0, 0)) #turn gravity off
+            self.world = b2.world(gravity=(0,gravity), doSleep=shouldSleep)
+
+        self.ground = self.world.CreateStaticBody(position=(0,1),
+                                                  shapes=b2.polygonShape(box=(50,2))
+                                                  ) #TODO: this may need to be added 
+                                                    #after items are added to this simenv
         if vis:
-            self.r = render.Renderer(self.dW, debug=True)
+            self.r = render.Renderer(self.world) 
             self.r.setup()
      
-    def addPhysicsObject(self, physObj,color=None):
+    def addPhysicsObject(self, physObj, color=None):
         '''
-        Adds a PhysicsObject to this SimulationEnvironment, adding it to the collision manager and to the renderables
+        Adds a PhysicsObject to this SimulationEnvironment,
+        adding it to the collision manager and to the renderables
         '''
         self.objectDict[physObj.identifier] = physObj
-        self.cM.addPhysicsObject(physObj)
+
+        if isinstance(physObj, physics.objects.StaticPhysicsObject):
+            self.world.CreateStaticBody(position=physObj.position,
+                                        shapes=b2.polygonShape(box=physObj.size))
+        else:
+            body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
+            body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
+
         if color == None:
             color = (255,0,0)
         self.ents.add(renderable.makeRenderable(physObj, color))
@@ -98,13 +103,16 @@ class SimulationEnvironment(object):
             return None
 
         
-
-    def step(self, rot=0, rotUp=0, zoomMag=0, visOnly=False):
+    def step(self, offset, ppm, visOnly=False):
         '''
-        Simulates one time step in the physic engine, rendering it to the pyGame window
+        Simulates one time step in the physic engine, rendering it to the pyGame window.
+
+        offset is a tuple used for panning, and ppm is the size of the physical
+        objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
         timeStep = fixedTimeStep = 1.0 / 600.0
-        for id1,id2 in self.constraintDict.iterkeys():
+        
+        '''for id1,id2 in self.constraintDict.iterkeys():
             break
             nn1 = self.objectDict[id1].nn
             nn2 = self.objectDict[id2].nn
@@ -114,36 +122,22 @@ class SimulationEnvironment(object):
             
             #give them access to the actuators
             #somehow combine their outputs
+        '''
         if not visOnly:
-            self.dW.stepSimulation(timeStep, 1, fixedTimeStep)
-        now = time.time()
-        delay = now % timeStep
-        time.sleep(delay)
+            self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
         self.r.render(self.ents)
-        self.r.rotateCamera(rot,rotUp)
-        self.r.zoomCamera(zoomMag)
         
-        
-    def _run(self):
-        '''
-        Prepares this SimulationEnvironment to be run, placing all of the
-        objects in the DynamicsWorld with their collisions properly mapped. This
-        should not be invoked by the user
-        '''
-        self.cM.calculateCollisionGroups()
-        for o in self.objectDict.itervalues():
-            self.dW.addRigidBody(o.body,self.cM.getCollisionFilterGroup(o),self.cM.getCollisionFilterMask(o))
 
-            
     def run(self, visOnly=False):
-        self._run()
-        rot = 0
-        rotUp = 0
-        zoomMag = 0
+        vOffset = 0
+        hOffset = 0
+        PPM = 20.0
         running = True
-        while running:
 
-            self.step(rot, rotUp, zoomMag, visOnly)
+        while running:
+            self.step((hOffset, vOffset), PPM, visOnly)
+
+            self.r.render(self.ents)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -151,19 +145,19 @@ class SimulationEnvironment(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_LEFT:
-                        rot -= 0.1
+                        hOffset -= 0.1
                     elif event.key == pygame.K_RIGHT:
-                        rot += 0.1
+                        hOffset += 0.1
                     elif event.key == pygame.K_UP:
-                        rotUp += 0.1
+                        vOffset += 0.1
                     elif event.key == pygame.K_DOWN:
-                        rotUp -= 0.1
-                    elif event.key == pygame.K_PLUS:    
-                        zoomMag += 0.1
-                    elif event.key == pygame.K_MINUS:    
-                        zoomMag -= 0.1
+                        vOffset -= 0.1
+                    elif event.key == pygame.K_PLUS:
+                        PPM += 1.0
+                    elif event.key == pygame.K_MINUS:
+                        PPM -= 1.0
 
-    
+
     def simulate(self, timeToRun):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
