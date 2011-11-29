@@ -24,7 +24,7 @@ class Renderer(object):
         This uses pygame and depends on the physics implementation at the moment.
         offset is the offset used for panning, and PPM is the pixels per meter resolution
         """
-        
+        pygame.Surface.fill((0,0,0))
         for body in self.world.bodies: # or: world.bodies
             # The body gives us the position and angle of its shapes
             for fixture in body.fixtures:
