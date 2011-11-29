@@ -16,7 +16,7 @@ class Renderer(object):
     
     def setup(self):
         pygame.init()
-        pygame.display.set_mode((Renderer.SCREEN_WIDTH, Renderer.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((Renderer.SCREEN_WIDTH, Renderer.SCREEN_HEIGHT))
     
     def render(self, offset, PPM):
         """Draws all objects in self.world
@@ -25,7 +25,7 @@ class Renderer(object):
         offset is the offset used for panning, and PPM is the pixels per meter resolution
         """
         
-        for body in world.bodies: # or: world.bodies
+        for body in self.world.bodies: # or: world.bodies
             # The body gives us the position and angle of its shapes
             for fixture in body.fixtures:
                 # The fixture holds information like density and friction,
@@ -44,8 +44,8 @@ class Renderer(object):
                 # right and up. Pygame, on the other hand, increases in the
                 # right and downward directions. This means we must flip
                 # the y components.
-                vertices=[(v[0]+offset[0], SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
+                vertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
 
-                pygame.draw.polygon(screen, colors[body.type], vertices)
+                pygame.draw.polygon(self.screen,(255,0,0), vertices)
 
         pygame.display.flip()
