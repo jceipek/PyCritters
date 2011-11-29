@@ -34,11 +34,14 @@ class SimulationEnvironment(object):
         else:
             self.world = b2.world(gravity=(0,gravity), doSleep=shouldSleep)
 
-        self.ground = self.world.CreateStaticBody(position=(0,1),
-                                                  shapes=b2.polygonShape(box=(50,2))
-                                                  ) #TODO: this may need to be added 
-                                                    #after items are added to this simenv
-        if vis:
+        
+        self.ground = None #self.world.CreateStaticBody(position=(0,1),
+                           #                       shapes=b2.polygonShape(box=(50,2))
+                           #                       ) #TODO: This will be defined later on, by other code
+
+        self.vis = vis
+        
+        if self.vis:
             self.r = render.Renderer(self.world) 
             self.r.setup()
      
@@ -47,51 +50,65 @@ class SimulationEnvironment(object):
         Adds a PhysicsObject to this SimulationEnvironment,
         adding it to the collision manager and to the renderables
         '''
-        self.objectDict[physObj.identifier] = physObj
-
+        
         if isinstance(physObj, physics.objects.StaticPhysicsObject):
-            self.world.CreateStaticBody(position=physObj.position,
+            body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))
         else:
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
             body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
 
+        self.objectDict[physObj.identifier] = body
+        
         if color == None:
             color = (255,0,0)
-        self.ents.add(renderable.makeRenderable(physObj, color))
+        
+        if self.vis:
+            self.ents.add(renderable.makeRenderable(physObj, color))
     
-    def addHinge(self, physObj1, physObj2, globalLoc, unit1=None, unit2=None):
+    def addHinge(self, physObj1, physObj2, globalLoc):
         '''
         Adds a hinge between physObj1 and physObj2 at globalLoc with degrees of 
         freedom about the vectors unit1 and unit2
         '''
+
         if not physObj1.identifier in self.objectDict or not physObj2.identifier in self.objectDict:
             raise ValueError('PhysicsObjects must be in the SimulationEnvironment')
-        if unit1 == None:
-            unit1 = Vector3(0,0,1)
-        if unit2 == None:
-            unit2 = Vector3(0,1,0)
-        hinge = Hinge2Constraint(physObj1.body, physObj2.body, globalLoc, unit1, unit2)
-        self.addConstraint(hinge,physObj1,physObj2)
         
+        b1 = self.objectDict[pysObj1.identifier]
+        b2 = self.objectDict[pysObj2.identifier]
+        
+        joint = self.world.CreateRevoluteJoint(bodyA=b1,
+                                               bodyB=b2,
+                                               anchor=globalLoc,
+                                               lowerAngle = -0.5 * b2.pi,
+                                               upperAngle = 0.5 * b2.pi,
+                                               enableLimit = True,
+                                               maxMotorTorque = 200.0,
+                                               motorSpeed = 0,
+                                               enableMotor = True)
+        
+
+
     def ignoreCollision(self,po1,po2):
         '''
         Selects the two physics objects to have their collisions ignored by the physics engine.
         '''
         self.cM.ignoreCollision(po1,po2)
 
-    def addConstraint(self,constraint,po1,po2):
+    def addConstraint(self, constraint, po1, po2, globalLoc):
         '''
         #TODO need to add abstraction here...
         '''
-        self.constraintDict[frozenset([po1.identifier,po2.identifier])] = constraint
-        
-        connectionGlobalPos = constraint.getAnchor()
-        po1LocalPos = connectionGlobalPos - po1.body.getWorldTransform().getOrigin()
-        po2LocalPos = connectionGlobalPos - po2.body.getWorldTransform().getOrigin()
-        self.ents.add(renderable.makeRenderable((po1, po2, po1LocalPos, po2LocalPos)))
-        self.dW.addConstraint(constraint)
 
+        if constraint.joint == MorphConnection.HINGE_JOINT:
+            joint = self.addHinge(po1, po2, globalLoc)
+        else:
+            raise "Unimplemented Constraint Type!"
+
+        # Assumes that there is only one joint between two physics objects
+        self.constraintDict[frozenset([po1.identifier,po2.identifier])] = joint
+        
     def getConstraint(self,po1,po2):
         '''
         Returns the constraint (if any) found between the two PhysicsObjects po1 and po2.
