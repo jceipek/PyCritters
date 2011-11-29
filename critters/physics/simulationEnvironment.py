@@ -134,11 +134,14 @@ class SimulationEnvironment(object):
         hOffset = 0
         PPM = 20.0
         running = True
-
+        if self.vis:
+            clock = pygame.time.Clock()
+            pygame.key.set_repeat(1, 5)
         while running:
             self.step()
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
+                clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -146,17 +149,17 @@ class SimulationEnvironment(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_LEFT:
-                        hOffset -= 0.1
+                        hOffset -= 1
                     elif event.key == pygame.K_RIGHT:
-                        hOffset += 0.1
+                        hOffset += 1
                     elif event.key == pygame.K_UP:
-                        vOffset += 0.1
+                        vOffset -= 1
                     elif event.key == pygame.K_DOWN:
-                        vOffset -= 0.1
-                    elif event.key == pygame.K_PLUS:
-                        PPM += 1.0
+                        vOffset += 1
                     elif event.key == pygame.K_MINUS:
-                        PPM -= 1.0
+                        PPM += 1
+                    elif event.key == pygame.K_EQUALS:
+                        PPM -= 1
 
 
     def simulate(self, timeToRun):
