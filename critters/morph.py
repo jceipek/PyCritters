@@ -85,9 +85,11 @@ class Morphology(object):
     
     def crossover(self, other):
         daughters = self.clone(), other.clone()
-        graphs.crossover(daughters[0].graph, daughters[1].graph, 
-                         MorphConnection)
+        graphs.crossover(daughters[0].graph, daughters[1].graph)
         return daughters
+    
+    def visualize(self):
+        nx.draw(self.graph)
 
 class MorphNode(object):
     
@@ -95,9 +97,8 @@ class MorphNode(object):
     
     _dimensionsValue = MutableFloat(range=(0.1, 5.0), rate=0.1)
     
-    def __init__(self, dimensions=None, nn=None):
-        self.dimensions = dimensions or self._dimensionsValue(repeat=3)
-        self.nn = nn or self._createNetwork()
+    def __init__(self, dimensions=None):
+        self.dimensions = dimensions or self._dimensionsValue(repeat=2)
         
     @property
     def width(self): return self.dimensions[0]
@@ -105,29 +106,11 @@ class MorphNode(object):
     @property
     def height(self): return self.dimensions[1]
     
-    @property
-    def depth(self): return self.dimensions[2]
-    
     def mutate(self):
         self.dimensions = self._dimensionsValue(self.dimensions)
-        self.nn = self.nn.mutate()
-        
-    def crossover(self, other):
-        d1, d2 = self.clone(), other.clone()
-        
-        if random() < MorphNode.CROSSOVER_RATE:
-            d1.dimensions, d2.dimensions = d2.dimensions, d1.dimensions
-            d1.nn, d2.nn = d1.nn.crossover(d2.nn)
-        
-        return d1, d2
-        
-    def _createNetwork(self):
-        #TODO: random numbers here:
-        return neural.randomNeuralNetwork(2, 2, 5)
     
     def clone(self):
-        newNN = self.nn.clone()
-        return MorphNode(self.dimensions, newNN)
+        return MorphNode(self.dimensions)
         
         
 class MorphConnection(object):
@@ -139,11 +122,10 @@ class MorphConnection(object):
     
     _jointValue = MutableChoice(choices=JOINT_TYPES)
     _locationValue = MutableFloat(range=(0, 2*math.pi), rate=0.1)
-    _numChannelsValue = MutableInt(range=(1, 3), rate=0.05)
     _recursionLimitValue = MutableInt(range=(1, 4), rate=0.05)
     
     def __init__(self, nodes, joint=HINGE_JOINT, actuators=None, 
-                 locations=None, numChannels=None, recursionLimit=1):
+                 locations=None, recursionLimit=1):
         self.id = MorphConnection.idCounter
         MorphConnection.idCounter += 1
         
@@ -151,19 +133,27 @@ class MorphConnection(object):
         self.joint = joint
         self.actuators = actuators or self._createActuators()
         self.locations = locations or self._locationValue(repeat=2)
-        self.numChannels = numChannels or self._numChannelsValue()
         self.recursionLimit = recursionLimit
         
     def mutate(self):
         self.joint = self._jointValue(self.joint)
         self.locations = self._locationValue(self.locations)
-        self.numChannels = self._numChannelsValue(self.numChannels)
         self.recursionLimit = self._recursionLimitValue(self.recursionLimit)
             
         for actuator in self.actuators: actuator.mutate()
         
+    def withNewVertices(self, v1, v2):
+        return MorphConnection((v1, v2), 
+                               self.joint, 
+                               copy.deepcopy(self.actuators), 
+                               copy.copy(self.locations), 
+                               self.recursionLimit)
+        
     def _createActuators(self):
         return Actuator(), Actuator()
+    
+    def __getitem__(self, index):
+        return self.nodes[index]
     
 class Actuator(object):
     
@@ -230,11 +220,12 @@ if __name__ == '__main__':
     snake.addConnection(MorphConnection((middle, middle), recursionLimit=3))
     snake.createConnection(middle, tail)
     
+    snake.visualize()
+    
     expanded = snake.expand()
-    for node in expanded: print(node)
-    print "----"
-    s2 = snake.mutate()
-    for node in s2.expand(): print(node)
-    print "----"
-    s3, s4 = snake.crossover(s2)
-    for node in s3.expand(): print(s3)
+    nx.draw(expanded)
+    
+    m1, m2 = snake.crossover(createInchWorm())
+    print m1.graph
+    print "DONE"
+    
