@@ -110,15 +110,11 @@ class SimulationEnvironment(object):
             return None
 
         
-    def step(self, offset, ppm, visOnly=False):
+    def step(self):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window.
-
-        offset is a tuple used for panning, and ppm is the size of the physical
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
-        timeStep = fixedTimeStep = 1.0 / 600.0
-        
         '''for id1,id2 in self.constraintDict.iterkeys():
             break
             nn1 = self.objectDict[id1].nn
@@ -130,9 +126,7 @@ class SimulationEnvironment(object):
             #give them access to the actuators
             #somehow combine their outputs
         '''
-        if not visOnly:
-            self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
-
+        self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
     def run(self, visOnly=False):
         vOffset = 0
@@ -141,9 +135,9 @@ class SimulationEnvironment(object):
         running = True
 
         while running:
-            self.step((hOffset, vOffset), PPM, visOnly)
+            self.step()
             if self.vis:
-                self.r.render()
+                self.r.render((hOffset, vOffset), PPM)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
