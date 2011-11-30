@@ -151,7 +151,7 @@ class NeuralNetwork(object):
                 for _ in range(diff): 
                     self.connectNode(newNodeFunc(), **connectParams)
             else:
-                for node in sample(layer, abs(diff)): 
+                for node in sample(list(layer), abs(diff)): 
                     self.removeNode(node)
                     
         inputDiff = numInputs - self.numInputs

@@ -48,10 +48,21 @@ class ReifiedCreature(object):
     def _conformNeuralNet(self):
         self.neuralNet.conform(self.numSensors, len(self.actuators))
         
+    def _getConnections(self, bodyPart):
+        return [data['connection'] for _, _, data in 
+                self.morphology.edges_iter(bodyPart, data=True)]
+                
+    def _getAdjacentWithConnection(self, bodyPart):
+        for connection in self._getConnections(bodyPart):
+            for other in connection.nodes:
+                if other is not bodyPart:
+                    yield other, connection
+                    break
+        
     def buildPhysicsObject(self):
+        print self.bodyParts, self.connections
         def createRect(bodyPart):
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
-        
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
                 x = rect.size[0]/2.0
@@ -64,7 +75,7 @@ class ReifiedCreature(object):
             
             return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
                                  r2, positionToLocal(r2, connection.locations[1]))
-            
+     
         root = next(self.morphology.nodes_iter())
         rects = {}
         hinges = []
@@ -77,5 +88,5 @@ class ReifiedCreature(object):
             hinges.append(createHinge(connection, rects[prev], rects[node]))
             
         return rects.values(), hinges
-    
+
         

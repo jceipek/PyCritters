@@ -46,6 +46,7 @@ class Morphology(object):
     
     def expand(self):
         cache = {}
+       
         def expandNode(node, depth):
             key = node, depth
             try:
@@ -70,6 +71,7 @@ class Morphology(object):
                 graph.add_nodes_from(subgraph.nodes_iter())
                 graph.add_edges_from(subgraph.edges_iter(data=True))
                 
+                connection.nodes = (node, neighbor)
                 graph.add_edge(root, subroot, { 'connection': connection })
             
             value = root, graph

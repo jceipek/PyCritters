@@ -22,7 +22,8 @@ class SimulationEnvironment(object):
         self.objectDict = dict() #map from id to physicsObject
                                  # for every PO in this environment 
                                  #TODO: make a property
-
+                                 
+        self.connectionDict = dict() #map from MorphConnection to a PhysicsConstraint 
         #World Creation with gravity
         shouldSleep = True
         if gravity == None:
@@ -64,10 +65,9 @@ class SimulationEnvironment(object):
             color = (255,0,0)
         
     
-    def addHinge(self, physObj1, physObj2, globalLoc):
+    def _addHinge(self, physObj1, physObj2, globalLoc):
         '''
-        Adds a hinge between physObj1 and physObj2 at globalLoc with degrees of 
-        freedom about the vectors unit1 and unit2
+        Adds a hinge between physObj1 and physObj2 at globalLoc
         '''
 
         if not physObj1.identifier in self.objectDict or not physObj2.identifier in self.objectDict:
@@ -87,13 +87,13 @@ class SimulationEnvironment(object):
                                                enableMotor = True)
         return joint
 
-    def addConstraint(self, constraint, po1, po2, globalLoc):
+    def addConstraint(self, physicsConstraint,morphConnection):
         '''
         #TODO need to add abstraction here...
         '''
 
         if constraint.joint == morph.MorphConnection.HINGE_JOINT:
-            joint = self.addHinge(po1, po2, globalLoc)
+            joint = self._addHinge(po1, po2, globalLoc)
         else:
             raise "Unimplemented Constraint Type!"
 
