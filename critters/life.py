@@ -90,6 +90,27 @@ class ReifiedCreature(object):
             
             connection = self.morphology.get_edge_data(prev, node)['connection']
             hinges.append(createHinge(connection, rects[prev], rects[node]))
+        
+         def placeRects(root,parent = None):
+            for other,connection in self._getAdjacentWithConnection(root):
+                if other == parent: #graph is not directional, ensure that we do not repeat... 
+                    continue
+                rootGlobal = root.position
+                hinge = hinges[connection]
+                if root == hinge.physObj1:                
+                    rootLocal = hinge.local1
+                    otherLocal = hinge.local2
+                else:
+                    rootLocal = hinge.local2
+                    otherLocal = hinge.local1
+                
+                otherGlobalx = rootGlobal[0] + rootLocal[0] - otherLocal[0] 
+                otherGlobaly = rootGlobal[1] + rootLocal[1] - otherLocal[1]
+                other.position = (otherGlobalx,otherGlobaly)
+                hinge.globalLoc = other.position
+                placeRects(other,root)
+                #place this 'other'
+                #place all children of other recursively.
             
         return rects.values(), hinges
 
