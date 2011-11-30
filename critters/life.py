@@ -51,11 +51,8 @@ class ReifiedCreature(object):
     def buildPhysicsObject(self):
         def createRect(bodyPart):
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
-        rects = dict((part, createRect(part)) for part in self.bodyParts)
         
-        def createHinge(connection):
-            r1, r2 = [rects[part] for part in connection.nodes]
-            
+        def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
                 x = rect.size[0]/2.0
                 y = rect.size[1]/2.0
@@ -68,8 +65,17 @@ class ReifiedCreature(object):
             return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
                                  r2, positionToLocal(r2, connection.locations[1]))
             
-        hinges = dict((c, createHinge(c)) for c in self.connections)
-        
-        return rects, hinges
+        root = next(self.morphology.nodes_iter())
+        rects = {}
+        hinges = []
+        for prev, node in nx.bfs_edges(self.morphology, root):
+            for part in (prev, node):
+                if part not in rects:
+                    rects[part] = createRect(part)
+            
+            connection = self.morphology.get_edge_data(prev, node)['connection']
+            hinges.append(createHinge(connection, rects[prev], rects[node]))
+            
+        return rects.values(), hinges
     
         
