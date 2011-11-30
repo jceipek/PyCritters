@@ -62,6 +62,7 @@ class ReifiedCreature(object):
     def buildPhysicsObject(self):
         print self.bodyParts, self.connections
         def createRect(bodyPart):
+            print bodyPart.dimensions
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):

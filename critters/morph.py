@@ -201,8 +201,8 @@ def createSnake():
 def createInchWorm(rand=False):
     iWorm = Morphology()
     
-    head = MorphNode(dimensions=(2,2,2))
-    tail = MorphNode(dimensions=(2,2,2))
+    head = MorphNode(dimensions=(2,2))
+    tail = MorphNode(dimensions=(2,2))
     conLocations=(60,5)
     if rand:
         conLocations = None

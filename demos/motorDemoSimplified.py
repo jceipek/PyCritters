@@ -20,6 +20,6 @@ simEnv.addPhysicsObject(cube1)
 simEnv.addPhysicsObject(cube2)
 simEnv.addPhysicsObject(ground)
 
-joint = simEnv.addHinge(cube1,cube2,(3,3))
+joint = simEnv._addHinge(cube1,cube2,(3,3))
 joint.motorSpeed = 2
 simEnv.run()
