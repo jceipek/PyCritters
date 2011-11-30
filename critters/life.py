@@ -60,9 +60,10 @@ class ReifiedCreature(object):
                     break
         
     def buildPhysicsObject(self):
-        print self.bodyParts, self.connections
+        
         def createRect(bodyPart):
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
+        
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
                 x = rect.size[0]/2.0
@@ -79,6 +80,8 @@ class ReifiedCreature(object):
         root = next(self.morphology.nodes_iter())
         rects = {}
         hinges = []
+        
+        
         for prev, node in nx.bfs_edges(self.morphology, root):
             for part in (prev, node):
                 if part not in rects:
