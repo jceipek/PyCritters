@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-from visualization import render
-import physics.objects
+import critters.visualization.render
+import critters.physics.objects
 import pygame
 from Box2D import b2 
 import math
@@ -51,11 +51,13 @@ class SimulationEnvironment(object):
         Adds a PhysicsObject to this SimulationEnvironment,
         adding it to the collision manager and to the renderables
         '''
-        
-        if isinstance(physObj, physics.objects.StaticPhysicsObject):
+        print type(physObj)
+        if isinstance(physObj, critters.physics.objects.StaticPhysicsObject):
             body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))
         else:
+            if len(physObj.size) != 2:
+                raise ValueError("Size must be a two-tuple")
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
             body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
 
@@ -87,20 +89,16 @@ class SimulationEnvironment(object):
                                                enableMotor = True)
         return joint
 
-    def addConstraint(self, physicsConstraint,morphConnection):
+    def addConstraint(self, physicsConstraint):
         '''
         #TODO need to add abstraction here...
         '''
 
-        if constraint.joint == morph.MorphConnection.HINGE_JOINT:
-            joint = self._addHinge(po1, po2, globalLoc)
-        else:
-            raise "Unimplemented Constraint Type!"
-
+        if not  hasattr(physicsConstraint, 'globalLoc' ) and physicsConstraint.globalLoc !=None:
+            raise ValueError("In order to add a constratint to the simenv, it must have a not None globalLoc")
         # Note: Assumes that there is only one joint between two physics objects
-        self.constraintDict[frozenset([po1.identifier,po2.identifier])] = joint
+        self.connectionDict[frozenset([physicsConstraint.physObj1.identifier,physicsConstraint.physObj2.identifier])] = physicsConstraint
         
-        return joint
         
     def getConstraint(self,po1,po2):
         '''
@@ -108,7 +106,7 @@ class SimulationEnvironment(object):
         If no constraint is found, None is returned
         '''
         try:
-            return self.constraintDict[frozenset([po1.identifier,po2.identifier])] 
+            return self.connectionDict[frozenset([po1.identifier,po2.identifier])] 
         except:
             return None
 
