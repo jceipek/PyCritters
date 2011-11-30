@@ -1,12 +1,11 @@
 import sys
 sys.path.append('../')  #add critters to pythonpath to use as library
 import time
-import critters.visualization.render
+from critters.visualization.render import Renderer
 import critters.physics.objects
 import pygame
 from Box2D import b2 
 import math
-import morph 
 
 class SimulationEnvironment(object):
     '''
@@ -43,7 +42,7 @@ class SimulationEnvironment(object):
         self.vis = vis
         
         if self.vis:
-            self.r = render.Renderer(self.world) 
+            self.r = Renderer(self.world) 
             self.r.setup()
      
     def addPhysicsObject(self, physObj, color=None):

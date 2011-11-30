@@ -10,7 +10,6 @@ from critters.physics import simulationEnvironment
 from critters.physics import objects
 
 from critters import (neural,life,morph)
-import morph
 
 morphology = morph.createInchWorm()
 net = neural.simpleSineNetwork(0, 1)
