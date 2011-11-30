@@ -16,7 +16,7 @@ import morph
 morphology = morph.createInchWorm()
 net = neural.simpleSineNetwork(0, 1)
 creature = life.Critter(morphology, net, 0)
-phenotype = creature.phenotype()
+phenotype = creature.phenotype
 rects, hinges = phenotype.buildPhysicsObject()
 
 simEnv = SimulationEnvironment(vis=True, gravity=True)

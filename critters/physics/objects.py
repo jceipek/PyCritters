@@ -28,7 +28,9 @@ class StaticPhysicsObject(PhysicsObject):
 class DynamicPhysicsObject(PhysicsObject):
     pass
 
-
+class PhysicsConstraint(DynamicPhysicsObject):
+    pass
+    
 class Rect(DynamicPhysicsObject):
     '''A generic rectangular prism that uses Box2D's CreatePolygonFixture.
     It takes in a Box2D world, position and size tuples, and angle,
@@ -42,13 +44,13 @@ class Rect(DynamicPhysicsObject):
         self.density = density
         self.friction = friction
 
-class Hinge(DynamicPhysicsObject):
+class Hinge(PhysicsConstraint):
     def __init__(self,physObj1, local1, physObj2, local2):
         self.physObj1 = physObj1
         self.physObj2 = physObj2
         self.local1 = local1
         self.local2 = local2
-        
+        self.globalLoc = None        
     def applyTorque(self,torqueScalar):
         pass
         
