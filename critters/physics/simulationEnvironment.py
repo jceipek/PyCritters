@@ -46,12 +46,9 @@ class SimulationEnvironment(object):
         phenotype = creature.phenotype
         rects, hinges = phenotype.buildPhysicsObject()
         for r in rects:
-            print r,r.position
-            print "ADDING OBJ"
             self.addPhysicsObject(r)
 
         for h in hinges:
-            print h,h.globalLoc
             self.addConstraint(h)
 
         #TODO: Figure out what this should actually return!
