@@ -64,17 +64,21 @@ class ReifiedCreature(object):
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
         
         def createHinge(connection, r1, r2):
-            def positionToLocal(rect, position):
+            def positionToLocal(rect, position, negate):
                 x = rect.size[0]/2.0
                 y = rect.size[1]/2.0
                 
                 if position >= 2: x *= -1
                 if position == 0 or position == 3: y *= -1
                 
-                return x, y
+                if negate:
+                    return x, y
+                else:
+                    return -x, -y
             
-            return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
-                                 r2, positionToLocal(r2, connection.locations[1]))
+            return objects.Hinge(
+                    r1, positionToLocal(r1, connection.locations[0], False), 
+                    r2, positionToLocal(r2, connection.locations[1], True))
         
         root = next(self.morphology.nodes_iter())
         rects = {}
@@ -84,26 +88,28 @@ class ReifiedCreature(object):
             for part in (prev, node):
                 if part not in rects:
                     rects[part] = createRect(part)
+                    
             connection = self.morphology.get_edge_data(prev, node)['connection']
-            hinges.append(createHinge(connection, rects[prev], rects[node]))
-
-        def placeRects(root,parent = None):
-            for other,connection in self._getAdjacentWithConnection(root):
-                if other == parent: #graph is not directional, ensure that we do not repeat... 
-                    continue
-                rootGlobal = root.position
-                hinge = hinges[connection]
-                if root == hinge.physObj1:                
-                    rootLocal = hinge.local1
-                    otherLocal = hinge.local2
-                else:
-                    rootLocal = hinge.local2
-                    otherLocal = hinge.local1
+            hinge = createHinge(connection, rects[prev], rects[node])
+            hinges.append(hinge)
+            
+            prevGlobal = rects[prev].position
+            if prev == hinge.physObj1:                
+                prevLocal = hinge.local1
+                otherLocal = hinge.local2
+            else:
+                prevLocal = hinge.local2
+                otherLocal = hinge.local1
                 
-                otherGlobalx = rootGlobal[0] + rootLocal[0] - otherLocal[0] 
-                otherGlobaly = rootGlobal[1] + rootLocal[1] - otherLocal[1]
-                other.position = (otherGlobalx,otherGlobaly)
-                hinge.globalLoc = other.position
-                placeRects(other,root)
-
+            print prevLocal, otherLocal
+            
+            otherGlobalx = prevGlobal[0] + prevLocal[0] - otherLocal[0] 
+            otherGlobaly = prevGlobal[1] + prevLocal[1] - otherLocal[1]
+            rects[node].position = (otherGlobalx,otherGlobaly)
+            hinge.globalLoc = rects[node].position
+        
+        for rect in rects.values():
+            print rect
+        
         return rects.values(), hinges
+
