@@ -21,6 +21,8 @@ class PhysicsObject(object):
     
     def __str__(self):
         return str(type(self).__name__) + '_' + str(self.identifier)
+        
+
 
 class StaticPhysicsObject(PhysicsObject):
     pass
@@ -46,6 +48,7 @@ class Rect(DynamicPhysicsObject):
 
 class Hinge(PhysicsConstraint):
     def __init__(self,physObj1, local1, physObj2, local2):
+        PhysicsObject.__init__(self) # Handle unique identification
         self.physObj1 = physObj1
         self.physObj2 = physObj2
         self.local1 = local1

@@ -65,8 +65,8 @@ class ReifiedCreature(object):
         
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position, negate):
-                x = rect.size[0]/2.0
-                y = rect.size[1]/2.0
+                x = rect.size[0]
+                y = rect.size[1]
                 
                 if position >= 2: x *= -1
                 if position == 0 or position == 3: y *= -1
@@ -88,10 +88,11 @@ class ReifiedCreature(object):
             for part in (prev, node):
                 if part not in rects:
                     rects[part] = createRect(part)
-                    
+
             connection = self.morphology.get_edge_data(prev, node)['connection']
             hinge = createHinge(connection, rects[prev], rects[node])
             hinges.append(hinge)
+            
             
             prevGlobal = rects[prev].position
             if prev == hinge.physObj1:                
@@ -101,13 +102,19 @@ class ReifiedCreature(object):
                 prevLocal = hinge.local2
                 otherLocal = hinge.local1
                 
-            print prevLocal, otherLocal
+
             
             otherGlobalx = prevGlobal[0] + prevLocal[0] - otherLocal[0] 
             otherGlobaly = prevGlobal[1] + prevLocal[1] - otherLocal[1]
+            
+            jointLoc1 = (prevGlobal[0] + prevLocal[0],prevGlobal[1] + prevLocal[1]) #sanity check
+            jointLoc2 = (otherGlobalx + otherLocal[0],otherGlobaly+ otherLocal[1]) #calculate relative to both global locs
+            if jointLoc1 != jointLoc2:
+                raise "The joint should be in the same position when calculated from either object..."
+                
             rects[node].position = (otherGlobalx,otherGlobaly)
-            hinge.globalLoc = rects[node].position
-        
+            hinge.globalLoc = jointLoc1
+            print "root loc=",prevGlobal, " rootLocal=", prevLocal, "otherLocal=", otherLocal, "otherGlobal",hinge.globalLoc
         for rect in rects.values():
             print rect
         

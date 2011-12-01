@@ -16,12 +16,11 @@ class SimulationEnvironment(object):
         Initializes an Empty Simulation Environment containing only the ground.
         '''
         
-        self.objectDict = dict() #map from id to physicsObject
+        self.objectDict = dict() #map from id to pyBox2d object
                                  # for every PO in this environment 
                                  #TODO: make a property
                                  
-        self.connectionDict = dict() #map from MorphConnection to a PhysicsConstraint 
-        #World Creation with gravity
+        self.connectionDict = dict() #map from a frozen set of of PhysicsObject ids to a Pybox2d joint
         shouldSleep = True
         if gravity == None:
             self.world = b2.world(gravity=(0,0), doSleep=shouldSleep)
@@ -88,13 +87,23 @@ class SimulationEnvironment(object):
 
     def addConstraint(self, physicsConstraint):
         '''
-        #TODO need to add abstraction here...
+        Given a PhysicsConstraint object, a PyBox2d joint will be created
+        and all bookeeping done such that it is properly accounted for in the
+        simulation environment.
+        The PhysicsConstraint must have a GlobalLoc that is not None.
+        This implementation assumes that there is a single joint between a 
+        given pair of two PhysicsObjects
         '''
-
         if not  hasattr(physicsConstraint, 'globalLoc' ) and physicsConstraint.globalLoc !=None:
             raise ValueError("In order to add a constratint to the simenv, it must have a not None globalLoc")
+        
         # Note: Assumes that there is only one joint between two physics objects
-        self.connectionDict[frozenset([physicsConstraint.physObj1.identifier,physicsConstraint.physObj2.identifier])] = physicsConstraint
+        
+        po1 =physicsConstraint.physObj1
+        po2 = physicsConstraint.physObj2
+        globalLoc = physicsConstraint.globalLoc
+        
+        self.connectionDict[frozenset([physicsConstraint.physObj1.identifier,physicsConstraint.physObj2.identifier])] = self._addHinge(po1,po2,globalLoc)
         
         
     def getConstraint(self,po1,po2):
