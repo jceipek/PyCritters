@@ -4,8 +4,8 @@ import networkx as nx
 import copy
 import math
 import graphs
-from mutations import *
-from utils import *
+from critters.mutations import *
+from critters.utils import *
 from random import random, choice, sample, randint, normalvariate
 
 def randomNeuralNetwork(numInputs, numOutputs, numInner):

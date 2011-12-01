@@ -5,7 +5,7 @@ import networkx as nx
 import copy
 import operator
 import math
-from utils import *
+from critters.utils import *
 from random import random, choice, sample, randint, normalvariate
 
 def randomNeuralNetwork(numInputs, numOutputs, numUpperLayers, nodesPerLayer):

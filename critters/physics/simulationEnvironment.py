@@ -1,8 +1,6 @@
-import sys
-sys.path.append('../')  #add critters to pythonpath to use as library
 import time
 from critters.visualization.render import Renderer
-import critters.physics.objects
+from critters.physics.objects import StaticPhysicsObject
 import pygame
 from Box2D import b2 
 import math
@@ -51,7 +49,7 @@ class SimulationEnvironment(object):
         adding it to the collision manager and to the renderables
         '''
         print type(physObj)
-        if isinstance(physObj, critters.physics.objects.StaticPhysicsObject):
+        if isinstance(physObj, StaticPhysicsObject):
             body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))
         else:

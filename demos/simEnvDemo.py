@@ -3,12 +3,8 @@
 """
 """
 
-import sys
-sys.path.append('../critters')  #add critters to pythonpath to use as library
-
-from physics.simulationEnvironment import SimulationEnvironment
-from physics import objects 
-
+from critters.physics.simulationEnvironment import SimulationEnvironment
+from critters.physics import objects 
 
 simEnv = SimulationEnvironment(vis=True, gravity=True)
 
