@@ -26,7 +26,7 @@ class BodyPart(object):
 class Connection(object):
     '''
     '''
-    def __init__(self,connectionType='hinge',connectionValue1,connectionValue2):
+    def __init__(self,connectionValue1,connectionValue2,connectionType='hinge'):
         self.connectionValue1 = connectionValue1
         self.connectionValue2 = connectionValue2
         

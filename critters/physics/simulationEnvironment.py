@@ -41,7 +41,23 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-     
+    
+    def addCreature(self, creature):
+        phenotype = creature.phenotype
+        print phenotype
+        rects, hinges = phenotype.buildPhysicsObject()
+        print "CRITTER", rects, hinges
+        for r in rects:
+            print r,r.position
+            print "ADDING OBJ"
+            self.addPhysicsObject(r)
+
+        for h in hinges:
+            print h,h.globalLoc
+            self.addConstraint(h)
+
+        return rects,hinges
+
     def addPhysicsObject(self, physObj, color=None):
         '''
         Adds a PhysicsObject to this SimulationEnvironment,
@@ -58,6 +74,7 @@ class SimulationEnvironment(object):
             body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
 
         self.objectDict[physObj.identifier] = body
+        print "GOINGS ON:", self.objectDict
         
         if color == None:
             color = (255,0,0)
