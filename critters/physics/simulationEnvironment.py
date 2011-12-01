@@ -16,12 +16,11 @@ class SimulationEnvironment(object):
         Initializes an Empty Simulation Environment containing only the ground.
         '''
         
-        self.objectDict = dict() #map from id to physicsObject
+        self.objectDict = dict() #map from id to pyBox2d object
                                  # for every PO in this environment 
                                  #TODO: make a property
                                  
-        self.connectionDict = dict() #map from MorphConnection to a PhysicsConstraint 
-        #World Creation with gravity
+        self.connectionDict = dict() #map from a frozen set of of PhysicsObject ids to a Pybox2d joint
         shouldSleep = True
         if gravity == None:
             self.world = b2.world(gravity=(0,0), doSleep=shouldSleep)
