@@ -91,7 +91,7 @@ class ReifiedCreature(object):
             connection = self.morphology.get_edge_data(prev, node)['connection']
             hinges.append(createHinge(connection, rects[prev], rects[node]))
         
-         def placeRects(root,parent = None):
+        def placeRects(root,parent = None):
             for other,connection in self._getAdjacentWithConnection(root):
                 if other == parent: #graph is not directional, ensure that we do not repeat... 
                     continue
