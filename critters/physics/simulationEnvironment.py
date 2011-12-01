@@ -21,6 +21,8 @@ class SimulationEnvironment(object):
                                  #TODO: make a property
                                  
         self.connectionDict = dict() #map from a frozen set of of PhysicsObject ids to a Pybox2d joint
+        
+        self.creatures = list() #store a reference to every creature being simulated
         shouldSleep = True
         if gravity == None:
             self.world = b2.world(gravity=(0,0), doSleep=shouldSleep)
@@ -52,6 +54,7 @@ class SimulationEnvironment(object):
             self.addConstraint(h)
 
         #TODO: Figure out what this should actually return!
+        self.creatures.append(creature)
         return rects,hinges
 
     def addPhysicsObject(self, physObj, color=None):
@@ -134,17 +137,8 @@ class SimulationEnvironment(object):
         Simulates one time step in the physic engine, rendering it to the pyGame window.
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
-        '''for id1,id2 in self.constraintDict.iterkeys():
-            break
-            nn1 = self.objectDict[id1].nn
-            nn2 = self.objectDict[id2].nn
-            inputs1=inputs2=None
-            outputs1=nn1.process(inputs1,timeStep)
-            outputs2=nn2.process(inputs2,timeStep)
-            
-            #give them access to the actuators
-            #somehow combine their outputs
-        '''
+        for creature in self.creatures:
+            print creature.phenotype.think([],0)
         self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
     def run(self, offset=(0,0)):
