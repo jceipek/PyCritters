@@ -1,6 +1,6 @@
 
 import random
-from utils import clampRange
+from critters.utils import clampRange
 
 __all__ = ["MutableInt", "MutableFloat", "MutableChoice"]
 

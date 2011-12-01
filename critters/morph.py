@@ -4,8 +4,8 @@ import math
 import copy
 import graphs
 
-from utils import *
-from mutations import *
+from critters.utils import *
+from critters.mutations import *
 from random import random, choice
 
 class Morphology(object):

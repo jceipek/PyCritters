@@ -1,14 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 """
-
-import critters
-from critters.physics import simulationEnvironment
-from critters.physics import objects
+from critters.physics.simulationEnvironment import SimulationEnvironment
+from critters.physics import objects 
 
 
-simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=True)
+simEnv = SimulationEnvironment(vis=True, gravity=True)
 ground= objects.StaticRect(position=(0,1),size=(50,1))
 
 cube1 = objects.Rect((2.0,2.0), (1,1))

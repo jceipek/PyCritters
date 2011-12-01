@@ -60,9 +60,7 @@ class ReifiedCreature(object):
                     break
         
     def buildPhysicsObject(self):
-        
         def createRect(bodyPart):
-            print bodyPart.dimensions
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
         
         def createHinge(connection, r1, r2):
@@ -77,21 +75,19 @@ class ReifiedCreature(object):
             
             return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
                                  r2, positionToLocal(r2, connection.locations[1]))
-     
+        
         root = next(self.morphology.nodes_iter())
         rects = {}
         hinges = []
-        
-        
+
         for prev, node in nx.bfs_edges(self.morphology, root):
             for part in (prev, node):
                 if part not in rects:
                     rects[part] = createRect(part)
-            
             connection = self.morphology.get_edge_data(prev, node)['connection']
             hinges.append(createHinge(connection, rects[prev], rects[node]))
-        
-         def placeRects(root,parent = None):
+
+        def placeRects(root,parent = None):
             for other,connection in self._getAdjacentWithConnection(root):
                 if other == parent: #graph is not directional, ensure that we do not repeat... 
                     continue
@@ -109,9 +105,5 @@ class ReifiedCreature(object):
                 other.position = (otherGlobalx,otherGlobaly)
                 hinge.globalLoc = other.position
                 placeRects(other,root)
-                #place this 'other'
-                #place all children of other recursively.
-            
-        return rects.values(), hinges
 
-        
+        return rects.values(), hinges
