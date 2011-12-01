@@ -14,9 +14,13 @@ class Renderer(object):
     def __init__(self, world):
         self.world = world
     
-    def setup(self):
+    def setup(self, showCoords=False):
         pygame.init()
         self.screen = pygame.display.set_mode((Renderer.SCREEN_WIDTH, Renderer.SCREEN_HEIGHT))
+        self.showCoords = showCoords
+        if self.showCoords:
+            fontName = pygame.font.get_default_font()
+            self.font = pygame.font.Font(fontName, 12)
     
     def render(self, offset, PPM):
         """Draws all objects in self.world
@@ -44,8 +48,14 @@ class Renderer(object):
                 # right and up. Pygame, on the other hand, increases in the
                 # right and downward directions. This means we must flip
                 # the y components.
-                vertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
+                pgvertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
 
-                pygame.draw.polygon(self.screen,(255,0,0), vertices)
+                pygame.draw.polygon(self.screen,(255,0,0), pgvertices)
+
+                if self.showCoords:
+                    for v in vertices:
+                        surf = self.font.render('('+str(v[0])+','+str(v[1])+')', True, (255,255,255))
+                        self.screen.blit(surf, (v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]))
+                    
 
         pygame.display.flip()

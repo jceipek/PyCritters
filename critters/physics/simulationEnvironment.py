@@ -41,7 +41,7 @@ class SimulationEnvironment(object):
         
         if self.vis:
             self.r = Renderer(self.world) 
-            self.r.setup()
+            self.r.setup(showCoords=True)
      
     def addPhysicsObject(self, physObj, color=None):
         '''
