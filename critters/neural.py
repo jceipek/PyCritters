@@ -442,7 +442,7 @@ class SineNode(Node):
         
 
 if __name__ == '__main__':
-    nn = simpleSineNetwork(2, 3)
+    nn = simpleSineNetwork(1, 1)
     for _ in range(10):
-        print(nn.process([0, 0], dt=0.5))
+        print(nn.process([0], dt=0.5))
     

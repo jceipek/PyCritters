@@ -138,7 +138,13 @@ class SimulationEnvironment(object):
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
         for creature in self.creatures:
-            print creature.phenotype.think([],0)
+            actuatorDict  = creature.phenotype.think([0],1.0/60.0)
+            #special case because of one actuator in test... need to fixLater
+            #neural networks and or actuators need a mapping to the physicsObjects
+            #or to the ids at least...             
+            actuatorValue = actuatorDict.values()[0]
+            self.connectionDict.values()[0].motorSpeed = actuatorValue
+            
         self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
     def run(self, offset=(0,0)):

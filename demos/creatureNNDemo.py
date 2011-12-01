@@ -13,8 +13,8 @@ from critters import (neural,life,morph)
 
 
 morphology = morph.createInchWorm()
-net = neural.simpleSineNetwork(0, 1)
-creature = life.Critter(morphology, net, 0)
+net = neural.simpleSineNetwork(1, 1)
+creature = life.Critter(morphology, net, 1)
 
 simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
 
