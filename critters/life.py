@@ -60,6 +60,22 @@ class ReifiedCreature(object):
                     break
         
     def buildPhysicsObject(self):
+        def createRect(bodyPart):
+            return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
+        
+        def createHinge(connection, r1, r2):
+            def positionToLocal(rect, position):
+                x = rect.size[0]/2.0
+                y = rect.size[1]/2.0
+                
+                if position >= 2: x *= -1
+                if position == 0 or position == 3: y *= -1
+                
+                return x, y
+            
+            return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
+                                 r2, positionToLocal(r2, connection.locations[1]))
+        
         root = next(self.morphology.nodes_iter())
         rects = {}
         hinges = []
@@ -89,20 +105,5 @@ class ReifiedCreature(object):
                 other.position = (otherGlobalx,otherGlobaly)
                 hinge.globalLoc = other.position
                 placeRects(other,root)
-                def createRect(bodyPart):
-        return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
-        
-        def createHinge(connection, r1, r2):
-            def positionToLocal(rect, position):
-                x = rect.size[0]/2.0
-                y = rect.size[1]/2.0
-                
-                if position >= 2: x *= -1
-                if position == 0 or position == 3: y *= -1
-                
-                return x, y
-            
-            return objects.Hinge(r1, positionToLocal(r1, connection.locations[0]), 
-                                 r2, positionToLocal(r2, connection.locations[1]))
 
         return rects.values(), hinges
