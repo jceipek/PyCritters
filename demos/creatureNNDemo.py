@@ -35,4 +35,4 @@ print joint.motorSpeed
 joint.motorSpeed = 2
 #simEnv.addPhysicsObject(ground)
 
-simEnv.run()
+simEnv.run(offset=(500,-300))

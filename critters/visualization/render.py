@@ -54,7 +54,8 @@ class Renderer(object):
 
                 if self.showCoords:
                     for v in vertices:
-                        surf = self.font.render('('+str(v[0])+','+str(v[1])+')', True, (255,255,255))
+                        vstr = '(%.2f,%.2f)' % (v[0],v[1])
+                        surf = self.font.render(vstr, True, (255,255,255))
                         self.screen.blit(surf, (v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]))
                     
 

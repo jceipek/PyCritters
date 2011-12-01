@@ -135,9 +135,8 @@ class SimulationEnvironment(object):
         '''
         self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
-    def run(self, visOnly=False):
-        vOffset = 0
-        hOffset = 0
+    def run(self, offset=(0,0)):
+        hOffset, vOffset = offset
         PPM = 20.0
         panningRate = 5
         running = True
