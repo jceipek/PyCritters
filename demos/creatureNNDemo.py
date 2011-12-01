@@ -3,9 +3,6 @@
 """
 """
 
-import sys
-sys.path.append('../.')  #add critters to pythonpath to use as library
-
 from critters.physics import simulationEnvironment
 from critters.physics import objects
 
