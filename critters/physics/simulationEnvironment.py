@@ -147,17 +147,17 @@ class SimulationEnvironment(object):
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     elif event.key == pygame.K_LEFT:
-                        hOffset -= panningRate 
-                    elif event.key == pygame.K_RIGHT:
                         hOffset += panningRate 
+                    elif event.key == pygame.K_RIGHT:
+                        hOffset -= panningRate 
                     elif event.key == pygame.K_UP:
-                        vOffset -= panningRate 
-                    elif event.key == pygame.K_DOWN:
                         vOffset += panningRate 
+                    elif event.key == pygame.K_DOWN:
+                        vOffset -= panningRate 
                     elif event.key == pygame.K_MINUS:
-                        PPM += 1
-                    elif event.key == pygame.K_EQUALS:
                         PPM -= 1
+                    elif event.key == pygame.K_EQUALS:
+                        PPM += 1
 
 
     def simulate(self, timeToRun):
