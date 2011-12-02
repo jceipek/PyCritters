@@ -74,10 +74,10 @@ class SimulationEnvironment(object):
             halfSize = tuple(x/2.0 for x in physObj.size) #box takes half size, not full size
             body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction)
 
-        self.objectDict[physObj.identifier] = body
         
-        if color == None:
-            color = (255,0,0)
+        
+
+        self.objectDict[physObj.identifier] = body
         
     
     def _addHinge(self, physObj1, physObj2, globalLoc):

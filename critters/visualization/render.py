@@ -6,6 +6,7 @@ which is PyBox2D. Optimally, it would be implementation independent.
 '''
 
 import pygame
+import random
 
 class Renderer(object):
     SCREEN_WIDTH = 1024
@@ -49,14 +50,33 @@ class Renderer(object):
                 # right and downward directions. This means we must flip
                 # the y components.
                 pgvertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
+                
+                c1 = random.randint(100,255)          
+                c2 = random.randint(100,255)          
+                c3 = random.randint(100,255)          
+                color = (c1,c2,c3)
 
-                pygame.draw.polygon(self.screen,(255,0,0), pgvertices)
+                pygame.draw.polygon(self.screen,color, pgvertices)
 
                 if self.showCoords:
                     for v in vertices:
                         vstr = '(%.2f,%.2f)' % (v[0],v[1])
                         surf = self.font.render(vstr, True, (255,255,255))
                         self.screen.blit(surf, (v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]))
+
+        for jointEdge in body.joints:
+            
+            ax, ay = jointEdge.joint.anchorA
+            ax = int(ax * PPM + offset[0] + 0.5)
+            ay = int(Renderer.SCREEN_HEIGHT - (ay * PPM) + offset[1] + 0.5)
+
+            bx, by = jointEdge.joint.anchorB
+            bx = int(bx * PPM + offset[0] + 0.5)
+            by = int(Renderer.SCREEN_HEIGHT - (by * PPM) + offset[1] + 0.5)
+
+
+            pygame.draw.circle(self.screen, (0,255,0),(ax,ay), 3)
+            pygame.draw.circle(self.screen, (0,0,255), (bx,by), 5, 1)
                     
 
         pygame.display.flip()

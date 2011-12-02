@@ -33,7 +33,7 @@ simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
 
 rects,hinges = simEnv.addCreature(creature)
 
-print [rect.position for rect in rects]
+print [(rect.position, rect.size) for rect in rects]
 print hinges
 
 #joint = simEnv.getConstraint(rects[0], rects[2])

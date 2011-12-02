@@ -1,21 +1,32 @@
 
 import genetics
+import neural
+import morph
 from utils import flatten, cached
-import networkx as nx
 from critters.physics import objects
+from critters.physics.simulationEnvironment import SimulationEnvironment
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, morphology, neuralNet, numSensors):
-        self.morphology = morphology
-        self.neuralNet = neuralNet
+    def __init__(self, numSensors=1, morphology=None, neuralNet=None):
         self.numSensors = numSensors
+        self.morphology = morphology or morph.randomMorphology(6)
+        self.neuralNet = neuralNet or \
+                         neural.randomNeuralNetwork(numSensors, 10, 5)
     
     @property
     @cached
     def phenotype(self):
         return ReifiedCreature(self.morphology.expand(),
                                self.neuralNet, self.numSensors)
+                               
+    def mutate(self):
+        newNN = self.neuralNet.mutate()
+        newMorph = self.morphology.mutate()
+        return Critter(newMorph, newNN, self.numSensors)
+        
+    def crossover(self, other):
+        assert False
     
 class ReifiedCreature(object):
     
@@ -94,12 +105,14 @@ class ReifiedCreature(object):
             
             
             prevGlobal = rects[prev].position
-            if prev == hinge.physObj1:                
+            if rects[prev] == hinge.physObj1:                
                 prevLocal = hinge.local1
                 otherLocal = hinge.local2
-            else:
+            elif rects[prev] == hinge.physObj2:
                 prevLocal = hinge.local2
                 otherLocal = hinge.local1
+            else:
+                raise ValueError, "Neither check for equality with physObj worked"
             
             otherGlobalx = prevGlobal[0] + prevLocal[0] - otherLocal[0] 
             otherGlobaly = prevGlobal[1] + prevLocal[1] - otherLocal[1]
@@ -119,4 +132,28 @@ class ReifiedCreature(object):
         self.hinges = hinges
             
         return self.rects, self.hinges
+
+class DistanceCompetition(genetics.IndividualCompetition):
+    
+    def __init__(self, maxTime=100.0):
+        self.maxTime = maxTime
+    
+    def _doCalculation(self, individual):
+        simEnv = SimulationEnvironment()
+        rects, hinges = simEnv.addCreature(individual)
+        simEnv.simulate(self.maxTime)
+        
+        meanX = sum(r.position[0] for r in rects)/float(len(rects))
+        return max(0.00001, meanX)
+
+if __name__ == '__main__':
+    reproduction = genetics.Spartans(10, Critter)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 20)
+    evo.populate()
+    evo.run(5)
+
+
+
+
+
 

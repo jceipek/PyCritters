@@ -8,6 +8,17 @@ from critters.utils import *
 from critters.mutations import *
 from random import random, choice
 
+def randomMorphology(numNodes):
+    m = Morphology()
+    
+    nodes = [MorphNode() for _ in range(numNodes)]
+    for node in nodes: m.addNode(node)
+    
+    for prev, node in zip(nodes, nodes[:1]):
+        m.createConnection(prev, node)
+        
+    return m
+
 class Morphology(object):
     
     def __init__(self):
@@ -188,6 +199,23 @@ def createBox():
 
     return box
 
+def createSnakeVaried():
+    """Hardcoded test function that creates a snake creature
+    
+    (for testing purposes)
+    """
+    
+    snake = Morphology()
+    
+    head = MorphNode((1, 3))
+    middle = MorphNode((1, 1))
+    tail = MorphNode((1, 1))
+    
+    snake.createConnection(head, middle)
+    snake.createConnection(middle, tail)
+
+    return snake
+
 
 def createSnake():
     """Hardcoded test function that creates a snake creature
@@ -197,9 +225,9 @@ def createSnake():
     
     snake = Morphology()
     
-    head = MorphNode((1, 1))
-    middle = MorphNode((1, 1))
-    tail = MorphNode((1, 1))
+    head = MorphNode()
+    middle = MorphNode()
+    tail = MorphNode()
     
     snake.createConnection(head, middle)
     snake.createConnection(middle, tail)
