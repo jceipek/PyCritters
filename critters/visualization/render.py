@@ -50,7 +50,7 @@ class Renderer(object):
                 # the y components.
                 pgvertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
 
-                pygame.draw.polygon(self.screen,(255,0,0), pgvertices)
+                pygame.draw.polygon(self.screen,fixture.color, pgvertices)
 
                 if self.showCoords:
                     for v in vertices:
