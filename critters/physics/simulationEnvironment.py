@@ -1,6 +1,6 @@
 import time
 from critters.visualization.render import Renderer
-from critters.physics.objects import StaticPhysicsObject
+from critters.physics.objects import StaticPhysicsObject, StaticRect
 import pygame
 from Box2D import b2 
 import math
@@ -162,8 +162,8 @@ class SimulationEnvironment(object):
                 
                 if currentMinY == None or tMin < currentMinY:
                     currentMinY = tMin
-        self.ground= objects.StaticRect(position=(0,tMin-1),size=(150,1))
-        simEnv.addPhysicsObject(self.ground)
+        self.ground= StaticRect(position=(0,tMin-1),size=(150,1))
+        self.addPhysicsObject(self.ground)
         
     def run(self, offset=(0,0),timeToRun=None):
         hOffset, vOffset = offset
