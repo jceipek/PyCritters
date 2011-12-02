@@ -141,7 +141,9 @@ class DistanceCompetition(genetics.IndividualCompetition):
         self._count = 0
     
     def _doCalculation(self, individual):
-        simEnv = SimulationEnvironment()
+        self._count += 1
+        
+        simEnv = SimulationEnvironment(vis=(self._count % 10 == 0))
         
         rects, hinges = simEnv.addCreature(individual)
         if not rects or not hinges: return 0.00001
