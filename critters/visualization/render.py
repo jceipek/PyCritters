@@ -6,6 +6,7 @@ which is PyBox2D. Optimally, it would be implementation independent.
 '''
 
 import pygame
+import random
 
 class Renderer(object):
     SCREEN_WIDTH = 1024
@@ -49,8 +50,13 @@ class Renderer(object):
                 # right and downward directions. This means we must flip
                 # the y components.
                 pgvertices=[(v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]) for v in vertices]
+                
+                c1 = random.randint(100,255)          
+                c2 = random.randint(100,255)          
+                c3 = random.randint(100,255)          
+                color = (c1,c2,c3)
 
-                pygame.draw.polygon(self.screen,fixture.color, pgvertices)
+                pygame.draw.polygon(self.screen,color, pgvertices)
 
                 if self.showCoords:
                     for v in vertices:

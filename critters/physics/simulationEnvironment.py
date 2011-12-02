@@ -4,7 +4,6 @@ from critters.physics.objects import StaticPhysicsObject
 import pygame
 from Box2D import b2 
 import math
-import random
 
 class SimulationEnvironment(object):
     '''
@@ -71,16 +70,10 @@ class SimulationEnvironment(object):
             if len(physObj.size) != 2:
                 raise ValueError("Size must be a two-tuple")
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
-            f=body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
+            body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
 
         
-        #XXX: Color is unused!!!
-        if color == None:
-            c1 = random.randint(100,255)          
-            c2 = random.randint(100,255)          
-            c3 = random.randint(100,255)          
-            f.color = (c1,c2,c3)
-
+        
 
         self.objectDict[physObj.identifier] = body
         
