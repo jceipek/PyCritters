@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 """
 
@@ -13,22 +11,20 @@ from critters import (neural,life,morph)
 
 
 morphology = morph.createSnake()
-net = neural.simpleSineNetwork(0, 1)
-creature = life.Critter(morphology, net, 0)
-phenotype = creature.phenotype
-rects, hinges = phenotype.buildPhysicsObject()
-print rects,hinges
+net = neural.simpleSineNetwork(1, 2)
+creature = life.Critter(morphology, net, 1)
+
 
 simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
-ground = objects.StaticRect(position=(0,1),size=(50,1))
 
-for r in rects:
-    print r.position
-    simEnv.addPhysicsObject(r)
+rects,hinges = simEnv.addCreature(creature)
 
-for h in hinges:
-    simEnv.addConstraint(h)
+print rects
+print hinges
 
+joint = simEnv.getConstraint(rects[0], rects[1])
+print joint.motorSpeed
+joint.motorSpeed = 2
 #simEnv.addPhysicsObject(ground)
 
-simEnv.run()
+simEnv.run(offset=(500,-300))
