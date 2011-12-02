@@ -67,8 +67,8 @@ class ReifiedCreature(object):
         
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position, negate):
-                x = rect.size[0]
-                y = rect.size[1]
+                x = rect.size[0]/2
+                y = rect.size[1]/2
                 
                 if position >= 2: x *= -1
                 if position == 0 or position == 3: y *= -1
