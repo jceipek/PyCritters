@@ -63,7 +63,6 @@ class SimulationEnvironment(object):
         Adds a PhysicsObject to this SimulationEnvironment,
         adding it to the collision manager and to the renderables
         '''
-        print type(physObj)
         if isinstance(physObj, StaticPhysicsObject):
             body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))

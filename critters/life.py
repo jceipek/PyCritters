@@ -24,7 +24,7 @@ class Critter(genetics.Genotype):
     def mutate(self):
         newNN = self.neuralNet.mutate()
         newMorph = self.morphology.mutate()
-        return Critter(newMorph, newNN, self.numSensors)
+        return Critter(self.numSensors, newMorph, newNN)
         
     def crossover(self, other):
         assert False
@@ -141,7 +141,10 @@ class DistanceCompetition(genetics.IndividualCompetition):
     
     def _doCalculation(self, individual):
         simEnv = SimulationEnvironment()
+        
         rects, hinges = simEnv.addCreature(individual)
+        if not rects or not hinges: return 0.00001
+        
         simEnv.simulate(self.maxTime)
         
         meanX = sum(r.position[0] for r in rects)/float(len(rects))
