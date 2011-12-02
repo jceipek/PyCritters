@@ -10,10 +10,9 @@ from critters import (neural,life,morph)
 #critters.objects.Rect
 
 
-morphology = morph.createSnake()
-net = neural.simpleSineNetwork(1, 2)
+morphology = morph.createInchWorm()
+net = neural.simpleSineNetwork(1, 1)
 creature = life.Critter(morphology, net, 1)
-
 
 simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
 
