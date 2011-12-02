@@ -43,7 +43,8 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-    
+        self.physicsStep = 1.0/60.0
+        
     def addCreature(self, creature):
         phenotype = creature.phenotype
         rects, hinges = phenotype.buildPhysicsObject()
@@ -138,7 +139,7 @@ class SimulationEnvironment(object):
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
         for phenotype in self.creatures.values():
-            actuatorDict  = phenotype.think([0],1.0/60.0)
+            actuatorDict  = phenotype.think([0],self.physicsStep)
             #special case because of one actuator in test... need to fixLater
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...
@@ -149,10 +150,22 @@ class SimulationEnvironment(object):
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
                 joint.motorSpeed = actuatorValues[i]
 
+        self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
 
-        self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
-
-    def run(self, offset=(0,0)):
+    def placeGround(self):
+        currentMinY = None 
+        for body in self.world.bodies: # or: world.bodies
+            for fixture in body.fixtures:
+                shape=fixture.shape
+                
+                tMin = min([v[1] for v in  shape.vertices])
+                
+                if currentMinY == None or tMin < currentMinY:
+                    currentMinY = tMin
+        self.ground= objects.StaticRect(position=(0,tMin-1),size=(150,1))
+        simEnv.addPhysicsObject(self.ground)
+        
+    def run(self, offset=(0,0),timeToRun=None):
         hOffset, vOffset = offset
         PPM = 20.0
         panningRate = 5
@@ -160,7 +173,13 @@ class SimulationEnvironment(object):
         if self.vis:
             clock = pygame.time.Clock()
             pygame.key.set_repeat(1, 5)
-        while running:
+        time = 0
+        if timeToRun==None:
+            shouldRun = lambda t: True
+        else:
+            shouldRun= lambda t: t < timeToRun
+            
+        while running and shouldRun(time):
             self.step()
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
@@ -183,14 +202,15 @@ class SimulationEnvironment(object):
                         PPM -= 1
                     elif event.key == pygame.K_EQUALS:
                         PPM += 1
+            time +=self.physicsStep
 
-
-    def simulate(self, timeToRun):
+    def simulate(self,offset=(0,0),timeToRun=10):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
         '''
-        pass
+        self.placeGround()
+        self.run(offset=offset,timeToRun=timeToRun)
         
 if __name__ =='__main__':
     print("Not intended to be run as a script")
