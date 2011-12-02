@@ -150,6 +150,7 @@ class SimulationEnvironment(object):
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...
             actuatorValues = actuatorDict.values() #XXX:TODO: preserve order better.
+            assert len(actuatorValues) == len(phenotype.hinges) #these must be 1:1, otherwise it makes no sense
             for i in range(len(phenotype.hinges)):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
