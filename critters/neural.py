@@ -128,7 +128,7 @@ class NeuralNetwork(object):
         self.graph.add_node(node)
         
     def makeConnection(self, prev, node, weight=None):
-        connection = NeuralConnection(prev, node, weight)
+        connection = NeuralConnection((prev, node), weight)
         self.graph.add_edge(prev, node, key=0, connection=connection)
         
     def connectNode(self, node, numInputs=0, numOutputs=0):
@@ -221,15 +221,17 @@ class NeuralConnection(object):
     
     _weightValue = MutableFloat(range=(-1.0, 1.0))
     
-    def __init__(self, prev, node, weight=None):
-        self.prev = prev
-        self.node = node
+    def __init__(self, nodes, weight=None):
+        self.nodes = nodes
         self.weight = weight or self._weightValue()
         
         self.id = 0 # never allow multiple edges
         
     def mutate(self):
         self.weight = self._weightValue(self.weight)
+        
+    def __getitem__(self, *args):
+        return self.nodes.__getitem__(*args)
  
 class Node(object):
     """The base class for a neural network node.

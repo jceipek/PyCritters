@@ -1,6 +1,6 @@
 import time
 from critters.visualization.render import Renderer
-from critters.physics.objects import StaticPhysicsObject
+from critters.physics.objects import (StaticPhysicsObject,StaticRect)
 import pygame
 from Box2D import b2 
 import math
@@ -63,7 +63,6 @@ class SimulationEnvironment(object):
         Adds a PhysicsObject to this SimulationEnvironment,
         adding it to the collision manager and to the renderables
         '''
-        print type(physObj)
         if isinstance(physObj, StaticPhysicsObject):
             body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))
@@ -163,8 +162,8 @@ class SimulationEnvironment(object):
                 
                 if currentMinY == None or tMin < currentMinY:
                     currentMinY = tMin
-        self.ground= objects.StaticRect(position=(0,tMin-1),size=(150,1))
-        simEnv.addPhysicsObject(self.ground)
+        self.ground= StaticRect(position=(0,tMin-1),size=(150,1))
+        self.addPhysicsObject(self.ground)
         
     def run(self, offset=(0,0),timeToRun=None):
         hOffset, vOffset = offset

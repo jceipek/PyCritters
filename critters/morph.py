@@ -58,12 +58,15 @@ class Morphology(object):
     def expand(self):
         cache = {}
         
+        rootCache = set()
         def findRoot(diGraph, current=None):
             current = current or next(diGraph.nodes_iter())
-            pred = [v for v in diGraph.predecessors(current) if v != current]
+            pred = [v for v in diGraph.predecessors(current) 
+                       if v not in rootCache]
             if not pred: 
                 return current
             else: 
+                rootCache.add(current)
                 return findRoot(diGraph, pred[0])
        
         def expandNode(node, depth):
@@ -85,6 +88,7 @@ class Morphology(object):
                 else:
                     subDepth = 0
                 
+                print id(neighbor)
                 subroot, subgraph = expandNode(neighbor, subDepth)
                 
                 graph.add_nodes_from(subgraph.nodes_iter())

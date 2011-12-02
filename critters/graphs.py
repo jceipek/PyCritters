@@ -28,7 +28,7 @@ def mutate(graph, createNode, createConnection, rates=DEFAULT_MUTATION_RATES):
         for edge in toRemove: graph.remove_edge(*edge)
         
     def makeEdge(prev, node):
-        connection = createConnection(prev, node)
+        connection = createConnection((prev, node))
         _addConnection(graph, connection)
     
     def insertNewNode():
