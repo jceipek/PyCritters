@@ -59,10 +59,10 @@ class Renderer(object):
                 pygame.draw.polygon(self.screen,color, pgvertices)
 
                 if self.showCoords:
-                    for v in vertices:
-                        vstr = '(%.2f,%.2f)' % (v[0],v[1])
+                    for realv,scaledv in zip(shape.vertices,vertices):
+                        vstr = '(%.2f,%.2f)' % (realv[0],realv[1])
                         surf = self.font.render(vstr, True, (255,255,255))
-                        self.screen.blit(surf, (v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]))
+                        self.screen.blit(surf, (scaledv[0]+offset[0], Renderer.SCREEN_HEIGHT-scaledv[1]+offset[1]))
 
         for jointEdge in body.joints:
             
