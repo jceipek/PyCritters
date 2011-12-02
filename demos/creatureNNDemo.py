@@ -27,3 +27,4 @@ joint.motorSpeed = 2
 #simEnv.addPhysicsObject(ground)
 
 simEnv.run(offset=(500,-300))
+#simEnv.simulate(offset=(500,-300),timeToRun=10)

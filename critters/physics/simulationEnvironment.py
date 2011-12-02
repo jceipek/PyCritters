@@ -1,6 +1,6 @@
 import time
 from critters.visualization.render import Renderer
-from critters.physics.objects import StaticPhysicsObject, StaticRect
+from critters.physics.objects import (StaticPhysicsObject,StaticRect)
 import pygame
 from Box2D import b2 
 import math
