@@ -111,6 +111,7 @@ class ReifiedCreature(object):
             
             jointLoc1 = (prevGlobal[0] + prevLocal[0],prevGlobal[1] + prevLocal[1]) #sanity check
             jointLoc2 = (otherGlobalx + otherLocal[0],otherGlobaly+ otherLocal[1]) #calculate relative to both global locs
+            
             xDif = abs(jointLoc1[0]-jointLoc2[0])
             yDif = abs(jointLoc1[1]-jointLoc2[1])
             if yDif > 0.1 or xDif > 0.1: #we may need to change this value later
