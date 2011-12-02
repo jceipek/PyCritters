@@ -22,7 +22,7 @@ class SimulationEnvironment(object):
                                  
         self.connectionDict = dict() #map from a frozen set of of PhysicsObject ids to a Pybox2d joint
         
-        self.creatures = list() #store a reference to every creature being simulated
+        self.creatures = dict() #store a reference to every creature being simulated
         shouldSleep = True
         if gravity == None:
             self.world = b2.world(gravity=(0,0), doSleep=shouldSleep)
@@ -54,7 +54,7 @@ class SimulationEnvironment(object):
             self.addConstraint(h)
 
         #TODO: Figure out what this should actually return!
-        self.creatures.append(creature)
+        self.creatures[creature] = phenotype
         return rects,hinges
 
     def addPhysicsObject(self, physObj, color=None):
@@ -137,14 +137,18 @@ class SimulationEnvironment(object):
         Simulates one time step in the physic engine, rendering it to the pyGame window.
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
-        for creature in self.creatures:
-            actuatorDict  = creature.phenotype.think([0],1.0/60.0)
+        for phenotype in self.creatures.values():
+            actuatorDict  = phenotype.think([0],1.0/60.0)
             #special case because of one actuator in test... need to fixLater
             #neural networks and or actuators need a mapping to the physicsObjects
-            #or to the ids at least...             
-            actuatorValue = actuatorDict.values()[0]
-            self.connectionDict.values()[0].motorSpeed = actuatorValue
-            
+            #or to the ids at least...
+            actuatorValues = actuatorDict.values() #XXX:TODO: preserve order better.
+            for i in range(len(phenotype.hinges)):
+                connection = phenotype.hinges[i]
+                joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
+                joint.motorSpeed = actuatorValues[i]
+
+
         self.world.Step(1.0/60.0, 10, 10) #1/desFPS, velIters, posIters
 
     def run(self, offset=(0,0)):

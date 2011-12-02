@@ -27,6 +27,8 @@ class ReifiedCreature(object):
         self._calculateBodyParts()
         self._calculateConnections()
         self._conformNeuralNet()
+        self.hinges = None#filled in when buildPhysicsObject() is invoked
+        self.rects = None #filled in when buildPhysicsObject() is invoked
         
     def clear(self):
         self.neuralNet.clear()
@@ -114,9 +116,9 @@ class ReifiedCreature(object):
                 
             rects[node].position = (otherGlobalx,otherGlobaly)
             hinge.globalLoc = jointLoc1
-            print "root loc=",prevGlobal, " rootLocal=", prevLocal, "otherLocal=", otherLocal, "otherGlobal",hinge.globalLoc
-        for rect in rects.values():
-            print rect
-        
-        return rects.values(), hinges
+
+        self.rects = rects.values()
+        self.hinges = hinges
+            
+        return self.rects, self.hinges
 
