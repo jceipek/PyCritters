@@ -12,7 +12,7 @@ from critters import (neural,life,morph)
 #critters.objects.Rect
 
 
-morphology = morph.createInchWorm()
+morphology = morph.createSnake()
 net = neural.simpleSineNetwork(0, 1)
 creature = life.Critter(morphology, net, 0)
 phenotype = creature.phenotype
