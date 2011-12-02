@@ -63,6 +63,20 @@ class Renderer(object):
                         vstr = '(%.2f,%.2f)' % (v[0],v[1])
                         surf = self.font.render(vstr, True, (255,255,255))
                         self.screen.blit(surf, (v[0]+offset[0], Renderer.SCREEN_HEIGHT-v[1]+offset[1]))
+
+        for jointEdge in body.joints:
+            
+            ax, ay = jointEdge.joint.anchorA
+            ax = int(ax * PPM + offset[0] + 0.5)
+            ay = int(Renderer.SCREEN_HEIGHT - (ay * PPM) + offset[1] + 0.5)
+
+            bx, by = jointEdge.joint.anchorB
+            bx = int(bx * PPM + offset[0] + 0.5)
+            by = int(Renderer.SCREEN_HEIGHT - (by * PPM) + offset[1] + 0.5)
+
+
+            pygame.draw.circle(self.screen, (0,255,0),(ax,ay), 3)
+            pygame.draw.circle(self.screen, (0,0,255), (bx,by), 5, 1)
                     
 
         pygame.display.flip()
