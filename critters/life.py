@@ -145,7 +145,11 @@ class DistanceCompetition(genetics.IndividualCompetition):
         
         simEnv = SimulationEnvironment(vis=(self._count % 10 == 0))
         
-        rects, hinges = simEnv.addCreature(individual)
+        try:
+            rects, hinges = simEnv.addCreature(individual)
+        except RuntimeError, e:
+            print e
+            return 0.00001
         if not rects or not hinges: return 0.00001
         
         simEnv.simulate(timeToRun=self.maxTime)
