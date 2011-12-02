@@ -2,6 +2,7 @@
 import genetics
 import neural
 import morph
+import networkx as nx
 from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment

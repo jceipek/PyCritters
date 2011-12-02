@@ -14,7 +14,7 @@ def randomMorphology(numNodes):
     nodes = [MorphNode() for _ in range(numNodes)]
     for node in nodes: m.addNode(node)
     
-    for prev, node in zip(nodes, nodes[:1]):
+    for prev, node in zip(nodes, nodes[1:]):
         m.createConnection(prev, node)
         
     return m
