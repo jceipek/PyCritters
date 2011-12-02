@@ -180,17 +180,17 @@ class SimulationEnvironment(object):
         else:
             shouldRun= lambda t: t < timeToRun
             
-        while shouldRun and shouldRun(time):
+        while running and shouldRun(time):
             self.step()
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
                 clock.tick(60)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    shouldRun = False
+                    running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        shouldRun = False
+                        running = False
                     elif event.key == pygame.K_LEFT:
                         hOffset += panningRate 
                     elif event.key == pygame.K_RIGHT:
