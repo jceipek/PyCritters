@@ -1,8 +1,8 @@
 
 import genetics
 from utils import flatten, cached
-import networkx as nx
 from critters.physics import objects
+from critters.physics.simulationEnvironment import SimulationEnvironment
 
 class Critter(genetics.Genotype):
     
@@ -16,6 +16,14 @@ class Critter(genetics.Genotype):
     def phenotype(self):
         return ReifiedCreature(self.morphology.expand(),
                                self.neuralNet, self.numSensors)
+                               
+    def mutate(self):
+        newNN = self.neuralNet.mutate()
+        newMorph = self.morphology.mutate()
+        return Critter(newMorph, newNN, self.numSensors)
+        
+    def crossover(self, other):
+        assert False
     
 class ReifiedCreature(object):
     
@@ -119,4 +127,28 @@ class ReifiedCreature(object):
         self.hinges = hinges
             
         return self.rects, self.hinges
+
+class DistanceCompetition(genetics.IndividualCompetition):
+    
+    def __init__(self, maxTime=100.0):
+        self.maxTime = maxTime
+    
+    def _doCalculation(self, individual):
+        simEnv = SimulationEnvironment()
+        rects, hinges = simEnv.addCreature(individual)
+        simEnv.simulate(self.maxTime)
+        
+        meanX = sum(r.position[0] for r in rects)/float(len(rects))
+        return max(0.00001, meanX)
+
+if __name__ == '__main__':
+    reproduction = genetics.Spartans(10, Critter)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 20)
+    evo.populate()
+    evo.run(5)
+
+
+
+
+
 

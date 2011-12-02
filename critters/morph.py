@@ -197,9 +197,9 @@ def createSnake():
     
     snake = Morphology()
     
-    head = MorphNode((1, 1))
-    middle = MorphNode((1, 1))
-    tail = MorphNode((1, 1))
+    head = MorphNode()
+    middle = MorphNode()
+    tail = MorphNode()
     
     snake.createConnection(head, middle)
     snake.createConnection(middle, tail)
