@@ -206,7 +206,7 @@ class SimulationEnvironment(object):
                             PPM += 1
             time +=self.physicsStep
 
-    def simulate(self,offset=(0,0),timeToRun=10):
+    def simulate(self,offset=(300,-200),timeToRun=10):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
