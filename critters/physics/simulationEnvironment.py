@@ -205,14 +205,13 @@ class SimulationEnvironment(object):
                         PPM += 1
             time +=self.physicsStep
 
-    def simulate(self, timeToRun):
+    def simulate(self,offset=(0,0),timeToRun=10):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
         '''
         self.placeGround()
-        self.run(timeToRun=timeToRun)
-        pass
+        self.run(offset=offset,timeToRun=timeToRun)
         
 if __name__ =='__main__':
     print("Not intended to be run as a script")
