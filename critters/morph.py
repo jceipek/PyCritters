@@ -199,23 +199,6 @@ def createBox():
 
     return box
 
-def createSnakeVaried():
-    """Hardcoded test function that creates a snake creature
-    
-    (for testing purposes)
-    """
-    
-    snake = Morphology()
-    
-    head = MorphNode((1, 3))
-    middle = MorphNode((1, 1))
-    tail = MorphNode((1, 1))
-    
-    snake.createConnection(head, middle)
-    snake.createConnection(middle, tail)
-
-    return snake
-
 
 def createSnake():
     """Hardcoded test function that creates a snake creature
