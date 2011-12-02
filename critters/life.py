@@ -1,15 +1,18 @@
 
 import genetics
+import neural
+import morph
 from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, morphology, neuralNet, numSensors):
-        self.morphology = morphology
-        self.neuralNet = neuralNet
+    def __init__(self, numSensors=1, morphology=None, neuralNet=None):
         self.numSensors = numSensors
+        self.morphology = morphology or morph.randomMorphology(6)
+        self.neuralNet = neuralNet or \
+                         neural.randomNeuralNetwork(numSensors, 10, 5)
     
     @property
     @cached
