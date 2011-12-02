@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 """
 
@@ -19,6 +17,9 @@ creature = life.Critter(morphology, net, 1)
 simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
 
 rects,hinges = simEnv.addCreature(creature)
+
+print rects
+print hinges
 
 joint = simEnv.getConstraint(rects[0], rects[1])
 print joint.motorSpeed
