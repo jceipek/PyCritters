@@ -66,21 +66,18 @@ class ReifiedCreature(object):
             return objects.Rect((0.0, 0.0), bodyPart.dimensions, 0.0, 1, 0.5)
         
         def createHinge(connection, r1, r2):
-            def positionToLocal(rect, position, negate):
-                x = rect.size[0]
-                y = rect.size[1]
+            def positionToLocal(rect, position):
+                x = rect.size[0]/2.0
+                y = rect.size[1]/2.0
                 
                 if position >= 2: x *= -1
                 if position == 0 or position == 3: y *= -1
                 
-                if negate:
-                    return x, y
-                else:
-                    return -x, -y
+                return x, y
             
             return objects.Hinge(
-                    r1, positionToLocal(r1, connection.locations[0], False), 
-                    r2, positionToLocal(r2, connection.locations[1], True))
+                    r1, positionToLocal(r1, connection.locations[0]), 
+                    r2, positionToLocal(r2, connection.locations[1]))
         
         root = next(self.morphology.nodes_iter())
         rects = {}
@@ -103,8 +100,6 @@ class ReifiedCreature(object):
             else:
                 prevLocal = hinge.local2
                 otherLocal = hinge.local1
-                
-
             
             otherGlobalx = prevGlobal[0] + prevLocal[0] - otherLocal[0] 
             otherGlobaly = prevGlobal[1] + prevLocal[1] - otherLocal[1]

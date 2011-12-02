@@ -70,7 +70,8 @@ class SimulationEnvironment(object):
             if len(physObj.size) != 2:
                 raise ValueError("Size must be a two-tuple")
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
-            body.CreatePolygonFixture(box=physObj.size, density=physObj.density, friction=physObj.friction)
+            halfSize = tuple(x/2.0 for x in physObj.size) #box takes half size, not full size
+            body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction)
 
         
         

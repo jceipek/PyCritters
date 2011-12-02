@@ -67,7 +67,6 @@ class Morphology(object):
             
             for _, neighbor, data in self.graph.out_edges_iter(node, data=True):
                 connection = data['connection']
-                print root, neighbor, connection
                 
                 if node == neighbor:
                     subDepth = depth + 1
@@ -198,9 +197,9 @@ def createSnake():
     
     snake = Morphology()
     
-    head = MorphNode()
-    middle = MorphNode()
-    tail = MorphNode()
+    head = MorphNode((1, 1))
+    middle = MorphNode((1, 1))
+    tail = MorphNode((1, 1))
     
     snake.createConnection(head, middle)
     snake.createConnection(middle, tail)
