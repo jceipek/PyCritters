@@ -144,7 +144,9 @@ class SimulationEnvironment(object):
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...
             actuatorValues = actuatorDict.values() #XXX:TODO: preserve order better.
-            assert len(actuatorValues) == len(phenotype.hinges) #these must be 1:1, otherwise it makes no sense
+            if len(actuatorValues) != len(phenotype.hinges): #these must be 1:1, otherwise it makes no sense
+                print len(actuatorValues), len(phenotype.hinges)
+                raise ValueError, "actuatorValues length is inconsistent with phenotype hinge length"
             for i in range(len(phenotype.hinges)):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
@@ -184,24 +186,24 @@ class SimulationEnvironment(object):
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
                 clock.tick(60)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
                         running = False
-                    elif event.key == pygame.K_LEFT:
-                        hOffset += panningRate 
-                    elif event.key == pygame.K_RIGHT:
-                        hOffset -= panningRate 
-                    elif event.key == pygame.K_UP:
-                        vOffset += panningRate 
-                    elif event.key == pygame.K_DOWN:
-                        vOffset -= panningRate 
-                    elif event.key == pygame.K_MINUS:
-                        PPM -= 1
-                    elif event.key == pygame.K_EQUALS:
-                        PPM += 1
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            running = False
+                        elif event.key == pygame.K_LEFT:
+                            hOffset += panningRate 
+                        elif event.key == pygame.K_RIGHT:
+                            hOffset -= panningRate 
+                        elif event.key == pygame.K_UP:
+                            vOffset += panningRate 
+                        elif event.key == pygame.K_DOWN:
+                            vOffset -= panningRate 
+                        elif event.key == pygame.K_MINUS:
+                            PPM -= 1
+                        elif event.key == pygame.K_EQUALS:
+                            PPM += 1
             time +=self.physicsStep
 
     def simulate(self,offset=(0,0),timeToRun=10):
