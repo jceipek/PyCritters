@@ -33,12 +33,12 @@ simEnv = simulationEnvironment.SimulationEnvironment(vis=True, gravity=False)
 
 rects,hinges = simEnv.addCreature(creature)
 
-print rects
+print [rect.position for rect in rects]
 print hinges
 
-joint = simEnv.getConstraint(rects[0], rects[2])
+#joint = simEnv.getConstraint(rects[0], rects[2])
 #print joint.motorSpeed
-joint.motorSpeed = 2
+#joint.motorSpeed = 2
 
 #simEnv.addPhysicsObject(ground)
 
