@@ -161,7 +161,7 @@ if __name__ == '__main__':
     reproduction = genetics.Spartans(10, Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 20)
     evo.populate()
-    evo.run(5)
+    evo.run(maxSteps=100)
 
 
 

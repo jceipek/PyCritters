@@ -22,6 +22,8 @@ class Renderer(object):
         if self.showCoords:
             fontName = pygame.font.get_default_font()
             self.font = pygame.font.Font(fontName, 12)
+
+        self.colors = [] 
     
     def render(self, offset, PPM):
         """Draws all objects in self.world
@@ -30,6 +32,9 @@ class Renderer(object):
         offset is the offset used for panning, and PPM is the pixels per meter resolution
         """
         self.screen.fill((0,0,0))
+        colorId = 0
+        if len(self.world.bodies) > len(self.colors):
+            self.colors = [(random.randint(100,255),random.randint(100,255),random.randint(100,255)) for _ in self.world.bodies]
         for body in self.world.bodies: # or: world.bodies
             # The body gives us the position and angle of its shapes
             for fixture in body.fixtures:
@@ -51,10 +56,8 @@ class Renderer(object):
                 # the y components.
                 pgvertices=[(v[0]*PPM+offset[0], Renderer.SCREEN_HEIGHT-v[1]*PPM+offset[1]) for v in realVertices]
                 
-                c1 = random.randint(100,255)          
-                c2 = random.randint(100,255)          
-                c3 = random.randint(100,255)          
-                color = (c1,c2,c3)
+                color = self.colors[colorId]
+                colorId += 1
 
                 pygame.draw.polygon(self.screen,color, pgvertices)
 
@@ -64,19 +67,18 @@ class Renderer(object):
                         surf = self.font.render(vstr, True, (255,255,255))
                         self.screen.blit(surf, scaledv)
 
-        for jointEdge in body.joints:
-            
-            ax, ay = jointEdge.joint.anchorA
-            ax = int(ax * PPM + offset[0] + 0.5)
-            ay = int(Renderer.SCREEN_HEIGHT - (ay * PPM) + offset[1] + 0.5)
+            for jointEdge in body.joints:
+                ax, ay = jointEdge.joint.anchorA
+                ax = int(ax * PPM + offset[0] + 0.5)
+                ay = int(Renderer.SCREEN_HEIGHT - (ay * PPM) + offset[1] + 0.5)
 
-            bx, by = jointEdge.joint.anchorB
-            bx = int(bx * PPM + offset[0] + 0.5)
-            by = int(Renderer.SCREEN_HEIGHT - (by * PPM) + offset[1] + 0.5)
+                bx, by = jointEdge.joint.anchorB
+                bx = int(bx * PPM + offset[0] + 0.5)
+                by = int(Renderer.SCREEN_HEIGHT - (by * PPM) + offset[1] + 0.5)
 
 
-            pygame.draw.circle(self.screen, (0,255,0),(ax,ay), 3)
-            pygame.draw.circle(self.screen, (0,0,255), (bx,by), 5, 1)
+                pygame.draw.circle(self.screen, (0,255,0),(ax,ay), 3)
+                pygame.draw.circle(self.screen, (0,0,255), (bx,by), 5, 1)
                     
 
         pygame.display.flip()
