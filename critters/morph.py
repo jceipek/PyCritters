@@ -175,7 +175,7 @@ class MorphConnection(object):
                                self.recursionLimit)
         
     def _createActuators(self):
-        return Actuator(), Actuator()
+        return (Actuator(),)
     
     def __getitem__(self, index):
         return self.nodes[index]

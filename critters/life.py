@@ -60,7 +60,7 @@ class ReifiedCreature(object):
                                   self.connections])
     
     def _conformNeuralNet(self):
-        self.neuralNet.conform(self.numSensors, len(self.connections))
+        self.neuralNet.conform(self.numSensors, len(self.actuators))
         
     def _getConnections(self, bodyPart):
         return [data['connection'] for _, _, data in 
@@ -131,7 +131,7 @@ class ReifiedCreature(object):
 
         self.rects = rects.values()
         self.hinges = hinges
-            
+        
         return self.rects, self.hinges
 
 class DistanceCompetition(genetics.IndividualCompetition):
@@ -147,7 +147,7 @@ class DistanceCompetition(genetics.IndividualCompetition):
         
         try:
             rects, hinges = simEnv.addCreature(individual)
-        except RuntimeError, e:
+        except RuntimeError as e:
             print e
             return 0.00001
         if not rects or not hinges: return 0.00001
