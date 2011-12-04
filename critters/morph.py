@@ -88,7 +88,7 @@ class Morphology(object):
                 else:
                     subDepth = 0
                 
-                print id(neighbor)
+                #print id(neighbor)
                 subroot, subgraph = expandNode(neighbor, subDepth)
                 
                 graph.add_nodes_from(subgraph.nodes_iter())

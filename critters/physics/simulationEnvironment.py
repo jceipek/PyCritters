@@ -1,6 +1,6 @@
 import time
 from critters.visualization.render import Renderer
-from critters.physics.objects import (StaticPhysicsObject,StaticRect)
+from critters.physics.objects import (StaticPhysicsObject,StaticRect,DynamicPhysicsObject)
 import pygame
 from Box2D import b2 
 import math
@@ -10,6 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
+    MAX_SPEED = 100 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -66,15 +67,15 @@ class SimulationEnvironment(object):
         if isinstance(physObj, StaticPhysicsObject):
             body = self.world.CreateStaticBody(position=physObj.position,
                                         shapes=b2.polygonShape(box=physObj.size))
-        else:
+        elif isinstance(physObj,DynamicPhysicsObject):
             if len(physObj.size) != 2:
                 raise ValueError("Size must be a two-tuple")
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
             halfSize = tuple(x/2.0 for x in physObj.size) #box takes half size, not full size
             body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction)
+        else:
+            raise ValueError("Object was neither a StaticPhysicsObject nor a DynamicPhysicsObject. Unexpected")
 
-        
-        
 
         self.objectDict[physObj.identifier] = body
         
@@ -150,8 +151,13 @@ class SimulationEnvironment(object):
             for i in range(len(phenotype.hinges)):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
-                joint.motorSpeed = actuatorValues[i]
-
+                
+                if math.copysign(1,actuatorValues[i]) == -1:
+                    actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
+                else:
+                    actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
+                joint.motorSpeed = actValue
+                
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
 
     def placeGround(self):
@@ -159,15 +165,16 @@ class SimulationEnvironment(object):
         for body in self.world.bodies: # or: world.bodies
             for fixture in body.fixtures:
                 shape=fixture.shape
-                
-                tMin = min([v[1] for v in  shape.vertices])
-                
+                tMin = min([(body.transform*v)[1] for v in  shape.vertices])
                 if currentMinY == None or tMin < currentMinY:
                     currentMinY = tMin
-        self.ground= StaticRect(position=(0,tMin-1),size=(150,1))
+        self.ground= StaticRect(position=(0,currentMinY-1),size=(150,1))
         self.addPhysicsObject(self.ground)
         
+
+        
     def run(self, offset=(0,0),timeToRun=None):
+
         hOffset, vOffset = offset
         PPM = 20.0
         panningRate = 5
@@ -211,6 +218,7 @@ class SimulationEnvironment(object):
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
         '''
+
         self.placeGround()
         self.run(offset=offset,timeToRun=timeToRun)
         
