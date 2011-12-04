@@ -147,6 +147,7 @@ class SimulationEnvironment(object):
             actuatorValues = actuatorDict.values() #XXX:TODO: preserve order better.
             if len(actuatorValues) != len(phenotype.hinges): #these must be 1:1, otherwise it makes no sense
                 print len(actuatorValues), len(phenotype.hinges)
+                print len(phenotype.actuators)
                 raise ValueError, "actuatorValues length is inconsistent with phenotype hinge length"
             for i in range(len(phenotype.hinges)):
                 connection = phenotype.hinges[i]

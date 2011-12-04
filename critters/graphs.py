@@ -73,7 +73,7 @@ def _graft(graphs):
     g1.remove_node(replacementSite)
     
     for prev, _, data in incomingConnections:
-        connection = data['connection'].withNewVertices(prev, root)
+        connection = data['connection'].withNewVertices((prev, root))
         _addConnection(g1, connection)
     
     garbageCollect(g1)

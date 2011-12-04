@@ -27,7 +27,9 @@ class Critter(genetics.Genotype):
         return Critter(self.numSensors, newMorph, newNN)
         
     def crossover(self, other):
-        assert False
+        newNN = self.neuralNet.crossover(other.neuralNet)[0]
+        newMorph = self.morphology.crossover(other.morphology)[0]
+        return Critter(self.numSensors, newMorph, newNN)
     
 class ReifiedCreature(object):
     
@@ -79,11 +81,24 @@ class ReifiedCreature(object):
         
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
+                vertex = int(position)
+                r = position - vertex
+                
                 x = rect.size[0]/2.0
                 y = rect.size[1]/2.0
                 
-                if position >= 2: x *= -1
-                if position == 0 or position == 3: y *= -1
+                if vertex == 0:
+                    y = 2*r*y - y
+                elif vertex == 1:
+                    x = x - 2*r*x
+                elif vertex == 2:
+                    x *= -1
+                    y = y - 2*r*y
+                elif vertex == 3:
+                    y *= -1
+                    x = 2*r*x - x
+                else:
+                    assert False
                 
                 return x, y
             
@@ -143,7 +158,8 @@ class DistanceCompetition(genetics.IndividualCompetition):
     def _doCalculation(self, individual):
         self._count += 1
         
-        simEnv = SimulationEnvironment(vis=(self._count % 10 == 0))
+        #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
+        simEnv = SimulationEnvironment(vis=False)
         
         try:
             rects, hinges = simEnv.addCreature(individual)
@@ -154,14 +170,22 @@ class DistanceCompetition(genetics.IndividualCompetition):
         
         simEnv.simulate(timeToRun=self.maxTime)
         
-        meanX = sum(r.position[0] for r in rects)/float(len(rects))
-        return max(0.00001, meanX)
+        score = sum(r.position[0] for r in rects)/float(len(rects))
+        if len(rects) > 8:
+            score /= float(len(rects) - 8)
+        
+        return max(0.00001, score)
 
 if __name__ == '__main__':
-    reproduction = genetics.Spartans(10, Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 20)
+    reproduction = genetics.MatedReproduction(Critter)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
     evo.populate()
-    evo.run(maxSteps=100)
+    
+    def onGeneration(latest, n):
+        print n, latest.maxFitness, latest.meanFitness, latest.size
+    
+    evo.run(maxSteps=500, onGeneration=onGeneration)
+    print "done"
 
 
 

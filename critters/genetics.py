@@ -1,6 +1,7 @@
 
 import operator
 import random
+import Cdf
 
 class Genotype(object):
     
@@ -34,6 +35,10 @@ class Population(object):
     
     def __getitem__(self, index):
         return self.individuals[index]
+        
+    @property
+    def maxFitness(self):
+        return max(self.scores.values())
         
 class FitnessCalculator(object):
     
@@ -80,23 +85,50 @@ class ReproductionMechanism(object):
     def newGeneration(self, population):
         assert False
         
+    def _getTop(self, population, n):
+        ranked = sorted(population.scores.iteritems(), 
+                        key=operator.itemgetter(1), reverse=True)
+        return map(operator.itemgetter(0), ranked[:n])
+
 class Spartans(ReproductionMechanism):
     
     def __init__(self, numSpartans, createRandomIndividual):
         ReproductionMechanism.__init__(self, createRandomIndividual)
         self.numSpartans = numSpartans
         
-    def getSpartans(self, scores):
-        ranked = sorted(scores.iteritems(), key=operator.itemgetter(1), 
-                        reverse=True)
-        return map(operator.itemgetter(0), ranked[:self.numSpartans])
-        
     def newGeneration(self, population):
-        spartans = self.getSpartans(population.scores)
+        spartans = self._getTop(population, self.numSpartans)
         
         newIndividuals = spartans
         for _ in range(population.size - len(newIndividuals)):
             newIndividuals.append(random.choice(spartans).mutate())
+        
+        return Population(newIndividuals)
+        
+class MatedReproduction(ReproductionMechanism):
+    
+    def __init__(self, createRandomIndividual, 
+                 mated=0.5, spartans=0.1, asexual=0.3):
+        ReproductionMechanism.__init__(self, createRandomIndividual)
+        self.mated = mated
+        self.spartans = spartans
+        self.asexual = asexual
+        
+    def newGeneration(self, population):
+        newIndividuals = self._getTop(population, 
+                                      int(self.spartans*population.size))
+        
+        fitnessCdf = Cdf.MakeCdfFromDict(population.scores)
+        def randomParent(): return fitnessCdf.Random()
+        
+        for _ in range(int(self.mated*population.size)):
+            newIndividuals.append(randomParent().crossover(randomParent()))
+        
+        for _ in range(int(self.asexual*population.size)):
+            newIndividuals.append(randomParent().mutate())
+            
+        for _ in range(population.size - len(newIndividuals)):
+            newIndividuals.append(self.createRandomIndividual())
         
         return Population(newIndividuals)
         

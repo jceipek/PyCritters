@@ -156,14 +156,16 @@ class NeuralNetwork(object):
                     
         inputDiff = numInputs - self.numInputs
         if inputDiff: 
-            fixLayer(self.inputNodes, inputDiff, InputNode, numOuputs=5)
+            fixLayer(self.inputNodes, inputDiff, InputNode, numOutputs=5)
         
         outputDiff = numOutputs - self.numOutputs
         if outputDiff: 
-            fixLayer(self.outputNodes, outputDiff, randomNode, numInputs=5)
+            fixLayer(self.outputNodes, outputDiff, OutputNode, numInputs=5)
         
-        graphs.garbageCollect(self.graph, 
-                              shouldIgnore=lambda n: isinstance(n, InputNode))
+        def shouldIgnore(node):
+            return node.isInput or node.isOutput
+        
+        graphs.garbageCollect(self.graph, shouldIgnore=shouldIgnore)
     
     def mutate(self):
         newNN = self.clone()
@@ -232,6 +234,9 @@ class NeuralConnection(object):
         
     def __getitem__(self, *args):
         return self.nodes.__getitem__(*args)
+        
+    def withNewVertices(self, nodes):
+        return NeuralConnection(nodes, self.weight)
  
 class Node(object):
     """The base class for a neural network node.
