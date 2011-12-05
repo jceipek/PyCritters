@@ -2,9 +2,6 @@
 import operator
 import random
 import Cdf
-from multiprocessing import Process,Queue,cpu_count,Manager
-from Queue import Empty
-import math
 
 class Genotype(object):
     
@@ -53,31 +50,7 @@ class FitnessCalculator(object):
 class IndividualCompetition(FitnessCalculator):
     
     def calculate(self, individuals):
-
-        def do_work(q,r,fun): #passed in when creating processes
-            while True:
-                try:
-                    x = q.get(block=False)
-                    r.append(fun(x))
-                except Empty:
-                    break
-    
-        work_queue = Queue()
-        manager = Manager()
-        res = manager.list()
-        processes = [Process(target=do_work, args=(work_queue,res,self._doCalculation)) for i in range(cpu_count())]
-        
-        for indv in individuals:
-            work_queue.put(indv)
-        for p in processes:
-            p.start()
-        for p in processes:
-            p.join()
-        print res
-        realDict = res.copy()
-        print realDict
-        assert len(realDict.keys()) == len(individuals)
-        return realDict
+        return dict((indv, self._doCalculation(indv)) for indv in individuals)
     
     def _doCalculation(self, individual):
         assert False

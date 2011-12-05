@@ -6,7 +6,7 @@ import networkx as nx
 from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
-import datetime
+
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -155,10 +155,12 @@ class DistanceCompetition(genetics.IndividualCompetition):
         self.maxTime = maxTime
         self._count = 0
     
-    def _doCalculation(individual):
-        #self._count += 1
+    def _doCalculation(self, individual):
+        self._count += 1
+        
         #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
         simEnv = SimulationEnvironment(vis=False)
+        
         try:
             rects, hinges = simEnv.addCreature(individual)
         except RuntimeError as e:
@@ -180,8 +182,7 @@ if __name__ == '__main__':
     evo.populate()
     
     def onGeneration(latest, n):
-        print n, latest.maxFitness, latest.meanFitness, latest.size,datetime.datetime.now().time()
-
+        print n, latest.maxFitness, latest.meanFitness, latest.size
     
     evo.run(maxSteps=500, onGeneration=onGeneration)
     print "done"
