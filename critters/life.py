@@ -6,7 +6,7 @@ import networkx as nx
 from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
-
+import datetime
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     evo.populate()
     
     def onGeneration(latest, n):
-        print n, latest.maxFitness, latest.meanFitness, latest.size
+        print n, latest.maxFitness, latest.meanFitness, latest.size, datetime.datetime.now().time()
     
     evo.run(maxSteps=500, onGeneration=onGeneration)
     print "done"
