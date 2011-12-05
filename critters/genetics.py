@@ -160,6 +160,7 @@ class Evolution(object):
             previousGen = self.latestGeneration
             nextGen = self.reproductionMechanism.newGeneration(previousGen)
             nextGen.calculateFitness(self.fitnessCalculator)
+            self.populations = self.populations[1:] #save memory, please :-) #TODO: write to disk
             self.populations.append(nextGen)
             
         for _ in range(maxSteps):

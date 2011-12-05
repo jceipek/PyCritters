@@ -153,11 +153,9 @@ class DistanceCompetition(genetics.IndividualCompetition):
     
     def __init__(self, maxTime=5.0):
         self.maxTime = maxTime
-        self._count = 0
+
     
-    def _doCalculation(self, individual):
-        self._count += 1
-        
+    def _doCalculation(self, individual):       
         #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
         simEnv = SimulationEnvironment(vis=False)
         
