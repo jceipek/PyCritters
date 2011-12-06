@@ -20,3 +20,11 @@ Thumbs.db
 # Meld generated files#
 ######################
 *.orig
+
+
+#LaTeX
+####################
+case_study/*.aux
+case_study/*.log
+case_study/*.out
+case_study/*.*.gz
