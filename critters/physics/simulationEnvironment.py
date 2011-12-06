@@ -157,6 +157,7 @@ class SimulationEnvironment(object):
                     actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
                 else:
                     actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
+                print actValue
                 joint.motorSpeed = actValue
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
@@ -214,7 +215,7 @@ class SimulationEnvironment(object):
                             PPM += 1
             time +=self.physicsStep
 
-    def simulate(self,offset=(300,-200),timeToRun=10):
+    def simulate(self,offset=(300,-200),timeToRun=None):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    

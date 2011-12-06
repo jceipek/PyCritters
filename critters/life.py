@@ -81,7 +81,7 @@ class ReifiedCreature(object):
         
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
-                vertex = int(position)
+                vertex = int(position) % 4
                 r = position - vertex
                 
                 x = rect.size[0]/2.0
