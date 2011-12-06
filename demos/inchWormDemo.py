@@ -1,6 +1,6 @@
 """
 A simple demonstration of how to use the SimulationEnvironment and 
-Creatures.
+Creatures with an example "Inchworm" creature
 """
 
 from critters.physics import simulationEnvironment

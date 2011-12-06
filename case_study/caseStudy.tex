@@ -122,7 +122,7 @@ class Arrangement(genetics.Individual):
 		self.queens = queens or self.makeRandomQueens()
 \end{verbatim}
 
-To create a random arrangement and allow for mutations, we’ll use the mutations module:
+To create a random arrangement and allow for mutations, we’ll use the \verb|mutations| module:
 \begin{verbatim}
 import mutations
 ...
@@ -146,11 +146,21 @@ def mutate(self):
 	newQueens = [(self.randomRowValue(row), self.randomColumnValue(col))
                    for row, col in self.queens]
 	return Arrangement(newQueens)
-		
-
 \end{verbatim}
 
-Will explain framework of \verb|Genotype|, \verb|phenotype|, \verb|Population|, \verb|Fitness Calculator|, \verb|Reproduction Mechanism|, \verb|mutations|, \verb|Evolution|. As an exciting python feature, explain \verb|@property|, \verb|@cached| and decorators.
+Finally, we need a way to \emph{crossover} parts of two different arrangements:
+\begin{verbatim}
+import random
+...
+def crossover(self, otherArrangement):
+	crossoverPoint = random.randint(0, 8-1)
+	newQueens = self.queens[:crossoverPoint] + \
+otherArrangement.queens[crossoverPoint:]
+	return Arrangement(newQueens)
+\end{verbatim}
+
+\TODO{Will finish eight queens example to explain the rest of the framework}
+
 \end{ex}
 
 \section{Implementing Neural Networks and Genetic Algorithms}
@@ -161,13 +171,13 @@ Using NetworkX and directed graphs to do this
 \section{Making Virtual Creatures}
 
 \subsection{Representing Creatures}
-As is standard in genetic algorithms, creatures are referred to as individuals. An individual is represented by a Genotype which represents the definition for the Phenotype of a creature. Creatuers are represented as a combination of a body and a brain. 
+As is standard in genetic algorithms, creatures are referred to as individuals. Individuals have two fundamental components: a brain and a body. 
 
 \subsubsection{The body}
-We define the body of a creature using a Morphology object. This object wraps a MultiDirectedGraph \TODO{(we should talk about why we use a multidirected graph, and perhaps how/why we expand it into a Tree)}.  
+We define the body of a creature using a Morphology object. This object wraps a MultiDirectedGraph \TODO{(we should talk about why we use a multidirected graph, and perhaps how/why we expand it into a Tree)}.  In this graph, each body part is represented as a node, and connections between body parts are represented as edges. The directed graph allows cycles, and thus when building a physical representation, the expand() method is used to create a tree that is easy to parse, in this process a recursion limit is imposed. An example morphology and the body defined by the morphology is provided below:\TODO{this needs to be fleshed out and rewritten}
 
 \subsubsection{The mind}
-The brain of a creature is represented as a neural network as detailed previously.  The outputs of the neural network are mapped to actuators located in the joint between two body parts. 
+The brain of a creature is represented as a neural network as detailed previously.  The outputs of the neural network are mapped to actuators located in the joint between two body parts. \TODO{link this to body}
 
 \subsection{Simulating Creatures in Physical Environments}
 The physics package \verb|PyBox2d| is well suited for physics implementation and calculations, it provides joints, rigid bodies and collision detection. In order to visualize the creatures, we use a popular visualization library, \verb|PyGame|. Abstracting further away from the details of physics implementation, a Simulation Environment object was created to encapsulate the world in which virtual creatures are simulated, it provides physics simulation and visualization.

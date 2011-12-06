@@ -134,7 +134,7 @@ class SimulationEnvironment(object):
             return None
 
         
-    def step(self):
+    def _step(self):
         '''
         Simulates one time step in the physic engine, rendering it to the pyGame window.
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
@@ -161,7 +161,7 @@ class SimulationEnvironment(object):
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
 
-    def placeGround(self):
+    def _placeGround(self):
         currentMinY = None 
         for body in self.world.bodies: # or: world.bodies
             for fixture in body.fixtures:
@@ -174,7 +174,7 @@ class SimulationEnvironment(object):
         
 
         
-    def run(self, offset=(0,0),timeToRun=None):
+    def _run(self, offset=(0,0),timeToRun=None):
 
         hOffset, vOffset = offset
         PPM = 20.0
@@ -190,7 +190,7 @@ class SimulationEnvironment(object):
             shouldRun= lambda t: t < timeToRun
             
         while running and shouldRun(time):
-            self.step()
+            self._step()
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
                 clock.tick(60)
@@ -214,14 +214,14 @@ class SimulationEnvironment(object):
                             PPM += 1
             time +=self.physicsStep
 
-    def simulate(self,offset=(300,-200),timeToRun=10):
+    def simulate(self,offset=(300,-200),timeToRun=None):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
         '''
 
-        self.placeGround()
-        self.run(offset=offset,timeToRun=timeToRun)
+        self._placeGround()
+        self._run(offset=offset,timeToRun=timeToRun)
         
 if __name__ =='__main__':
     print("Not intended to be run as a script")

@@ -6,7 +6,7 @@ import networkx as nx
 from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
-
+import datetime
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -81,7 +81,7 @@ class ReifiedCreature(object):
         
         def createHinge(connection, r1, r2):
             def positionToLocal(rect, position):
-                vertex = int(position)
+                vertex = int(position) % 4
                 r = position - vertex
                 
                 x = rect.size[0]/2.0
@@ -153,13 +153,11 @@ class DistanceCompetition(genetics.IndividualCompetition):
     
     def __init__(self, maxTime=5.0):
         self.maxTime = maxTime
-        self._count = 0
+
     
-    def _doCalculation(self, individual):
-        self._count += 1
-        
-        simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
-        #simEnv = SimulationEnvironment(vis=False)
+    def _doCalculation(self, individual):       
+        #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
+        simEnv = SimulationEnvironment(vis=False)
         
         try:
             rects, hinges = simEnv.addCreature(individual)
@@ -177,13 +175,27 @@ class DistanceCompetition(genetics.IndividualCompetition):
         return max(0.00001, score)
 
 if __name__ == '__main__':
+    import os
+    _outputFileName = os.path.join(os.getcwd(),'output.csv')
+    outputFileName = _outputFileName + '' #ensure they are not the same reference
+    i = 0
+    while os.path.exists(outputFileName):
+        outputFileName = _outputFileName + "(%d)"%i
+        print 'lala'
+    print outputFileName
+    outFile = open(outputFileName,'w')
+
+
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
     evo.populate()
-    
+
     def onGeneration(latest, n):
-        print n, latest.maxFitness, latest.meanFitness, latest.size
-    
+        print len(latest.scores.values())
+        myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
+        myList.extend([str(round(f,5)) for f in latest.scores.values()])
+        outFile.write(" , ".join(myList) + "\n")
+        print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
     evo.run(maxSteps=500, onGeneration=onGeneration)
     print "done"
 

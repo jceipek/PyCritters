@@ -139,6 +139,7 @@ class Evolution(object):
         self.reproductionMechanism = reproductionMechanism
         self.fitnessCalculator = fitnessCalculator
         self.populationSize = populationSize
+        self._numGenerations = 0
     
     @property
     def latestGeneration(self): return self.populations[-1]
@@ -147,7 +148,7 @@ class Evolution(object):
     def basePopulation(self): return self.populations[0]
     
     @property
-    def numGenerations(self): return len(self.populations)
+    def numGenerations(self): return self._numGenerations
     
     def populate(self):
         self.populations = []
@@ -160,7 +161,9 @@ class Evolution(object):
             previousGen = self.latestGeneration
             nextGen = self.reproductionMechanism.newGeneration(previousGen)
             nextGen.calculateFitness(self.fitnessCalculator)
+            self.populations = self.populations[1:] #save memory, please :-) #TODO: write to disk
             self.populations.append(nextGen)
+            self._numGenerations +=1
             
         for _ in range(maxSteps):
             doGeneration()
