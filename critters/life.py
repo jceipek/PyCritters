@@ -175,13 +175,27 @@ class DistanceCompetition(genetics.IndividualCompetition):
         return max(0.00001, score)
 
 if __name__ == '__main__':
+    import os
+    _outputFileName = os.path.join(os.getcwd(),'output.csv')
+    outputFileName = _outputFileName + '' #ensure they are not the same reference
+    i = 0
+    while os.path.exists(outputFileName):
+        outputFileName = _outputFileName + "(%d)"%i
+        print 'lala'
+    print outputFileName
+    outFile = open(outputFileName,'w')
+
+
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
     evo.populate()
-    
+
     def onGeneration(latest, n):
-        print n, latest.maxFitness, latest.meanFitness, latest.size, datetime.datetime.now().time()
-    
+        print len(latest.scores.values())
+        myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
+        myList.extend([str(round(f,5)) for f in latest.scores.values()])
+        outFile.write(" , ".join(myList) + "\n")
+        print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
     evo.run(maxSteps=500, onGeneration=onGeneration)
     print "done"
 
