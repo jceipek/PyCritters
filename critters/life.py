@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
 
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
     evo.populate()
 
     def onGeneration(latest, n):
