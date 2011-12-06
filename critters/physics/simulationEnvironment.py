@@ -157,7 +157,6 @@ class SimulationEnvironment(object):
                     actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
                 else:
                     actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                print actValue
                 joint.motorSpeed = actValue
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
