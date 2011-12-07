@@ -62,6 +62,9 @@ def crossover(graph1, graph2, rate=0.3, method="graft"):
     
 def _graft(graphs):
     g1, g2 = graphs
+    if not g1.nodes() or g2.nodes():
+        return g1, g2
+    
     root = choice(g2.nodes())
     
     graftNodes, graftConnections = subgraphFromNode(root, g2)
