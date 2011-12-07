@@ -4,6 +4,7 @@ import networkx as nx
 import copy
 import math
 import graphs
+import Cdf
 from critters.mutations import *
 from critters.utils import *
 from random import random, choice, sample, randint, normalvariate
@@ -213,8 +214,8 @@ def randomNodes(n=1, **kwgs):
     Selects from all node types except input nodes and initializes them with no
     parameters specified (should yield random parameters).
     """
-    types = nodeTypes(**kwgs)
-    return [choice(types)() for _ in range(n)]
+    cdf = Cdf.MakeCdfFromItems((t, t.FREQUENCY) for t in nodeTypes(**kwgs))
+    return [cdf.Random()() for _ in range(n)]
 
 def randomNode(**kwgs):
     return randomNodes(n=1, **kwgs)[0]
@@ -248,6 +249,8 @@ class Node(object):
     Attributes:
         output (the output of the node)
     """
+    
+    FREQUENCY = 1.0
     
     def __init__(self):
         self.output = 0
@@ -303,6 +306,8 @@ class InputNode(Node):
     
 class SumNode(Node):
     """A node that returns the sum of all inputs."""
+    
+    FREQUENCY = 5.0
     
     def process(self, inputs, dt):
         self.output = sum(inputs)
@@ -428,6 +433,8 @@ class IfNode(Node):
         self.output = 0
 
 class SineNode(Node):
+    
+    FREQUENCY = 15.0
     
     _periodValue = MutableFloat(range=(0.01, 2*math.pi))
     
