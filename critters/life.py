@@ -106,7 +106,12 @@ class ReifiedCreature(object):
                     r1, positionToLocal(r1, connection.locations[0]), 
                     r2, positionToLocal(r2, connection.locations[1]))
         
-        root = next(self.morphology.nodes_iter())
+        try:
+            root = next(self.morphology.nodes_iter())
+        except StopIteration:
+            print "Empty morphology"
+            return [], []
+        
         rects = {}
         hinges = []
 
