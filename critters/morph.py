@@ -60,9 +60,13 @@ class Morphology(object):
         
         rootCache = set()
         def findRoot(diGraph, current=None):
-            current = current or next(diGraph.nodes_iter())
+            try:
+                current = current or next(diGraph.nodes_iter())
+            except StopIteration:
+                return None
+            
             pred = [v for v in diGraph.predecessors(current) 
-                       if v not in rootCache]
+                    if v not in rootCache]
             if not pred: 
                 return current
             else: 
@@ -101,11 +105,17 @@ class Morphology(object):
             cache[key] = value
             return value
         
-        return expandNode(findRoot(self.graph), 0)[1]
+        root = findRoot(self.graph)
+        return expandNode(root, 0)[1] if root else nx.Graph()
     
     def mutate(self):
         newMorph = self.clone()
         graphs.mutate(newMorph.graph, MorphNode, MorphConnection)
+        
+        graphs.garbageCollect(newMorph.graph)
+        if not newMorph.graph.nodes():
+            newMorph.createConnection(MorphNode(), MorphNode())
+        
         return newMorph
     
     def crossover(self, other):
