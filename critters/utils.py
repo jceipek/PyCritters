@@ -66,3 +66,4 @@ def cached(fn):
         return getattr(self, cacheVar)
     
     return functools.update_wrapper(wrapper, fn)
+
