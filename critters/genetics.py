@@ -1,7 +1,28 @@
-
+from multiprocessing import Pool
 import operator
 import random
 import Cdf
+import copy_reg
+import types
+def _pickle_method(method):
+    func_name = method.im_func.__name__
+    obj = method.im_self
+    cls = method.im_class
+    return _unpickle_method, (func_name, obj, cls)
+
+def _unpickle_method(func_name, obj, cls):
+    for cls in cls.mro():
+        try:
+            func = cls.__dict__[func_name]
+        except KeyError:
+            pass
+        else:
+            break
+    return func.__get__(obj, cls)
+    
+copy_reg.pickle(types.MethodType, _pickle_method, _unpickle_method)
+
+
 
 class Genotype(object):
     
@@ -44,15 +65,34 @@ class FitnessCalculator(object):
     
     def calculate(self, individuals):
         assert False
-        # return dict mapping from individuals to scores
+
         
 # Fitness are calculated based on individual performance only
 class IndividualCompetition(FitnessCalculator):
     
     def calculate(self, individuals):
-        return dict((indv, self._doCalculation(indv)) for indv in individuals)
-    
-    def _doCalculation(self, individual):
+
+        try:
+            resultDict = dict()
+            def cb(aTup):
+                #print aTup
+                resultDict[aTup[0]] = aTup[1]         # return dict mapping from individuals to scores             
+                #print "callback called"
+            po = Pool()
+            for indv in individuals:
+                po.apply_async(self._doCalculation,(indv,),callback=cb)
+            
+            po.close()
+            po.join()
+            #print resultDict
+            return resultDict
+        except KeyboardInterrupt:
+            print "caught interrupt, killing pool"
+            po.terminate()
+            raise KeyboardInterrupt
+        
+
+    def _doCalculation(self,individual):
         assert False
         # return individual score
         
@@ -190,7 +230,8 @@ if __name__ == '__main__':
         def crossover(self, other):
             avg = (self.num + other.num) / 2.0
             return TestIndividual(avg), TestIndividual(avg)
-        
+
+
     class TestCompetition(IndividualCompetition):
         
         def __init__(self, target=2.5):
@@ -199,7 +240,7 @@ if __name__ == '__main__':
         def _doCalculation(self, individual):
             return self.target**2 - (individual.phenotype - self.target)**2
         
-    evo = Evolution(Spartans(5, TestIndividual), TestCompetition(), 10)
+    evo = Evolution(Spartans(5, TestIndividual), TestCompetition(), 1000)
     evo.populate()
     evo.run(10)
     print evo.basePopulation.meanFitness, evo.latestGeneration.meanFitness

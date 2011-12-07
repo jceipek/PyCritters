@@ -160,8 +160,8 @@ class DistanceCompetition(genetics.IndividualCompetition):
     def __init__(self, maxTime=10.0):
         self.maxTime = maxTime
 
-    
-    def _doCalculation(self, individual):       
+
+    def _doCalculation(self,individual):       
         #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
         simEnv = SimulationEnvironment(vis=True)
         
@@ -169,8 +169,8 @@ class DistanceCompetition(genetics.IndividualCompetition):
             rects, hinges = simEnv.addCreature(individual)
         except RuntimeError as e:
             print e
-            return 0.00001
-        if not rects or not hinges: return 0.000001
+            return (individual,0.00001)
+        if not rects or not hinges: return (individual,0.00001)
         
         initAvgPos = sum(r.position[0] for r in rects)/float(len(rects))
         
@@ -181,7 +181,7 @@ class DistanceCompetition(genetics.IndividualCompetition):
         if len(rects) > 8:
             score /= float(len(rects) - 8)
         
-        return max(0.00001, score)
+        return (individual,max(0.00001, score))
 
 if __name__ == '__main__':
     import os
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     outFile = open(outputFileName,'w')
 
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 10)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
     evo.populate()
 
     def onGeneration(latest, n):
