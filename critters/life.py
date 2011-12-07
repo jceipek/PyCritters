@@ -166,9 +166,11 @@ class DistanceCompetition(genetics.IndividualCompetition):
             return 0.00001
         if not rects or not hinges: return 0.00001
         
+        initAvgPos = sum(r.position[0] for r in rects)/float(len(rects))
+        
         simEnv.simulate(timeToRun=self.maxTime)
         
-        score = sum(r.position[0] for r in rects)/float(len(rects))
+        score = sum(r.position[0] for r in rects)/float(len(rects)) - initAvgPos
         if len(rects) > 8:
             score /= float(len(rects) - 8)
         
