@@ -178,15 +178,15 @@ class DistanceCompetition(genetics.IndividualCompetition):
 
 if __name__ == '__main__':
     import os
-    _outputFileName = os.path.join(os.getcwd(),'output.csv')
-    outputFileName = _outputFileName + '' #ensure they are not the same reference
+    _outputFileName = os.path.join(os.getcwd(),'output')
+    outputFileName = _outputFileName + '.csv' 
     i = 0
     while os.path.exists(outputFileName):
-        outputFileName = _outputFileName + "(%d)"%i
-        print 'lala'
+        outputFileName = _outputFileName + "(%d).csv"%i 
+        i +=1
+
     print outputFileName
     outFile = open(outputFileName,'w')
-
 
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
@@ -198,7 +198,12 @@ if __name__ == '__main__':
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
         print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
-    evo.run(maxSteps=500, onGeneration=onGeneration)
+    try:    
+        evo.run(maxSteps=500, onGeneration=onGeneration)
+    except KeyboardInterrupt:
+        print "caught interrupt, writing to disk"
+        outFile.flush()
+        
     print "done"
 
 
