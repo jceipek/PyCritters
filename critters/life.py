@@ -167,7 +167,6 @@ class DistanceCompetition(genetics.IndividualCompetition):
         if not rects or not hinges: return 0.00001
         
         initAvgPos = sum(r.position[0] for r in rects)/float(len(rects))
-        
         simEnv.simulate(timeToRun=self.maxTime)
         
         score = sum(r.position[0] for r in rects)/float(len(rects)) - initAvgPos
@@ -183,7 +182,7 @@ if __name__ == '__main__':
     i = 0
     while os.path.exists(outputFileName):
         outputFileName = _outputFileName + "(%d).csv"%i 
-        i +=1
+        i += 1
 
     print outputFileName
     outFile = open(outputFileName,'w')
