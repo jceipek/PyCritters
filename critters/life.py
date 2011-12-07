@@ -163,7 +163,7 @@ class DistanceCompetition(genetics.IndividualCompetition):
 
     def _doCalculation(self,individual):       
         #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
-        simEnv = SimulationEnvironment(vis=True)
+        simEnv = SimulationEnvironment(vis=False)
         
         try:
             rects, hinges = simEnv.addCreature(individual)
@@ -200,7 +200,6 @@ if __name__ == '__main__':
     evo.populate()
 
     def onGeneration(latest, n):
-        print [(len(c.morphology.graph.nodes()), latest.scores[c]) for c in latest]
         myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
