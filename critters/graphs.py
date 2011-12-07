@@ -6,7 +6,7 @@ from random import random, randint, sample, shuffle, choice
 DEFAULT_MUTATION_RATES = { 'node': 0.3, 
                            'removeConnection': 0.01,
                            'connection': 0.3,
-                           'newNodeConnection': 0.01,
+                           'newNodeConnection': 0.06,
                            'addEdgeRatio': 0.1,
                          }
 

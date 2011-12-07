@@ -49,15 +49,13 @@ class SimulationEnvironment(object):
     def addCreature(self, creature):
         phenotype = creature.phenotype
         rects, hinges = phenotype.buildPhysicsObject()
-        for r in rects:
-            self.addPhysicsObject(r)
-
-        for h in hinges:
-            self.addConstraint(h)
+        
+        physObjs = [self.addPhysicsObject(r) for r in rects]
+        constraints = [self.addConstraint(h) for h in hinges]
 
         #TODO: Figure out what this should actually return!
         self.creatures[creature] = phenotype
-        return rects,hinges
+        return physObjs, constraints
 
     def addPhysicsObject(self, physObj, color=None):
         '''
@@ -78,6 +76,7 @@ class SimulationEnvironment(object):
 
 
         self.objectDict[physObj.identifier] = body
+        return body
         
     
     def _addHinge(self, physObj1, physObj2, globalLoc):
@@ -120,7 +119,9 @@ class SimulationEnvironment(object):
         po2 = physicsConstraint.physObj2
         globalLoc = physicsConstraint.globalLoc
         
-        self.connectionDict[frozenset([physicsConstraint.physObj1.identifier,physicsConstraint.physObj2.identifier])] = self._addHinge(po1,po2,globalLoc)
+        constr = self._addHinge(po1,po2,globalLoc)
+        self.connectionDict[frozenset([physicsConstraint.physObj1.identifier,physicsConstraint.physObj2.identifier])] = constr
+        return constr
         
         
     def getConstraint(self,po1,po2):

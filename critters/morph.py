@@ -38,7 +38,7 @@ class Morphology(object):
         self.addConnection(MorphConnection(tuple(nodes)))
         
     @property
-    def nodes(self): 
+    def nodes(self):
         return self.graph.nodes_iter()
     
     @property
@@ -110,7 +110,9 @@ class Morphology(object):
     
     def mutate(self):
         newMorph = self.clone()
+        print "Morph len before mutation: ", len(newMorph.graph.nodes())
         graphs.mutate(newMorph.graph, MorphNode, MorphConnection)
+        print "Morph len after mutation: ", len(newMorph.graph.nodes())
         
         graphs.garbageCollect(newMorph.graph)
         if not newMorph.graph.nodes():
@@ -120,7 +122,9 @@ class Morphology(object):
     
     def crossover(self, other):
         daughters = self.clone(), other.clone()
+        print "Morph len before crossover: ", len(self.graph.nodes())
         graphs.crossover(daughters[0].graph, daughters[1].graph)
+        print "Morph len after crossover: ", len(daughters[0].graph.nodes())
         return daughters
     
     def visualize(self):

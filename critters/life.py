@@ -7,6 +7,7 @@ from utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
 import datetime
+
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -37,7 +38,7 @@ class ReifiedCreature(object):
         self.morphology = morphology
         self.neuralNet = neuralNet
         self.numSensors = numSensors
-        
+                          
         self._calculateBodyParts()
         self._calculateConnections()
         self._conformNeuralNet()
@@ -156,13 +157,13 @@ class ReifiedCreature(object):
 
 class DistanceCompetition(genetics.IndividualCompetition):
     
-    def __init__(self, maxTime=5.0):
+    def __init__(self, maxTime=10.0):
         self.maxTime = maxTime
 
     
     def _doCalculation(self, individual):       
         #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
-        simEnv = SimulationEnvironment(vis=False)
+        simEnv = SimulationEnvironment(vis=True)
         
         try:
             rects, hinges = simEnv.addCreature(individual)
@@ -172,9 +173,11 @@ class DistanceCompetition(genetics.IndividualCompetition):
         if not rects or not hinges: return 0.000001
         
         initAvgPos = sum(r.position[0] for r in rects)/float(len(rects))
+        
         simEnv.simulate(timeToRun=self.maxTime)
         
         score = sum(r.position[0] for r in rects)/float(len(rects)) - initAvgPos
+        
         if len(rects) > 8:
             score /= float(len(rects) - 8)
         
@@ -193,17 +196,17 @@ if __name__ == '__main__':
     outFile = open(outputFileName,'w')
 
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 10)
     evo.populate()
 
     def onGeneration(latest, n):
-        print len(latest.scores.values())
+        print [(len(c.morphology.graph.nodes()), latest.scores[c]) for c in latest]
         myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
         print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
     try:    
-        evo.run(maxSteps=500, onGeneration=onGeneration)
+        evo.run(maxSteps=5, onGeneration=onGeneration)
     except KeyboardInterrupt:
         print "caught interrupt, writing to disk"
         outFile.flush()
