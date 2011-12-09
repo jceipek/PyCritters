@@ -10,10 +10,8 @@ import random
 iWorm = morph.Morphology() #instantiate an 'empty' morphology
 head = morph.MorphNode(dimensions=(2,2)) #create a node representing the head
 tail = morph.MorphNode(dimensions=(2,2)) #create a node representing the tail
-conLocations=(random.randint(0,4),random.randint(0,4))#select random vertices
-                                                      #to join the body parts at
 
-iWorm.addConnection(morph.MorphConnection((head,tail),locations=conLocations))
+iWorm.addConnection(morph.MorphConnection((head,tail)))
 
 net = neural.simpleSineNetwork(1, 1) #create a simple neural network
 
