@@ -1,13 +1,13 @@
 
-import genetics
-import neural
-import morph
+from critters import genetics
+from critters import neural
+from critters import morph
 import networkx as nx
-from utils import flatten, cached
+from critters.utils import flatten, cached
 from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
 import datetime
-
+import pickle
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -194,7 +194,8 @@ if __name__ == '__main__':
 
     print outputFileName
     outFile = open(outputFileName,'w')
-
+    outFolderName = outputFileName.replace('.csv','')
+    os.mkdir(outFolderName)
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 500)
     evo.populate()
@@ -203,7 +204,8 @@ if __name__ == '__main__':
         myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
-        print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
+        print 'Generation ',n, 'was written to disk a    t', str(datetime.datetime.now().time())
+        pickle.dump(latest.bestPhenotype, open( os.path.join(os.getcwd(), outFolderName+'/max_%d'%n), "wb" ))
     try:    
         evo.run(maxSteps=500, onGeneration=onGeneration)
     except KeyboardInterrupt:

@@ -1,5 +1,5 @@
 import networkx as nx
-import neural
+from critters import neural
 import math
 import copy
 import graphs
