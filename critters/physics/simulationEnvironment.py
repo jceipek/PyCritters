@@ -219,8 +219,6 @@ class SimulationEnvironment(object):
 
     def simulate(self,offset=(300,-200), timeToRun=None, check=None):
         '''
-        TODO: add a simulate function which accepts the amount of time to simulate
-        and returns the final state of the environment    
         '''
         self._placeGround()
         
