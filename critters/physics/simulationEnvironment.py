@@ -44,7 +44,7 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-        self.physicsStep = 1.0/60.0
+        self.physicsStep = 1.0/200.0
         
     def addCreature(self, creature):
         phenotype = creature.phenotype
@@ -96,7 +96,7 @@ class SimulationEnvironment(object):
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
                                                enableLimit = True,
-                                               maxMotorTorque = 200.0,
+                                               maxMotorTorque = 50.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
         return joint
