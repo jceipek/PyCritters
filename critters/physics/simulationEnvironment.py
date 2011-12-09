@@ -44,7 +44,7 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-        self.physicsStep = 1.0/600.0
+        self.physicsStep = 1.0/200.0
         
     def addCreature(self, creature):
         phenotype = creature.phenotype
