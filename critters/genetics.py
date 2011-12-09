@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 import operator
 import random
-import Cdf
+from critters import Cdf
 import copy_reg
 import types
 def _pickle_method(method):
