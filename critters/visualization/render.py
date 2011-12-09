@@ -59,7 +59,7 @@ class Renderer(object):
                 color = self.colors[colorId]
                 colorId += 1
 
-                pygame.draw.polygon(self.screen,color, pgvertices)
+                pygame.draw.polygon(self.screen,color, pgvertices,1)
 
                 if self.showCoords:
                     for realv,scaledv in zip(realVertices,pgvertices):
