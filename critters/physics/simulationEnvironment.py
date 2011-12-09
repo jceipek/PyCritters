@@ -53,9 +53,9 @@ class SimulationEnvironment(object):
         physObjs = [self.addPhysicsObject(r) for r in rects]
         constraints = [self.addConstraint(h) for h in hinges]
 
-        #TODO: Figure out what this should actually return!
         self.creatures[creature] = phenotype
-        return physObjs, constraints
+        
+        return physObjs, constraints if physObjs and constraints else None
 
     def addPhysicsObject(self, physObj, color=None):
         '''
@@ -133,7 +133,10 @@ class SimulationEnvironment(object):
             return self.connectionDict[frozenset([po1.identifier,po2.identifier])] 
         except:
             return None
-
+    
+    def getMeanX(self, body):
+        rects, _ = body
+        return sum(r.position[0] for r in rects)/float(len(rects))
         
     def _step(self):
         '''
@@ -173,28 +176,26 @@ class SimulationEnvironment(object):
         self.ground= StaticRect(position=(0,currentMinY-1),size=(150,1))
         self.addPhysicsObject(self.ground)
         
-
-        
     def _run(self, offset=(0,0),timeToRun=None):
-
-        hOffset, vOffset = offset
-        PPM = 20.0
-        panningRate = 5
         running = True
+        timeToRun = timeToRun or float('inf')
+        
         if self.vis:
+            hOffset, vOffset = offset
+            PPM = 20.0
+            panningRate = 5
             clock = pygame.time.Clock()
             pygame.key.set_repeat(1, 5)
+        
         time = 0
-        if timeToRun==None:
-            shouldRun = lambda t: True
-        else:
-            shouldRun= lambda t: t < timeToRun
-            
-        while running and shouldRun(time):
+        
+        while running and time < timeToRun:
             self._step()
+            
             if self.vis:
                 self.r.render((hOffset, vOffset), PPM)
                 clock.tick(60)
+                
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
@@ -213,16 +214,26 @@ class SimulationEnvironment(object):
                             PPM -= 1
                         elif event.key == pygame.K_EQUALS:
                             PPM += 1
-            time +=self.physicsStep
+            
+            time += self.physicsStep
 
-    def simulate(self,offset=(300,-200),timeToRun=None):
+    def simulate(self,offset=(300,-200), timeToRun=None, check=None):
         '''
         TODO: add a simulate function which accepts the amount of time to simulate
         and returns the final state of the environment    
         '''
-
         self._placeGround()
-        self._run(offset=offset,timeToRun=timeToRun)
+        
+        if check:
+            minTime, func = check
+            self._run(offset=offset, timeToRun=minTime)
+            
+            if func():
+                assert timeToRun
+                remaining = timeToRun - minTime
+                self._run(offset=offset, timeToRun=remaining)
+        else:
+            self._run(offset=offset,timeToRun=timeToRun)
         
 if __name__ =='__main__':
     print("Not intended to be run as a script")
