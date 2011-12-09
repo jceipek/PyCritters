@@ -157,31 +157,42 @@ class ReifiedCreature(object):
 
 class DistanceCompetition(genetics.IndividualCompetition):
     
-    def __init__(self, maxTime=5.0):
-        self.maxTime = maxTime
-
+    MIN_TIME = 3.0
+    MIN_SCORE = 20.0
+    MAX_TIME = 15.0
+    
+    MIN_FITNESS = 0.000001
+    RECTS_THRESHOLD = 8.0
 
     def _doCalculation(self,individual):       
-        #simEnv = SimulationEnvironment(vis=(self._count % 100 == 0))
         simEnv = SimulationEnvironment(vis=False)
+        failure = individual, self.MIN_FITNESS
         
         try:
-            rects, hinges = simEnv.addCreature(individual)
+            body = simEnv.addCreature(individual)
         except RuntimeError as e:
             print e
-            return (individual,0.00001)
-        if not rects or not hinges: return (individual,0.00001)
+            return failure
         
-        initAvgPos = sum(r.position[0] for r in rects)/float(len(rects))
+        if not body: return failure
         
-        simEnv.simulate(timeToRun=self.maxTime)
+        before = simEnv.getMeanX(body)
         
-        score = sum(r.position[0] for r in rects)/float(len(rects)) - initAvgPos
+        def calculateScore():
+            score = simEnv.getMeanX(body) - before
+            
+            rects, _ = body
+            if len(rects) > self.RECTS_THRESHOLD:
+                score /= len(rects) - self.RECTS_THRESHOLD
+            
+            return max(self.MIN_FITNESS, score)
         
-        if len(rects) > 8:
-            score /= float(len(rects) - 8)
+        def check():
+            return calculateScore() >= self.MIN_SCORE
         
-        return (individual,max(0.00001, score))
+        simEnv.simulate(timeToRun=self.MAX_TIME, check=(self.MIN_TIME, check))
+        
+        return individual, calculateScore()
 
 if __name__ == '__main__':
     import os
@@ -197,15 +208,18 @@ if __name__ == '__main__':
     outFolderName = outputFileName.replace('.csv','')
     os.mkdir(outFolderName)
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 500)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 50)
     evo.populate()
 
     def onGeneration(latest, n):
         myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
-        print 'Generation ',n, 'was written to disk a    t', str(datetime.datetime.now().time())
+        print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
+        print "N=%d, max fitness=%.3f, mean fitness=%.3f" % (n, latest.maxFitness, latest.meanFitness)
+        
         pickle.dump(latest.bestPhenotype, open( os.path.join(os.getcwd(), outFolderName+'/max_%d'%n), "wb" ))
+        
     try:    
         evo.run(maxSteps=500, onGeneration=onGeneration)
     except KeyboardInterrupt:
