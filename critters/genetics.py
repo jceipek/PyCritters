@@ -61,6 +61,10 @@ class Population(object):
     def maxFitness(self):
         return max(self.scores.values())
         
+    @property
+    def bestPhenotype(self):
+        return max(self.scores.items(), key=operator.itemgetter(1))[0]
+        
 class FitnessCalculator(object):
     
     def calculate(self, individuals):

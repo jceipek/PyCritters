@@ -157,7 +157,7 @@ class ReifiedCreature(object):
 
 class DistanceCompetition(genetics.IndividualCompetition):
     
-    def __init__(self, maxTime=10.0):
+    def __init__(self, maxTime=5.0):
         self.maxTime = maxTime
 
 
@@ -196,7 +196,7 @@ if __name__ == '__main__':
     outFile = open(outputFileName,'w')
 
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 1000)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 500)
     evo.populate()
 
     def onGeneration(latest, n):
@@ -205,7 +205,7 @@ if __name__ == '__main__':
         outFile.write(" , ".join(myList) + "\n")
         print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
     try:    
-        evo.run(maxSteps=5, onGeneration=onGeneration)
+        evo.run(maxSteps=500, onGeneration=onGeneration)
     except KeyboardInterrupt:
         print "caught interrupt, writing to disk"
         outFile.flush()
