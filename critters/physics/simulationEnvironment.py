@@ -96,7 +96,7 @@ class SimulationEnvironment(object):
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
                                                enableLimit = True,
-                                               maxMotorTorque = 50.0,
+                                               maxMotorTorque = 90.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
         return joint
@@ -162,6 +162,7 @@ class SimulationEnvironment(object):
                 else:
                     actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
                 joint.motorSpeed = actValue
+#                print joint.GetMotorTorque(1/self.physicsStep)
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
 
@@ -173,7 +174,7 @@ class SimulationEnvironment(object):
                 tMin = min([(body.transform*v)[1] for v in  shape.vertices])
                 if currentMinY == None or tMin < currentMinY:
                     currentMinY = tMin
-        self.ground= StaticRect(position=(0,currentMinY-1),size=(150,1))
+        self.ground= StaticRect(position=(0,currentMinY-1),size=(1500,1))
         self.addPhysicsObject(self.ground)
         
     def _run(self, offset=(0,0),timeToRun=None):

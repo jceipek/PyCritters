@@ -40,8 +40,8 @@ rj=world.CreateRevoluteJoint(
     lowerAngle = -.5 * b2.pi, # -90 degrees
     upperAngle = .5 * b2.pi, #  45 degrees
     enableLimit = True,
-    maxMotorTorque = 200.0,
-    motorSpeed = 1,
+    maxMotorTorque = -200.0,
+    motorSpeed = 5,
     enableMotor = True,
     )
 
