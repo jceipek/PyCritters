@@ -3,9 +3,9 @@ import networkx as nx
 import collections
 from random import random, randint, sample, shuffle, choice
 
-DEFAULT_MUTATION_RATES = { 'node': 0.3, 
-                           'removeConnection': 0.01,
-                           'connection': 0.3,
+DEFAULT_MUTATION_RATES = { 'node': 0.1, 
+                           'removeConnection': 0.005,
+                           'connection': 0.1,
                            'newNodeConnection': 0.06,
                            'addEdgeRatio': 0.1,
                          }
@@ -41,7 +41,7 @@ def mutate(graph, createNode, createConnection, rates=DEFAULT_MUTATION_RATES):
                 
     def createNewConnections():
         nodes = graph.nodes()
-        for _ in range(int(len(nodes)*rates['addEdgeRatio'])):
+        for _ in range(int(random()*len(nodes)*rates['addEdgeRatio'])):
             makeEdge(*sample(nodes, 2))
     
     mutateNodes()

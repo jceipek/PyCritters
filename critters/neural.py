@@ -307,7 +307,7 @@ class InputNode(Node):
 class SumNode(Node):
     """A node that returns the sum of all inputs."""
     
-    FREQUENCY = 5.0
+    FREQUENCY = 3.0
     
     def process(self, inputs, dt):
         self.output = sum(inputs)
@@ -434,7 +434,7 @@ class IfNode(Node):
 
 class SineNode(Node):
     
-    FREQUENCY = 15.0
+    FREQUENCY = 8.0
     
     _periodValue = MutableFloat(range=(0.01, 2*math.pi))
     

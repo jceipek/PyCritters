@@ -8,6 +8,7 @@ from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
 import datetime
 import pickle
+
 class Critter(genetics.Genotype):
     
     def __init__(self, numSensors=1, morphology=None, neuralNet=None):
@@ -196,7 +197,7 @@ class DistanceCompetition(genetics.IndividualCompetition):
 
 if __name__ == '__main__':
     import os
-    _outputFileName = os.path.join(os.getcwd(),'output')
+    _outputFileName = os.path.join(os.getcwd(),'output', 'output')
     outputFileName = _outputFileName + '.csv' 
     i = 0
     while os.path.exists(outputFileName):
@@ -208,11 +209,11 @@ if __name__ == '__main__':
     outFolderName = outputFileName.replace('.csv','')
     os.mkdir(outFolderName)
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 50)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
     evo.populate()
 
     def onGeneration(latest, n):
-        myList =[str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
+        myList = [str(n), str(latest.maxFitness), str(latest.meanFitness), str(latest.size), str(datetime.datetime.now().time())]
         myList.extend([str(round(f,5)) for f in latest.scores.values()])
         outFile.write(" , ".join(myList) + "\n")
         print 'Generation ',n, 'was written to disk at', str(datetime.datetime.now().time())
@@ -221,7 +222,7 @@ if __name__ == '__main__':
         pickle.dump(latest.bestPhenotype, open( os.path.join(os.getcwd(), outFolderName+'/max_%d'%n), "wb" ))
         
     try:    
-        evo.run(maxSteps=500, onGeneration=onGeneration)
+        evo.run(maxSteps=100, onGeneration=onGeneration)
     except KeyboardInterrupt:
         print "caught interrupt, writing to disk"
         outFile.flush()

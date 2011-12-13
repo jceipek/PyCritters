@@ -128,9 +128,9 @@ class Morphology(object):
 
 class MorphNode(object):
     
-    CROSSOVER_RATE = 0.4
+    CROSSOVER_RATE = 0.1
     
-    _dimensionsValue = MutableFloat(range=(0.1, 5.0), rate=0.1)
+    _dimensionsValue = MutableFloat(range=(0.1, 5.0), rate=0.05)
     
     def __init__(self, dimensions=None):
         self.dimensions = dimensions or self._dimensionsValue(repeat=2)
@@ -156,8 +156,8 @@ class MorphConnection(object):
     JOINT_TYPES = [HINGE_JOINT]
     
     _jointValue = MutableChoice(choices=JOINT_TYPES)
-    _locationValue = MutableFloat(range=(0.0, 3.9999), rate=0.1)
-    _recursionLimitValue = MutableInt(range=(1, 4), rate=0.05)
+    _locationValue = MutableFloat(range=(0.0, 3.9999), rate=0.05)
+    _recursionLimitValue = MutableInt(range=(1, 4), rate=0.01)
     
     def __init__(self, nodes, joint=HINGE_JOINT, actuators=None, 
                  locations=None, recursionLimit=1):
@@ -192,7 +192,7 @@ class MorphConnection(object):
     
 class Actuator(object):
     
-    _strengthValue = MutableFloat(range=(0.0, 1.0))
+    _strengthValue = MutableFloat(range=(0.0, 1.0), rate=0.05)
     
     def __init__(self, strength=None, limits=(0.0, 1.0)):
         self.strength = self._strengthValue()
