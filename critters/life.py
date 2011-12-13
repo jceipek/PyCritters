@@ -205,9 +205,10 @@ if __name__ == '__main__':
         i += 1
 
     print outputFileName
-    outFile = open(outputFileName,'w')
-    outFolderName = outputFileName.replace('.csv','')
+
+    outFolderName = outputFileName[:outputFileName.rfind('/')]
     os.mkdir(outFolderName)
+    outFile = open(outputFileName,'w')
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
     evo.populate()
