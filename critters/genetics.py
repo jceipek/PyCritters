@@ -75,7 +75,8 @@ class FitnessCalculator(object):
 class IndividualCompetition(FitnessCalculator):
     
     def calculate(self, individuals,multiProcess=True):
-
+		#set multiProcess=False to see error messages in a readable format
+		#multiprocessing really kills error message propagation
         resultDict = dict()
         def cb(aTup):
             #print aTup
