@@ -20,8 +20,8 @@ all:	book.tex
 	makeindex book
 	latex book
 	dvips -t letter -Ppdf -o complexity.ps book
-	#evince complexity.ps
-	open complexity.ps
+	evince complexity.ps
+	#open complexity.ps
 
 pdf:
 	ps2pdf $(PDFFLAGS) complexity.ps
