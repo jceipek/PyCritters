@@ -139,6 +139,8 @@ class SimulationEnvironment(object):
     
     def getMeanX(self, body):
         rects, _ = body
+        if len(rects) == 0:
+            raise Exception("This body had no rectangles related to it.")
         return sum(r.position[0] for r in rects)/float(len(rects))
 
     def isBelowGround(self, body):
@@ -150,8 +152,22 @@ class SimulationEnvironment(object):
         Simulates one time step in the physic engine, rendering it to the pyGame window.
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
+        grnd = self.objectDict[self.ground.identifier]
         for phenotype in self.creatures.values():
-            actuatorDict  = phenotype.think([0],self.physicsStep)
+            try:
+                myContacts = []
+                for rect in phenotype.rects:
+                    cont = False
+                    for contact_edge in self.objectDict[rect.identifier].contacts:
+                        c = contact_edge.contact
+                        if c.touching and (c.fixtureA.body == grnd or c.fixtureB.body == grnd):
+                            cont = True
+                        
+                    myContacts.append(int(cont))
+                #print myContacts
+            except Exception as e:
+                print(e)
+            actuatorDict  = phenotype.think(myContacts,self.physicsStep)
             #special case because of one actuator in test... need to fixLater
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...

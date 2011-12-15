@@ -74,27 +74,24 @@ class FitnessCalculator(object):
 # Fitness are calculated based on individual performance only
 class IndividualCompetition(FitnessCalculator):
     
-    def calculate(self, individuals):
+    def calculate(self, individuals,multiProcess=True):
 
-        try:
-            resultDict = dict()
-            def cb(aTup):
-                #print aTup
-                resultDict[aTup[0]] = aTup[1]         # return dict mapping from individuals to scores             
-                #print "callback called"
-            po = Pool()
-            for indv in individuals:
+        resultDict = dict()
+        def cb(aTup):
+            #print aTup
+            resultDict[aTup[0]] = aTup[1]         # return dict mapping from individuals to scores             
+            #print "callback called"
+        po = Pool()
+        for indv in individuals:
+            if multiProcess:
                 po.apply_async(self._doCalculation,(indv,),callback=cb)
-            
-            po.close()
-            po.join()
-            #print resultDict
-            return resultDict
-        except KeyboardInterrupt:
-            print "caught interrupt, killing pool"
-            po.terminate()
-            raise KeyboardInterrupt
-        
+            else:
+                cb(self._doCalculation(indv))
+        po.close()
+        po.join()
+        #print resultDict
+        return resultDict
+
 
     def _doCalculation(self,individual):
         assert False
