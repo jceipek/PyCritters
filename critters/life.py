@@ -11,7 +11,7 @@ import pickle
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, numSensors=1, morphology=None, neuralNet=None):
+    def __init__(self, numSensors=6, morphology=None, neuralNet=None):
         self.numSensors = numSensors
         self.morphology = morphology or morph.randomMorphology(6)
         self.neuralNet = neuralNet or \
@@ -235,7 +235,7 @@ if __name__ == '__main__':
         print "caught interrupt, writing to disk"
         outFile.flush()
         
-    print "done"
+    print("done")
 
 
 
