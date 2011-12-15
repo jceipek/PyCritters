@@ -28,3 +28,9 @@ case_study/*.aux
 case_study/*.log
 case_study/*.out
 case_study/*.*.gz
+case_study/*.ind
+case_study/*.ilg
+case_study/*.idx
+case_study/*.dvi
+case_study/complexity.ps
+case_study/figs/
