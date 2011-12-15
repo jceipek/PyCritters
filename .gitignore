@@ -28,3 +28,9 @@ case_study/*.aux
 case_study/*.log
 case_study/*.out
 case_study/*.*.gz
+case_study/book.*
+case_study/complexity.ps
+case_study/figs/
+case_study/htmlonly
+case_study/latexonly
+case_study/Makefile
