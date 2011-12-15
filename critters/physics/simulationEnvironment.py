@@ -10,7 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
-    MAX_SPEED = 100 #TODO: Place this in actuators + morph
+    MAX_SPEED = 5 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -164,9 +164,9 @@ class SimulationEnvironment(object):
                     actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
                 else:
                     actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                self.powerControlle.setTarget(actValue)
+                #joint.motorSpeed = actValue
+                self.powerController.setTarget(actValue)
                 joint.motorSpeed = self.powerController.step(self.physicsStep)
-#                print joint.GetMotorTorque(1/self.physicsStep)
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
 

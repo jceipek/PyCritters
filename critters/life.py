@@ -197,18 +197,24 @@ class DistanceCompetition(genetics.IndividualCompetition):
 
 if __name__ == '__main__':
     import os
-    _outputFileName = os.path.join(os.getcwd(),'output', 'output')
-    outputFileName = _outputFileName + '.csv' 
+    _outFolderName = os.path.join(os.getcwd(),'output')
+    
+    outFolderName = _outFolderName
     i = 0
-    while os.path.exists(outputFileName):
-        outputFileName = _outputFileName + "(%d).csv"%i 
+    while os.path.exists(outFolderName):
         i += 1
+        outFolderName = _outFolderName + "(%d)"%i 
 
-    print outputFileName
+    if i == 0:
+        outFileName = os.path.join(outFolderName,'output.csv')
+     
+    outFileName = os.path.join(outFolderName,'output(%d).csv'%i)
 
-    outFolderName = outputFileName[:outputFileName.rfind('/')]
+    print 'Saving output to :' + outFolderName
+    print 'Saving output to :' + outFileName
     os.mkdir(outFolderName)
-    outFile = open(outputFileName,'w')
+    outFile = open(outFileName,'w')
+   
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
     evo.populate()
