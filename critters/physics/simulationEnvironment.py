@@ -38,14 +38,17 @@ class SimulationEnvironment(object):
         self.ground = None #self.world.CreateStaticBody(position=(0,1),
                            #                       shapes=b2.polygonShape(box=(50,2))
                            #                       ) #TODO: This will be defined later on, by other code
-
+        self._powerController = PowerController()
         self.vis = vis
         
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
         self.physicsStep = 1.0/200.0
-        
+
+    @property
+    def powerController(self): return self._powerController    
+                
     def addCreature(self, creature):
         phenotype = creature.phenotype
         rects, hinges = phenotype.buildPhysicsObject()
@@ -161,7 +164,8 @@ class SimulationEnvironment(object):
                     actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
                 else:
                     actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                joint.motorSpeed = actValue
+                self.powerControlle.setTarget(actValue)
+                joint.motorSpeed = self.powerController.step(self.physicsStep)
 #                print joint.GetMotorTorque(1/self.physicsStep)
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
@@ -233,7 +237,43 @@ class SimulationEnvironment(object):
                 self._run(offset=offset, timeToRun=remaining)
         else:
             self._run(offset=offset,timeToRun=timeToRun)
-        
+
+class PowerController(object):
+    def __init__(self,targetValue=0,initialValue = 0, proportionalGain=0.5):
+        self._targetValue = targetValue
+        self._currentValue = initialValue
+        self._proportionalGain= proportionalGain
+    
+    @property
+    def proportionalGain(self): return self._proportionalGain
+
+    @property
+    def targetValue(self): return self._targetValue
+    
+    @property
+    def currentValue(self): return self._currentValue    
+    
+    def setTarget(self,value):
+        self._targetValue = value
+    
+    def step(self,dt):
+        error = self.targetValue-self.currentValue
+        dVdT = self.proportionalGain *error
+        self._currentValue += dVdT*dt
+        return self.currentValue
+
+def testPowerControl():
+    from matplotlib import pyplot
+    a = PowerController()
+    a.setTarget(100)
+    
+    X = [i for i in range(10000)]
+    vals = [a.step(0.001) for _ in range(10000)]
+    pyplot.plot(X,vals)
+    pyplot.show()
+    
 if __name__ =='__main__':
+    testPowerControl()
+    
     print("Not intended to be run as a script")
-            
+    
