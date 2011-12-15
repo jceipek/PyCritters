@@ -214,6 +214,7 @@ under a free license from
 % START THE BOOK
 \mainmatter
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\TODO}{\hl{\emph{TODO:}}\hl}
 %Get rid of the above when done.
 
@@ -225,56 +226,46 @@ In 1994, a researcher named Karl Sims simulated Darwinian evolution by breeding
 virtual block creatures to accomplish tasks such as running, jumping, and following 
 light sources in a physical environment. His work was groundbreaking because he didn't 
 start by designing a control algorithm or a body for his creatures; the creatures 
-evolved complex brains and bodies {\em without human intervention}. 
+evolved complex brains and bodies {\em without human intervention}. You can look at 
+some of his work on YouTube at \url{youtube.com/watch?v=JBgG_VSP7f8}. Even though 
+the creatures were randomly generated, some of them look remarkably similar 
+to animals in the real world, because they evolved comparably efficient  
+locomotion mechanisms.
 \index{Sims, Karl}
 \index{Evolution, Darwinian}
 
-% TODO: Inline these exercises and put our answers to them in the text
-\begin{ex}
-  Watch some of Karl Sims' creatures on YouTube:
-  \url{youtube.com/watch?v=JBgG_VSP7f8}. Do they remind you of real world
-  animals? Since the creatures he started with were randomly generated, how can that be?
-\end{ex}
-
-\begin{ex}
-  Read the paper that Karl Sims presented at Siggraph:
-  \url{karlsims.com/papers/siggraph94.pdf}. How does he think his
-  work will be useful in the future?
-\end{ex}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In the paper\footnote{\url{karlsims.com/papers/siggraph94.pdf}} he presented at SIGGRAPH\footnote{An annual computer graphics 
+conference: \url{wikipedia.org/wiki/SIGGRAPH}} 1994, Sims claimed that his work could be used to simplify the task of creating
+``desirable complexity for use in virtual worlds and computer animation.'' True to this prediction, many popular computer games 
+now use realtime physics simulations based on his work.\footnote{\url{aigamedev.com/open/editorial/naturalmotion-euphoria/}}
 
 \section{Genetic Algorithms}
 
 % TODO: Make this flow better!
-Sims used {\bf genetic algorithms}, which can be used to approach problems 
-with large solution spaces that are computationally expensive to define.
-
-Genetic algorithms (GAs) model the process of 
-natural evolution. 
-
-% TODO: sentence that defines genotype + phenotype. Then explain that fitness operates on the phenotype
-
-In a nutshell, the {\bf fittest} of a population of possible 
-solutions survive to form a new (hopefully better) population, and the process
+Sims used {\bf genetic algorithms}, which model the process of natural evolution to solve  
+problems with large solution spaces that are computationally expensive to define.
+In a nutshell, a genetic algorithm operates on {\bf genotypes}, genetic material encoding {\bf phenotypes},
+which represent possible solutions to a problem. As the algorithm runs, the {\em fittest} 
+phenotypes survive to form a new (hopefully better) population, and the process
 repeats until an end condition is reached (for example, when an optimal
-solution has been found). 
+solution has been found).  
 
-% TODO: Transition statement: these are the steps
-
+More explicitly stated, a genetic algorithm consists of the following 
+steps\footnote{\url{wikipedia.org/wiki/Genetic_algorithm}}:
 \index{Genetic Algorithms}
 
 \begin{enumerate}
-  \item Generate an initial population of {\em genotypes} that encode potential
-  {\em phenotypes} (solutions). This initial population is usually random. % TODO: Modify so that defs work properly
+  \item Generate an initial population of genotypes that encode potential
+  phenotypes. This initial population is usually random.
 
   \item Evaluate the ``goodness'' of each phenotype in the population using a 
-  {\em fitness} function.
+  {\bf fitness function}.
 
   \item Select phenotypes probabilistically such that fit phenotypes 
   are more likely to be selected.
 
-  \item Breed the genotypes corresponding to the selected phenotypes by combining 
-  traits of the existing genotypes and {\em mutating} some of them randomly. %TODO: rephrase; work with mutation 
+  \item Breed the selected phenotypes by combining 
+  traits of their corresponding genotypes and modifying some of them randomly through. 
   The result of this step is a new population of genotypes that will be used in
   the next generation of the algorithm.
 
@@ -284,6 +275,7 @@ solution has been found).
 \end{enumerate}
 \index{genotype}
 \index{phenotype}
+\index{fitness function}
 
 Genetic algorithms are a subset of {\bf Evolutionary Algorithms}, which you can
 read about at \url{wikipedia.org/wiki/Evolutionary_algorithm}.
@@ -309,13 +301,6 @@ on a different hill in the solution space. For example, breeding {\tt A}
 and {\tt B} could result in {\tt C} in the diagram above, which is closer 
 to the global maximum than either of its parents.
  
-%TODO: inline this exercise
-\begin{ex}
-  Read more about genetic algorithms on wikipedia: 
-  \url{http://en.wikipedia.org/wiki/Genetic_algorithm}. List several ways that 
-  genotypes in a population could be represented.
-\end{ex}
-
 % Could be too much of a leap, TODO: decide if keep or not
 \begin{ex}
   Read about the 8 queens problem at \url{wikipedia.org/wiki/8_queens}.
