@@ -158,9 +158,9 @@ class ReifiedCreature(object):
 
 class DistanceCompetition(genetics.IndividualCompetition):
     
-    MIN_TIME = 3.0
+    MIN_TIME = 10.0
     MIN_SCORE = 20.0
-    MAX_TIME = 15.0
+    MAX_TIME = 30.0
     
     MIN_FITNESS = 0.000001
     RECTS_THRESHOLD = 8.0
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     outFolderName = outputFileName.replace('.csv','')
     os.mkdir(outFolderName)
     reproduction = genetics.MatedReproduction(Critter)
-    evo = genetics.Evolution(reproduction, DistanceCompetition(), 100)
+    evo = genetics.Evolution(reproduction, DistanceCompetition(), 300)
     evo.populate()
 
     def onGeneration(latest, n):
@@ -222,7 +222,7 @@ if __name__ == '__main__':
         pickle.dump(latest.bestPhenotype, open( os.path.join(os.getcwd(), outFolderName+'/max_%d'%n), "wb" ))
         
     try:    
-        evo.run(maxSteps=100, onGeneration=onGeneration)
+        evo.run(maxSteps=150, onGeneration=onGeneration)
     except KeyboardInterrupt:
         print "caught interrupt, writing to disk"
         outFile.flush()

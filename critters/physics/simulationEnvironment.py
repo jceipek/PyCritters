@@ -10,7 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
-    MAX_SPEED = 100 #TODO: Place this in actuators + morph
+    MAX_SPEED = 5.0 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -96,7 +96,7 @@ class SimulationEnvironment(object):
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
                                                enableLimit = True,
-                                               maxMotorTorque = 90.0,
+                                               maxMotorTorque = 40.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
         return joint
@@ -144,7 +144,7 @@ class SimulationEnvironment(object):
         objects on the screen. Note that the physics environment uses meters, while pygame uses pixels.
         '''
         for phenotype in self.creatures.values():
-            actuatorDict  = phenotype.think([0],self.physicsStep)
+            actuatorDict  = phenotype.think([0],self.physicsStep/10.0)
             #special case because of one actuator in test... need to fixLater
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...
@@ -157,11 +157,9 @@ class SimulationEnvironment(object):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
                 
-                if math.copysign(1,actuatorValues[i]) == -1:
-                    actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                else:
-                    actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                joint.motorSpeed = actValue
+                value = actuatorValues[i]
+                magnitude = min(SimulationEnvironment.MAX_SPEED, value)
+                joint.motorSpeed = math.copysign(magnitude, value)
 #                print joint.GetMotorTorque(1/self.physicsStep)
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
