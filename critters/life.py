@@ -11,7 +11,7 @@ import pickle
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, numSensors=1, morphology=None, neuralNet=None):
+    def __init__(self, numSensors=6, morphology=None, neuralNet=None):
         self.numSensors = numSensors
         self.morphology = morphology or morph.randomMorphology(6)
         self.neuralNet = neuralNet or \
@@ -185,6 +185,8 @@ class DistanceCompetition(genetics.IndividualCompetition):
             rects, _ = body
             if len(rects) > self.RECTS_THRESHOLD:
                 score /= len(rects) - self.RECTS_THRESHOLD
+            if simEnv.isBelowGround(body):
+                score = 0
             
             return max(self.MIN_FITNESS, score)
         
@@ -197,17 +199,23 @@ class DistanceCompetition(genetics.IndividualCompetition):
 
 if __name__ == '__main__':
     import os
-    _outputFileName = os.path.join(os.getcwd(),'output', 'output')
-    outputFileName = _outputFileName + '.csv' 
+    _outFolderName = os.path.join(os.getcwd(),'output')
+    
+    outFolderName = _outFolderName
     i = 0
-    while os.path.exists(outputFileName):
-        outputFileName = _outputFileName + "(%d).csv"%i 
+    while os.path.exists(outFolderName):
         i += 1
+        outFolderName = _outFolderName + "(%d)"%i 
 
-    print outputFileName
-    outFile = open(outputFileName,'w')
-    outFolderName = outputFileName.replace('.csv','')
+    if i == 0:
+        outFileName = os.path.join(outFolderName,'output.csv')
+     
+    outFileName = os.path.join(outFolderName,'output(%d).csv'%i)
+    print 'Saving output to :' + outFolderName
+    print 'Saving output to :' + outFileName
     os.mkdir(outFolderName)
+    outFile = open(outFileName,'w')
+   
     reproduction = genetics.MatedReproduction(Critter)
     evo = genetics.Evolution(reproduction, DistanceCompetition(), 300)
     evo.populate()
@@ -227,7 +235,7 @@ if __name__ == '__main__':
         print "caught interrupt, writing to disk"
         outFile.flush()
         
-    print "done"
+    print("done")
 
 
 
