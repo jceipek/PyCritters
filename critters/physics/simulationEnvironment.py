@@ -140,6 +140,10 @@ class SimulationEnvironment(object):
     def getMeanX(self, body):
         rects, _ = body
         return sum(r.position[0] for r in rects)/float(len(rects))
+
+    def isBelowGround(self, body):
+        rects, _ = body
+        return min(r.position[1] for r in rects) < (self.ground.position[1] + self.ground.size[1])
         
     def _step(self):
         '''

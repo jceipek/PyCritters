@@ -185,6 +185,8 @@ class DistanceCompetition(genetics.IndividualCompetition):
             rects, _ = body
             if len(rects) > self.RECTS_THRESHOLD:
                 score /= len(rects) - self.RECTS_THRESHOLD
+            if simEnv.isBelowGround(body):
+                score = 0
             
             return max(self.MIN_FITNESS, score)
         
@@ -209,7 +211,6 @@ if __name__ == '__main__':
         outFileName = os.path.join(outFolderName,'output.csv')
      
     outFileName = os.path.join(outFolderName,'output(%d).csv'%i)
-
     print 'Saving output to :' + outFolderName
     print 'Saving output to :' + outFileName
     os.mkdir(outFolderName)
