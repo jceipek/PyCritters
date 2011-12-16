@@ -436,7 +436,7 @@ class SineNode(Node):
     
     FREQUENCY = 8.0
     
-    _periodValue = MutableFloat(range=(10.0, 20.0*math.pi))
+    _periodValue = MutableFloat(range=(0.01, 2*math.pi))
     
     def __init__(self, period=None):
         Node.__init__(self)

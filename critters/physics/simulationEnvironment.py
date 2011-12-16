@@ -10,7 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
-    MAX_SPEED = 5 #TODO: Place this in actuators + morph
+    MAX_SPEED = 100 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -99,7 +99,7 @@ class SimulationEnvironment(object):
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
                                                enableLimit = True,
-                                               maxMotorTorque = 40.0,
+                                               maxMotorTorque = 90.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
         return joint
