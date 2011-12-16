@@ -44,7 +44,7 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-        self.physicsStep = 1.0/200.0
+        self.physicsStep = 50.0/200.0
 
     @property
     def powerController(self): return self._powerController    
@@ -99,7 +99,7 @@ class SimulationEnvironment(object):
                                                lowerAngle = -0.5 * b2.pi,
                                                upperAngle = 0.5 * b2.pi,
                                                enableLimit = True,
-                                               maxMotorTorque = 90.0,
+                                               maxMotorTorque = 40.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
         return joint
@@ -180,12 +180,9 @@ class SimulationEnvironment(object):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
                 
-                if math.copysign(1,actuatorValues[i]) == -1:
-                    actValue = max(-SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                else:
-                    actValue = min(SimulationEnvironment.MAX_SPEED,actuatorValues[i])
-                #joint.motorSpeed = actValue
-                self.powerController.setTarget(actValue)
+                value = actuatorValues[i]
+                magnitude = min(SimulationEnvironment.MAX_SPEED, value)
+                self.powerController.setTarget(math.copysign(magnitude, value)
                 joint.motorSpeed = self.powerController.step(self.physicsStep)
                 
         self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters

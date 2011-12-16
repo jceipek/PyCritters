@@ -38,7 +38,7 @@ class Rect(DynamicPhysicsObject):
     It takes in a Box2D world, position and size tuples, and angle,
     density, and friction floats.
     ''' 
-    def __init__(self, position, size=(1,1), angle=0.0, density=1.0, friction=0.9):
+    def __init__(self, position, size=(1,1), angle=0.0, density=1.0, friction=0.95):
         PhysicsObject.__init__(self) # Handle unique identification
         self.size = size
         self.position = position
