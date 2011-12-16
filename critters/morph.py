@@ -128,9 +128,7 @@ class Morphology(object):
 
 class MorphNode(object):
     
-    CROSSOVER_RATE = 0.1
-    
-    _dimensionsValue = MutableFloat(range=(0.1, 5.0), rate=0.05)
+    _dimensionsValue = MutableFloat(range=(2.5, 5.0), rate=0.05)
     
     def __init__(self, dimensions=None):
         self.dimensions = dimensions or self._dimensionsValue(repeat=2)

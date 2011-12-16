@@ -8,15 +8,17 @@ from critters.physics import objects
 from critters.physics.simulationEnvironment import SimulationEnvironment
 import datetime
 import pickle
+import random
+from critters.physics.objects import Rect, Hinge
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, numSensors=6, morphology=None, neuralNet=None):
+    def __init__(self, numSensors=4, morphology=None, neuralNet=None):
         self.numSensors = numSensors
-        self.morphology = morphology or morph.randomMorphology(6)
+        self.morphology = morphology or morph.randomMorphology(numSensors)
         self.neuralNet = neuralNet or \
-                         neural.randomNeuralNetwork(numSensors, 10, 5)
-    
+                         neural.randomNeuralNetwork(numInputs=numSensors, numOutputs=numSensors-1,numInner=5)
+
     @property
     @cached
     def phenotype(self):
@@ -25,12 +27,16 @@ class Critter(genetics.Genotype):
                                
     def mutate(self):
         newNN = self.neuralNet.mutate()
-        newMorph = self.morphology.mutate()
+        #newNN = self.neuralNet.clone()
+        #newMorph = self.morphology.mutate()
+        newMorph = self.morphology.clone()
         return Critter(self.numSensors, newMorph, newNN)
         
     def crossover(self, other):
         newNN = self.neuralNet.crossover(other.neuralNet)[0]
-        newMorph = self.morphology.crossover(other.morphology)[0]
+        #newNN = self.neuralNet.clone()
+        #newMorph = self.morphology.crossover(other.morphology)[0]
+        newMorph = self.morphology.clone()
         return Critter(self.numSensors, newMorph, newNN)
     
 class ReifiedCreature(object):
@@ -38,11 +44,13 @@ class ReifiedCreature(object):
     def __init__(self, morphology, neuralNet, numSensors):
         self.morphology = morphology
         self.neuralNet = neuralNet
+        assert self.neuralNet.numOutputs == 3
         self.numSensors = numSensors
-                          
+        
         self._calculateBodyParts()
         self._calculateConnections()
         self._conformNeuralNet()
+        assert self.neuralNet.numOutputs == 3
         self.hinges = None#filled in when buildPhysicsObject() is invoked
         self.rects = None #filled in when buildPhysicsObject() is invoked
         
@@ -64,7 +72,8 @@ class ReifiedCreature(object):
                                   self.connections])
     
     def _conformNeuralNet(self):
-        self.neuralNet.conform(self.numSensors, len(self.actuators))
+        #self.neuralNet.conform(self.numSensors, len(self.actuators))
+        self.neuralNet.conform(4, 3)
         
     def _getConnections(self, bodyPart):
         return [data['connection'] for _, _, data in 
@@ -151,16 +160,26 @@ class ReifiedCreature(object):
             rects[node].position = (otherGlobalx,otherGlobaly)
             hinge.globalLoc = jointLoc1
 
-        self.rects = rects.values()
-        self.hinges = hinges
+        #self.rects = rects.values()
+        #self.hinges = hinges
+        
+                
+        rects = [Rect((0, 0)), Rect((1, 0)), Rect((2, 0)), Rect((3, 0))]
+        self.rects = rects
+        self.hinges = [Hinge(rects[0], (0.5, 0.5), rects[1], (-0.5, 0.5)),
+                  Hinge(rects[1], (0.5, 0.5), rects[2], (-0.5, 0.5)),
+                  Hinge(rects[2], (0.5, 0.5), rects[3], (-0.5, 0.5))]
+        for i, hinge in enumerate(self.hinges):
+            hinge.globalLoc = (i + 0.5, 0)
+        
         
         return self.rects, self.hinges
 
 class DistanceCompetition(genetics.IndividualCompetition):
     
-    MIN_TIME = 3.0
-    MIN_SCORE = 20.0
-    MAX_TIME = 15.0
+    MIN_TIME = 20.0
+    MIN_SCORE = 4.0
+    MAX_TIME = 50.0
     
     MIN_FITNESS = 0.000001
     RECTS_THRESHOLD = 8.0
@@ -181,13 +200,16 @@ class DistanceCompetition(genetics.IndividualCompetition):
         
         def calculateScore():
             score = simEnv.getMeanX(body) - before
+            #print "Score %.2f, Before %.2f, MeanX %.2f" % \
+             #     (score, before, simEnv.getMeanX(body))
             
             rects, _ = body
             if len(rects) > self.RECTS_THRESHOLD:
                 score /= len(rects) - self.RECTS_THRESHOLD
             if simEnv.isBelowGround(body):
-                score = 0
+                score = 1e-10
             
+            #print "Final score: %.2f " % max(self.MIN_FITNESS, score)
             return max(self.MIN_FITNESS, score)
         
         def check():
@@ -195,7 +217,12 @@ class DistanceCompetition(genetics.IndividualCompetition):
         
         simEnv.simulate(timeToRun=self.MAX_TIME, check=(self.MIN_TIME, check))
         
-        return individual, calculateScore()
+        finalScore = calculateScore()
+        if False: #finalScore > 150:
+            simEnv = SimulationEnvironment(vis=True)
+            simEnv.addCreature(individual)
+            simEnv.simulate(timeToRun=self.MAX_TIME)
+        return individual, finalScore
 
 if __name__ == '__main__':
     import os

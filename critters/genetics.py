@@ -74,7 +74,7 @@ class FitnessCalculator(object):
 # Fitness are calculated based on individual performance only
 class IndividualCompetition(FitnessCalculator):
     
-    def calculate(self, individuals,multiProcess=True):
+    def calculate(self, individuals,multiProcess=False):
 		#set multiProcess=False to see error messages in a readable format
 		#multiprocessing really kills error message propagation
         resultDict = dict()
@@ -150,7 +150,7 @@ class Spartans(ReproductionMechanism):
 class MatedReproduction(ReproductionMechanism):
     
     def __init__(self, createRandomIndividual, 
-                 mated=0.5, spartans=0.1, asexual=0.3):
+                 mated=0.2, spartans=0.1, asexual=0.65):
         ReproductionMechanism.__init__(self, createRandomIndividual)
         self.mated = mated
         self.spartans = spartans

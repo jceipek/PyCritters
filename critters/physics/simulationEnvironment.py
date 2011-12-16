@@ -1,6 +1,6 @@
 import time
 from critters.visualization.render import Renderer
-from critters.physics.objects import (StaticPhysicsObject,StaticRect,DynamicPhysicsObject)
+from critters.physics.objects import (StaticPhysicsObject,StaticRect,DynamicPhysicsObject, Rect, Hinge)
 import pygame
 from Box2D import b2 
 import math
@@ -10,7 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
-    MAX_SPEED = 100 #TODO: Place this in actuators + morph
+    MAX_SPEED = 5 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -44,7 +44,7 @@ class SimulationEnvironment(object):
         if self.vis:
             self.r = Renderer(self.world) 
             self.r.setup(showCoords=True)
-        self.physicsStep = 50.0/200.0
+        self.physicsStep = 10.0/200.0
 
     @property
     def powerController(self): return self._powerController    
@@ -73,7 +73,7 @@ class SimulationEnvironment(object):
                 raise ValueError("Size must be a two-tuple")
             body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
             halfSize = tuple(x/2.0 for x in physObj.size) #box takes half size, not full size
-            body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction)
+            body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction, restitution=0.00)
         else:
             raise ValueError("Object was neither a StaticPhysicsObject nor a DynamicPhysicsObject. Unexpected")
 
@@ -96,9 +96,9 @@ class SimulationEnvironment(object):
         joint = self.world.CreateRevoluteJoint(bodyA=bod1,
                                                bodyB=bod2,
                                                anchor=globalLoc,
-                                               lowerAngle = -0.5 * b2.pi,
-                                               upperAngle = 0.5 * b2.pi,
-                                               enableLimit = True,
+                                               #lowerAngle = -1.0 * b2.pi,
+                                               #upperAngle = 1.0 * b2.pi,
+                                               enableLimit = False,
                                                maxMotorTorque = 90.0,
                                                motorSpeed = 0,
                                                enableMotor = True)
@@ -175,17 +175,19 @@ class SimulationEnvironment(object):
             if len(actuatorValues) != len(phenotype.hinges): #these must be 1:1, otherwise it makes no sense
                 print len(actuatorValues), len(phenotype.hinges)
                 print len(phenotype.actuators)
-                raise ValueError, "actuatorValues length is inconsistent with phenotype hinge length"
+                print "bad actuator values."
+                actuatorValues = [0, 0, 0]
+                #raise ValueError, "actuatorValues length is inconsistent with phenotype hinge length"
             for i in range(len(phenotype.hinges)):
                 connection = phenotype.hinges[i]
                 joint = self.connectionDict[frozenset([connection.physObj1.identifier,connection.physObj2.identifier])]
                 
                 value = actuatorValues[i]
-                magnitude = min(SimulationEnvironment.MAX_SPEED, value)
-                self.powerController.setTarget(math.copysign(magnitude, value)
+                magnitude = min(SimulationEnvironment.MAX_SPEED, abs(value))
+                self.powerController.setTarget(math.copysign(magnitude, value))
                 joint.motorSpeed = self.powerController.step(self.physicsStep)
                 
-        self.world.Step(self.physicsStep, 10, 10) #1/desFPS, velIters, posIters
+        self.world.Step(self.physicsStep, 8, 12) #1/desFPS, velIters, posIters
 
     def _placeGround(self):
         currentMinY = None 
