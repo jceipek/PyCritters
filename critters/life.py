@@ -13,7 +13,7 @@ from critters.physics.objects import Rect, Hinge
 
 class Critter(genetics.Genotype):
     
-    def __init__(self, numSensors=4, morphology=None, neuralNet=None):
+    def __init__(self, numSensors=6, morphology=None, neuralNet=None):
         self.numSensors = numSensors
         self.morphology = morphology or morph.randomMorphology(numSensors)
         self.neuralNet = neuralNet or \
@@ -44,13 +44,13 @@ class ReifiedCreature(object):
     def __init__(self, morphology, neuralNet, numSensors):
         self.morphology = morphology
         self.neuralNet = neuralNet
-        assert self.neuralNet.numOutputs == 3
+
         self.numSensors = numSensors
         
         self._calculateBodyParts()
         self._calculateConnections()
         self._conformNeuralNet()
-        assert self.neuralNet.numOutputs == 3
+
         self.hinges = None#filled in when buildPhysicsObject() is invoked
         self.rects = None #filled in when buildPhysicsObject() is invoked
         
@@ -58,8 +58,7 @@ class ReifiedCreature(object):
         self.neuralNet.clear()
         
     def think(self, inputs, dt):
-        actuatorValues = self.neuralNet.process(inputs, dt)
-        return dict(zip(self.actuators, actuatorValues))
+        return self.neuralNet.process(inputs, dt)
         
     def _calculateBodyParts(self):
         self.bodyParts = self.morphology.nodes()
@@ -73,7 +72,7 @@ class ReifiedCreature(object):
     
     def _conformNeuralNet(self):
         #self.neuralNet.conform(self.numSensors, len(self.actuators))
-        self.neuralNet.conform(4, 3)
+        self.neuralNet.conform(6, 5)
         
     def _getConnections(self, bodyPart):
         return [data['connection'] for _, _, data in 
@@ -163,12 +162,10 @@ class ReifiedCreature(object):
         #self.rects = rects.values()
         #self.hinges = hinges
         
-                
-        rects = [Rect((0, 0)), Rect((1, 0)), Rect((2, 0)), Rect((3, 0))]
+        rects = [Rect((i, 0)) for i in range(6)]   
         self.rects = rects
-        self.hinges = [Hinge(rects[0], (0.5, 0.5), rects[1], (-0.5, 0.5)),
-                  Hinge(rects[1], (0.5, 0.5), rects[2], (-0.5, 0.5)),
-                  Hinge(rects[2], (0.5, 0.5), rects[3], (-0.5, 0.5))]
+        self.hinges = [Hinge(r1, (0.5, 0.5), r2, (-0.5, 0.5)) 
+                       for r1, r2 in zip(rects, rects[1:])]
         for i, hinge in enumerate(self.hinges):
             hinge.globalLoc = (i + 0.5, 0)
         

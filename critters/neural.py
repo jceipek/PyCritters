@@ -56,7 +56,7 @@ class NeuralNetwork(object):
         
     @property
     def nodes(self): 
-        return self.graph.nodes_iter()
+        return sorted(self.graph.nodes_iter(), key=lambda n: n.id)
     
     @property
     def inputNodes(self): 
@@ -239,6 +239,8 @@ class NeuralConnection(object):
     def withNewVertices(self, nodes):
         return NeuralConnection(nodes, self.weight)
  
+_nodeIdCounter = [0] 
+ 
 class Node(object):
     """The base class for a neural network node.
     
@@ -253,6 +255,8 @@ class Node(object):
     FREQUENCY = 1.0
     
     def __init__(self):
+        self.id = _nodeIdCounter[0]
+        _nodeIdCounter[0] += 1
         self.output = 0
         
     

@@ -10,7 +10,7 @@ class SimulationEnvironment(object):
     This object represents a simulation environment, encapsulating a dynamics
     world and a collisionManager.
     '''
-    MAX_SPEED = 5 #TODO: Place this in actuators + morph
+    MAX_SPEED = 25 #TODO: Place this in actuators + morph
     
     def __init__(self, vis=True, gravity=True):
         '''
@@ -71,7 +71,8 @@ class SimulationEnvironment(object):
         elif isinstance(physObj,DynamicPhysicsObject):
             if len(physObj.size) != 2:
                 raise ValueError("Size must be a two-tuple")
-            body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle) 
+            body = self.world.CreateDynamicBody(position=physObj.position, angle=physObj.angle,bullet=True)
+
             halfSize = tuple(x/2.0 for x in physObj.size) #box takes half size, not full size
             body.CreatePolygonFixture(box=halfSize, density=physObj.density, friction=physObj.friction, restitution=0.00)
         else:
@@ -96,8 +97,8 @@ class SimulationEnvironment(object):
         joint = self.world.CreateRevoluteJoint(bodyA=bod1,
                                                bodyB=bod2,
                                                anchor=globalLoc,
-                                               #lowerAngle = -1.0 * b2.pi,
-                                               #upperAngle = 1.0 * b2.pi,
+                                               lowerAngle = -0.7 * b2.pi,
+                                               upperAngle = 0.7 * b2.pi,
                                                enableLimit = False,
                                                maxMotorTorque = 90.0,
                                                motorSpeed = 0,
@@ -167,11 +168,10 @@ class SimulationEnvironment(object):
                 #print myContacts
             except Exception as e:
                 print(e)
-            actuatorDict  = phenotype.think(myContacts,self.physicsStep)
+            actuatorValues = phenotype.think(myContacts,self.physicsStep)
             #special case because of one actuator in test... need to fixLater
             #neural networks and or actuators need a mapping to the physicsObjects
             #or to the ids at least...
-            actuatorValues = actuatorDict.values() #XXX:TODO: preserve order better.
             if len(actuatorValues) != len(phenotype.hinges): #these must be 1:1, otherwise it makes no sense
                 print len(actuatorValues), len(phenotype.hinges)
                 print len(phenotype.actuators)
