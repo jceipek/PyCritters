@@ -227,30 +227,28 @@ virtual block creatures to accomplish tasks such as running, jumping, and follow
 light sources in a physical environment. His work was groundbreaking because he didn't 
 start by designing a control algorithm or a body for his creatures; the creatures 
 evolved complex brains and bodies {\em without human intervention}. You can look at 
-some of his work on YouTube at \url{youtube.com/watch?v=JBgG_VSP7f8}. Even though 
-the creatures were randomly generated, some of them look remarkably similar 
-to animals in the real world, because they evolved comparably efficient  
+some of his work on YouTube at \url{youtube.com/watch?v=JBgG_VSP7f8}. Many of his virtual 
+creations look remarkably similar to animals in the real world, because they evolved comparably efficient 
 locomotion mechanisms.
 \index{Sims, Karl}
 \index{Evolution, Darwinian}
 
 In the paper\footnote{\url{karlsims.com/papers/siggraph94.pdf}} he presented at SIGGRAPH\footnote{An annual computer graphics 
 conference: \url{wikipedia.org/wiki/SIGGRAPH}} 1994, Sims claimed that his work could be used to simplify the task of creating
-``desirable complexity for use in virtual worlds and computer animation.'' True to this prediction, many popular computer games 
-now use realtime physics simulations based on his work.\footnote{\url{aigamedev.com/open/editorial/naturalmotion-euphoria/}}
+``desirable complexity for use in virtual worlds and computer animation.'' True to this prediction, characters in many popular computer games 
+are animated using techniques inspired by his work.\footnote{\url{aigamedev.com/open/editorial/naturalmotion-euphoria/}}
 
 \section{Genetic Algorithms}
 
 % TODO: Make this flow better!
 Sims used {\bf genetic algorithms}, which model the process of natural evolution to solve  
-problems with large solution spaces that are computationally expensive to define.
-In a nutshell, a genetic algorithm operates on {\bf genotypes}, genetic material encoding {\bf phenotypes},
-which represent possible solutions to a problem. As the algorithm runs, the {\em fittest} 
-phenotypes survive to form a new (hopefully better) population, and the process
-repeats until an end condition is reached (for example, when an optimal
-solution has been found).  
+problems with large solution spaces that are computationally expensive to define. 
+Creatures in nature have a genetic makeup known as a {\bf genotype} which encodes their physical 
+manifestation, or {\bf phenotype}. When a genetic algorithm solves a problem, the phenotypes represent
+possible solutions to the problem. During each iteration of the algorithm, the {\em fittest} 
+phenotypes survive to form a new, hopefully better, population.
 
-More explicitly stated, a genetic algorithm consists of the following 
+Specifically, a genetic algorithm consists of the following 
 steps\footnote{\url{wikipedia.org/wiki/Genetic_algorithm}}:
 \index{Genetic Algorithms}
 
@@ -258,14 +256,13 @@ steps\footnote{\url{wikipedia.org/wiki/Genetic_algorithm}}:
   \item Generate an initial population of genotypes that encode potential
   phenotypes. This initial population is usually random.
 
-  \item Evaluate the ``goodness'' of each phenotype in the population using a 
+  \item Evaluate how well each phenotype in the population solves the problem using a 
   {\bf fitness function}.
 
   \item Select phenotypes probabilistically such that fit phenotypes 
   are more likely to be selected.
 
-  \item Breed the selected phenotypes by combining 
-  traits of their corresponding genotypes and modifying some of them randomly through. 
+  \item Breed the selected phenotypes by randomly combining and mutating the traits of their genotypes. 
   The result of this step is a new population of genotypes that will be used in
   the next generation of the algorithm.
 
@@ -279,6 +276,8 @@ steps\footnote{\url{wikipedia.org/wiki/Genetic_algorithm}}:
 
 Genetic algorithms are a subset of {\bf Evolutionary Algorithms}, which you can
 read about at \url{wikipedia.org/wiki/Evolutionary_algorithm}.
+
+%TODO: A bit abrupt. Maybe fix this transition if there is time? Can't think of a good way.
 
 How do genetic algorithms solve problems? All possible solutions to a problem
 exist within a {\bf solution space} and a genetic algorithm is a type of
@@ -319,61 +318,80 @@ pattern matching and image recognition.
 
 The basic unit of computation in a neural network (NN) is the {\bf neuron}, which
 roughly corresponds to a logic gate in a CPU. However, while logic gates in 
-processors only deal with binary values, nodes in most NNs support real numbers.
+processors only deal with binary values, most neurons support real numbers.
 As is shown in the example below, every neuron (or node) in a network evaluates a 
-function that operates on one or more inputs to produce one or more output values. 
-Each edge in the graph has a weight associated with it, which scales the value passed in: %TODO: Introduce graphs in the context on NNs
+function that operates on one or more inputs to produce an output value. 
+Each connection in the network has a weight associated with it, which scales the value 
+passed in:
 \index{neuron}
 
 \beforefig
 \centerline{\includegraphics[width=3in]{./figs/Neuron.eps}}
 \afterfig
 
-In this example of a sum node, the input values {\tt (3,5)} yield 0.78 as the output: 
+In this example of a sum node, the input values $3$ and $5$ are scaled by the values $0.7$ and $0.1$, respectively.
+The neuron then adds these values together and scales the result, $2.6$, by output weight, $0.3$. The result is $0.78$: 
 $(0.7\times 3)+(0.1\times 5) \Rightarrow 2.6$; $2.6 \times 0.3 \Rightarrow 0.78$. 
 The function of a given neuron could be any operation on a set of numbers, including 
-(but not limited to) difference, product, and sine. More complicated nodes can 
-have a memory component. % TODO: Spell out this process
+(but not limited to) product, threshold, and sine. More complicated nodes can 
+have a memory component. 
 
-% TODO: Find a simple example of a NN that does something interesting (maybe in Braitenberg book Allen lent me) and explain how it works
+Let's look at a practical example of a neural network in the context of a simple creature that Sims' techniques could produce\footnote{This creature is based on vehicle $2$ in Braitenberg, {\em Vehicles: Experiments in Synthetic Psychology}.}:
+\beforefig
+\centerline{\includegraphics[width=3in]{./figs/LightFollowing.eps}}
+\afterfig
 
-% TODO: Transition from Sims to our own Implementation; what did we simplify (2d, no fluid, no competition)
+The creature in this diagram moves towards a light source in a viscous environment using two flagella-like appendages. Its brain drives two actuators using a time-dependent sine wave with an amplitude proportional to the readings from its light sensors. %TODO: This description is completely opaque and needs to be fixed.
 
+\section{Implementing Virtual Creatures}
+Almost two decades ago when Karl Sims was evolving virtual creatures for the first time, computers were massive, 
+slow machines. With an initial population size of 300, it took three hours for a 32 processor super computer to 
+simulate 100 generations of his creatures. Today, cheap laptops can outperform the machine he used, and we 
+were able to create {\tt PyCritters}, a simplified implementation of his work.
+You can download it from \url{https://github.com/jceipek/PyCritters}. It 
+uses the versatile {\tt pygame} module to visualize creatures simulated with {\tt pybox2d}.
+
+%Also no competition. Should we mention that?
+Sims' creatures are three dimensional, move in open air and fluid environments, and use angle, contact, and light sensors. Although the pycritters 
+live in a two dimensional world with a ground plane and only use contact sensors, their behaviors are also complex.
+
+\subsection{The Brain}
+
+The genotype for a pycritter's neural network is a directed cyclic graph created in {\tt NetworkX}. This graph maps directly to the brain phenotype that computes the creature's actuator behavior based its inputs (a global time and the readings from its contact sensors).
 % TODO: How do * we * implement the brain model?
 % genotype - "graph"
 % phenotype - "brain"
 
-\section{Body Model}
+\subsection{The Body}
 
 % TODO: Write this section
+
+The bodies of pycritters consist of rectangles connected by joints. The creatures are simulated in a physical environment with gravity, friction, and mostly inelastic collisions. The phenotype of each creature is simply an implementation of its body in {\tt pybox2d}.
+
+How can we get to this phenotype from a genotype? You can think of the phenotype as a tree---a graph with no cycles---where the nodes are the rectangular body parts and the edges form joints between them. The process of generating a phenotype from a genotype encoding is a form of {\bf unpacking} operation. Creature phenotypes support symmetry to model the way that the limbs of real animals are symmetrical. 
+
+To support this feature, the genotypes of pycritters are cyclic directed graphs that get converted into trees during the unpacking process. Since unpacking a cycle would typically lead to infinite recursion, each node has a fixed expansion limit associated with it.
+
+When two crossover happens between two pycritters, a process known as {\bf grafting} occurs. A portion of one creature's genotype is mapped the location of another node in the other creature's genotype, and any unconnected nodes are deleted from the graph.
 
 % 1. Model (abstract - environment and cubes)
 % 2. Phenotype (We are using box2d)
 % 3. Genotype (How can it lead to the phenotype - example of packing and unpacking)
 % 4. Introduction to mutation and crossover with examples of our own creatures
 
-\section{PyCritters}
+\subsection{Results}
 
+% TODO: Write this section
 \TODO{Discussion of Results}
-% Some things that are cool
-% Some things where they take advantage of engine
+\TODO{Some things that are cool}
+\TODO{Some things where they take advantage of engine}
 
 \section{The Blind Watchmaker}
 
-% TODO: Rearrange this section:
-% Lead with Paley's argument
-% Then go to Sims and how he refutes it
-% Finally, transition to Dawkins as a fun thing to play with
-
-As we have seen, complicated systems do not necessarily need to be designed that
-way; great complexity (such as that seen in Karl Sim's virtual creatures and in the pycritters) 
-can arise from simple processes. This is a counter point to the {\bf watchmaker
-argument} made famous by the philosopher William Paley in 1802. 
-\index{Paley, William}
-\index{Watchmaker argument}
-
-The argument follows this basic
+According to the {\bf watchmaker argument} popularized by the philosopher William Paley in 1802,
+complexity requires intelligent design. The argument follows this basic
 framework\footnote{\url{wikipedia.org/wiki/Watchmaker_analogy}}:
+\index{Paley, William}
 
 \begin{enumerate}
   \item Watches are complex, and if you saw one, you would know that it was made
@@ -383,8 +401,13 @@ framework\footnote{\url{wikipedia.org/wiki/Watchmaker_analogy}}:
   creature, or anything else. Therefore, it too was created by
   an intelligent designer.
 \end{enumerate}
+\index{Watchmaker argument}
 
-Evolutionary biologist Richard Dawkins refuted this argument in his 1986 book
+Evolved virtual creatures offer a counter point to this argument.
+Their behaviors often exhibit great complexity, even though the ``designer'' in both cases is a genetic algorithm---a simple process 
+involving random modification and targeted selection.
+
+Evolutionary biologist Richard Dawkins also refuted the watchmaker argument in his 1986 book
 {\em The Blind Watchmaker: Why the Evidence of Evolution Reveals a Universe
 without Design}, in which he used the mammalian eye as an example of a complex
 system that could plausibly be the product of natural selection rather than the
@@ -397,10 +420,13 @@ biomorphs}, two dimensional shapes that ``evolved'' based on user selected
 mutations.\footnote{\url{wikipedia.org/wiki/The_Blind_Watchmaker}}
 \index{Biomorphs}
 
-Karl Sims' virtual creatures can be viewed as a more convincing extension of this early work by
-Dawkins, because it doesn't require user interaction to create complex behavior.
+%Karl Sims' virtual creatures can be viewed as a more convincing extension of this early work by
+%Dawkins, because it doesn't require user interaction to create complex behavior. %TODO: Get rid of this or organize it better.
 
-\begin{ex} % TODO: Find one ourselves; give the reader clearer instructions on what to do.
+\begin{ex} 
+
+\TODO{Find one ourselves; give the reader clearer instructions on what to do.}
+
   Find one of the open source implementations of Dawkins' original Biomorphs
   program, which is called {\em The Blind Watchmaker}, like his book. Can you create 
   seemingly complex shapes with it? If you have time, try to automate the selection process
